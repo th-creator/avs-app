@@ -45,8 +45,24 @@
                                 <span v-if="errors.email" class="text-red-600 text-sm">{{ errors.email[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.password" type="password" placeholder="Password" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.password" class="text-red-600 text-sm">{{ errors.password[0] }}</span>
+                                <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <input v-model="data.phone" type="tel" placeholder="Mobile" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <span v-if="errors.phone" class="text-red-600 text-sm">{{ errors.phone[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <input v-model="data.field" type="text" placeholder="spécialité" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <span v-if="errors.field" class="text-red-600 text-sm">{{ errors.field[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <input v-model="data.level" type="text" placeholder="Niveau" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <span v-if="errors.level" class="text-red-600 text-sm">{{ errors.level[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <input v-model="data.parent_phone" type="text" placeholder="Mobile du parent" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <span v-if="errors.parent_phone" class="text-red-600 text-sm">{{ errors.parent_phone[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
                         </form>
@@ -67,10 +83,12 @@ import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogOverlay } f
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useUsersStore } from '@/stores/users.js';
+import { useStudentsStore } from '@/stores/students.js';
 import { useAlert } from '@/composables/useAlert';
+import {useAuthStore} from '@/stores/auth.js';
 
-const usersStore = useUsersStore();
+const studentsStore = useStudentsStore();
+const authStore = useAuthStore();
 
 const props = defineProps({
     showPopup: {
@@ -87,13 +105,19 @@ const data = ref({
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
+    date: '',
+    phone: '',
+    parent_phone: '',
+    field: '',
+    level: '',
+    user_id: '',
 })
 const errors = ref({})
 
 const Create = () => {
+    data.value.user_id = authStore?.user?.id
     errors.value = {}
-    usersStore.store(data.value).then(res => {
+    studentsStore.store(data.value).then(res => {
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {

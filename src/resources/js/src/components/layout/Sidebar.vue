@@ -57,7 +57,43 @@
                                         />
                                     </svg>
 
-                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Home</span>
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Accueil</span>
+                                        </div>
+                                    </router-link>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <ul>
+                                <li class="nav-item">
+                                    <router-link to="/registrants" class="group" @click="toggleMobileMenu">
+                                        <div class="flex items-center">
+                                            <IconComponent name="users"/>                                            
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">inscrits</span>
+                                        </div>
+                                    </router-link>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <ul>
+                                <li class="nav-item">
+                                    <router-link to="/students" class="group" @click="toggleMobileMenu">
+                                        <div class="flex items-center">
+                                            <IconComponent name="users"/>                                            
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">élèves</span>
+                                        </div>
+                                    </router-link>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <ul>
+                                <li class="nav-item">
+                                    <router-link to="/teachers" class="group" @click="toggleMobileMenu">
+                                        <div class="flex items-center">
+                                            <IconComponent name="users"/>                                            
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Enseignants</span>
                                         </div>
                                     </router-link>
                                 </li>
@@ -68,20 +104,32 @@
                                 <li class="nav-item">
                                     <router-link to="/users" class="group" @click="toggleMobileMenu">
                                         <div class="flex items-center">
-                                            <svg
-                                                class="group-hover:!text-primary shrink-0"
-                                                width="20"
-                                                height="20"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                            >
-                                                <circle opacity="0.5" cx="15" cy="6" r="3" fill="currentColor" />
-                                                <ellipse opacity="0.5" cx="16" cy="17" rx="5" ry="3" fill="currentColor" />
-                                                <circle cx="9.00098" cy="6" r="4" fill="currentColor" />
-                                                <ellipse cx="9.00098" cy="17.001" rx="7" ry="4" fill="currentColor" />
-                                            </svg>
-                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Users</span>
+                                            <IconComponent name="users"/>  
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Utilisateurs</span>
+                                        </div>
+                                    </router-link>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <ul>
+                                <li class="nav-item">
+                                    <router-link to="/sections" class="group" @click="toggleMobileMenu">
+                                        <div class="flex items-center">
+                                            <IconComponent name="users"/>  
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Sections</span>
+                                        </div>
+                                    </router-link>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <ul>
+                                <li class="nav-item">
+                                    <router-link to="/groups" class="group" @click="toggleMobileMenu">
+                                        <div class="flex items-center">
+                                            <IconComponent name="users"/>  
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Groups</span>
                                         </div>
                                     </router-link>
                                 </li>
@@ -93,7 +141,7 @@
                                     <router-link to="/settings" class="group" @click="toggleMobileMenu">
                                         <div class="flex items-center">
                                             <IconComponent name="settings"/>
-                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Settings</span>
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">paramètres</span>
                                         </div>
                                     </router-link>
                                 </li>
@@ -106,23 +154,23 @@
     </div>
 </template>
 
-<script lang="ts" setup>
+<script setup>
     import { ref, onMounted } from 'vue';
 
     import { useAppStore } from '@/stores/index';
     import VueCollapsible from 'vue-height-collapsible/vue3';
     import IconComponent from '@/components/icons/IconComponent.vue'
-    const store = useAppStore();
-    const activeDropdown: any = ref('');
-    const subActive: any = ref('');
+    const store = useAppStore(); 
+    const activeDropdown = ref('');
+    const subActive = ref('');
 
     onMounted(() => {
         const selector = document.querySelector('.sidebar ul a[href="' + window.location.pathname + '"]');
         if (selector) {
             selector.classList.add('active');
-            const ul: any = selector.closest('ul.sub-menu');
+            const ul = selector.closest('ul.sub-menu');
             if (ul) {
-                let ele: any = ul.closest('li.menu').querySelectorAll('.nav-link') || [];
+                let ele = ul.closest('li.menu').querySelectorAll('.nav-link') || [];
                 if (ele.length) {
                     ele = ele[0];
                     setTimeout(() => {

@@ -33,20 +33,38 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
-                                <input v-model="data.firstName" type="text" placeholder="Prenom" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName[0] }}</span>
+                                <multiselect
+                                    v-model="data.student"
+                                    :options="students"
+                                    class="custom-multiselect"
+                                    :searchable="true"
+                                    placeholder="Elève"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect>
+                                <span v-if="errors.student_id" class="text-red-600 text-sm">{{ errors.student_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.lastName" type="text" placeholder="Nom" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName[0] }}</span>
+                                <multiselect
+                                    v-model="data.group"
+                                    :options="groups"
+                                    class="custom-multiselect"
+                                    :searchable="true"
+                                    placeholder="Groupe"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect>
+                                <span v-if="errors.group_id" class="text-red-600 text-sm">{{ errors.group_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.email" type="email" placeholder="E-mail" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.email" class="text-red-600 text-sm">{{ errors.email[0] }}</span>
+                                <input v-model="data.center" type="text" placeholder="Centre" class="form-input" />
+                                <span v-if="errors.center" class="text-red-600 text-sm">{{ errors.center[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.password" type="password" placeholder="Password" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.password" class="text-red-600 text-sm">{{ errors.password[0] }}</span>
+                                <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
+                                <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full" @click="Edit()">Submit</button>
                         </form>
@@ -61,16 +79,34 @@
 </template>
 
 <script setup>
-import { ref, defineProps, onMounted } from 'vue';
+import { ref, defineProps, computed, onMounted  } from 'vue';
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogOverlay } from '@headlessui/vue';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useUsersStore } from '@/stores/users.js';
+import { useStudentsStore } from '@/stores/students.js';
+import { useGroupsStore } from '@/stores/groups.js';
+import { useRegistrantsStore } from '@/stores/registrants.js';
 import { useAlert } from '@/composables/useAlert';
+import Multiselect from '@suadelabs/vue3-multiselect';
+import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
-const usersStore = useUsersStore();
+const registrantsStore = useRegistrantsStore();
+const studentsStore = useStudentsStore();
+const groupsStore = useGroupsStore();
 
+const students = computed(() => {
+        return studentsStore.students.length > 0 ? studentsStore.students.map(res => res.id + ' : ' + res.firstName + ' '+ res.lastName) : [];
+        });
+
+const groups = computed(() => {
+        return groupsStore.groups.length > 0 ? groupsStore.groups.map(res => res.id + ' : ' + res.intitule) : [];
+        });
+
+onMounted(() => {
+    studentsStore.index()
+    groupsStore.index()
+})
 const props = defineProps({
     showEditPopup: {
         type: Boolean,
@@ -87,16 +123,18 @@ const props = defineProps({
 });
 
 const data = ref({
-    firstName: props.editedData.firstName,
-    lastName: props.editedData.lastName,
-    email: props.editedData.email,
-    password: props.editedData.password,
+    center: props.editedData.center,
+    date: props.editedData.date,
+    group: props.editedData.group_id,
+    group_id: props.editedData.group_id,
+    student: props.editedData.student_id,
+    student_id: props.editedData.student_id,
 })
 
 const errors = ref({})
 
 const Edit = () => {
-    usersStore.update(data.value,props.editedData.id).then(res => {
+    registrantsStore.update(data.value,props.editedData.id).then(res => {
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {

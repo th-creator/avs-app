@@ -1,6 +1,6 @@
 <template>
     <div>
-        <TransitionRoot appear :show="showPopup" as="template">
+        <TransitionRoot appear :show="showEditPopup" as="template">
             <Dialog as="div" @close="close()" class="relative z-50">
             <TransitionChild 
                 as="template"
@@ -29,26 +29,30 @@
                     <button type="button" class="absolute top-7 ltr:right-9 rtl:left-9 text-white-dark hover:text-dark outline-none" @click="close()">
                         X
                     </button>
-                    <div class="text-lg text-center font-semibold ltr:pl-5 rtl:pr-5 py-5 ltr:pr-[50px] rtl:pl-[50px]">Ajouter</div>
+                    <div class="text-lg text-center font-semibold ltr:pl-5 rtl:pr-5 py-5 ltr:pr-[50px] rtl:pl-[50px]">Modifier</div>
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
-                                <input v-model="data.firstName" type="text" placeholder="Prenom" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <input v-model="data.firstName" type="text" placeholder="First Name" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.lastName" type="text" placeholder="Nom" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <input v-model="data.lastName" type="text" placeholder="Last Name" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.email" type="email" placeholder="E-mail" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <input v-model="data.email" type="email" placeholder="Email" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.email" class="text-red-600 text-sm">{{ errors.email[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.password" type="password" placeholder="Password" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.password" class="text-red-600 text-sm">{{ errors.password[0] }}</span>
+                                <input v-model="data.phone" type="text" placeholder="Mobile" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <span v-if="errors.phone" class="text-red-600 text-sm">{{ errors.phone[0] }}</span>
                             </div>
-                            <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
+                            <div class="relative mb-4">
+                                <input v-model="data.subject" type="text" placeholder="Matière" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <span v-if="errors.subject" class="text-red-600 text-sm">{{ errors.subject[0] }}</span>
+                            </div>
+                            <button type="button" class="btn btn-primary w-full" @click="Edit()">Submit</button>
                         </form>
                     </div>
                     </DialogPanel>
@@ -58,23 +62,26 @@
             </Dialog>
         </TransitionRoot>
     </div>
-
 </template>
 
 <script setup>
-import { ref, defineProps } from 'vue';
+import { ref, defineProps, onMounted } from 'vue';
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogOverlay } from '@headlessui/vue';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useUsersStore } from '@/stores/users.js';
+import { useTeachersStore } from '@/stores/teachers.js';
 import { useAlert } from '@/composables/useAlert';
 
-const usersStore = useUsersStore();
+const teachersStore = useTeachersStore();
 
 const props = defineProps({
-    showPopup: {
+    showEditPopup: {
         type: Boolean,
+        required: true,
+    },
+    editedData: {
+        type: Object,
         required: true,
     },
     close: {
@@ -84,16 +91,18 @@ const props = defineProps({
 });
 
 const data = ref({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
+    firstName: props.editedData.firstName,
+    lastName: props.editedData.lastName,
+    email: props.editedData.email,
+    date: props.editedData.date,
+    phone: props.editedData.phone,
+    subject: props.editedData.subject,
 })
+
 const errors = ref({})
 
-const Create = () => {
-    errors.value = {}
-    usersStore.store(data.value).then(res => {
+const Edit = () => {
+    teachersStore.update(data.value,props.editedData.id).then(res => {
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {

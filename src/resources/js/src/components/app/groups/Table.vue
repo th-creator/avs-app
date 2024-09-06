@@ -1,14 +1,14 @@
 <template>
     <div>
         <div class="panel pb-0 mt-6">
-            <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Employés</h5>
+            <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Groupes</h5>
             <div class="flex justify-between mb-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
                 <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
             </div>
             <div class="datatable">
                 <vue3-datatable
-                    :rows="usersStore.users"
+                    :rows="groupsStore.groups"
                     :columns="cols"
                     :totalRows="rows?.length"
                     :sortable="true"
@@ -19,32 +19,34 @@
                     previousArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M15 5L9 12L15 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                     nextArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                 >
-                    <template #id="data">
+                    <template #intitule="data">
                         <div class="flex justify-around w-full items-center gap-2">
-                            <strong class="text-info">#{{ data.value.id }}</strong>
+                            <p class="font-semibold text-center">{{ data.value.intitule }}</p>
                         </div>
                     </template>
-                    <template #name="data">
+                    <template #n_place="data">
                         <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.firstName + ' ' + data.value.lastName }}</p>
+                            <p class="font-semibold text-center">{{ data.value.n_place }}</p>
                         </div>
                     </template>
-                    <template #email="data">
-                        <div class="flex justify-around w-full">
-                            <a :href="`mailto:${data.value.email}`" class="text-primary hover:underline">{{ data.value.email }}</a>
+                    <template #availability="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.availability }}</p>
                         </div>
                     </template>
-                    <template #status="data">
-                        <div class="flex justify-around w-full">
-                            <div class="relative !p-1">
-                                <button class="absolute left-0 top-0 z-10 h-full w-full" @click="usersStore.toggle({status: data.value.status ? 0 : 1},data.value.id)"></button>
-                                <label class="!relative !inline-flex !cursor-pointer !items-center">
-                                    <div
-                                        :class="[data.value.status && '!bg-blue-600 after:!translate-x-full after:!border-white']"
-                                        class="!peer !h-6 !w-11 !rounded-full bg-gray-200 after:!absolute after:!left-[2px] after:!top-[2px] after:!h-5 after:!w-5 after:!rounded-full after:!border after:!border-gray-300 after:!bg-white after:!transition-all after:!content-[''] peer-focus:!outline-none peer-focus:!ring-4 peer-focus:!ring-blue-300 dark:!border-gray-600 dark:!bg-gray-700 dark:peer-focus:!ring-blue-800"
-                                    ></div>
-                                </label>
-                            </div>    
+                    <template #teacher_id="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.teacher.firstName + ' ' + data.value.teacher.lastName }}</p>
+                        </div>
+                    </template>
+                    <template #timing="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center" v-for="time in data.value.timing">{{ time.day }}</p>
+                        </div>
+                    </template>
+                    <template #salle="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.salle }}</p>
                         </div>
                     </template>
                     <template #actions="data">
@@ -63,7 +65,7 @@
 <script setup>
     import { ref, reactive, computed, onMounted } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
-    import { useUsersStore } from '@/stores/users.js';
+    import { useGroupsStore } from '@/stores/groups.js';
     import IconComponent from '@/components/icons/IconComponent.vue'
     import Add from './Add.vue'
     import Edit from './Edit.vue'
@@ -77,29 +79,31 @@
         sort_direction: 'asc',
     });
 
-    const usersStore = useUsersStore();
+    const groupsStore = useGroupsStore();
 
     const showPopup = ref(false);
     const showEditPopup = ref(false);
     
     const cols =
         ref([
-            { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'name', title: 'Name', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'email', title: 'Email', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'status', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
+            // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'intitule', title: 'Intitule', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'n_place', title: 'Nombre de places', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'salle', title: "Salle", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'timing', title: "Temps", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'availability', title: "Disponibilité", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'teacher_id', title: "Enseignant", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
 
     const rows = computed(() => {
-        console.log('usersStore.users',usersStore.users);
-        return usersStore.users.length > 0 ? usersStore.users : [];
+        return groupsStore.groups.length > 0 ? groupsStore.groups : [];
         });
 
 
     const editedData = ref({})
     onMounted(() => {
-        usersStore.index()
+        groupsStore.index()
     })
 
     const toggleEdit = (data) => {
@@ -130,7 +134,7 @@
         })
         .then((result) => {
             if (result.value) {
-                usersStore.destroy(data.id).then(res => {
+                groupsStore.destroy(data.id).then(res => {
                     swalWithBootstrapButtons.fire('supprimé!', 'il a été supprimé.', 'success');
                     rows.value = res.data.data
                 }).catch(err => {

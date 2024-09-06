@@ -33,20 +33,16 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
-                                <input v-model="data.firstName" type="text" placeholder="Prenom" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName[0] }}</span>
+                                <input v-model="data.subject" type="text" placeholder="Matière" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <span v-if="errors.subject" class="text-red-600 text-sm">{{ errors.subject[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.lastName" type="text" placeholder="Nom" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName[0] }}</span>
+                                <input v-model="data.level" type="text" placeholder="Niveau" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <span v-if="errors.level" class="text-red-600 text-sm">{{ errors.level[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.email" type="email" placeholder="E-mail" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.email" class="text-red-600 text-sm">{{ errors.email[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <input v-model="data.password" type="password" placeholder="Password" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.password" class="text-red-600 text-sm">{{ errors.password[0] }}</span>
+                                <input v-model="data.price" type="text" placeholder="Prix" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <span v-if="errors.price" class="text-red-600 text-sm">{{ errors.price[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
                         </form>
@@ -67,10 +63,12 @@ import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogOverlay } f
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useUsersStore } from '@/stores/users.js';
+import { useSectionsStore } from '@/stores/sections.js';
 import { useAlert } from '@/composables/useAlert';
+import {useAuthStore} from '@/stores/auth.js';
 
-const usersStore = useUsersStore();
+const sectionsStore = useSectionsStore();
+const authStore = useAuthStore();
 
 const props = defineProps({
     showPopup: {
@@ -87,13 +85,17 @@ const data = ref({
     firstName: '',
     lastName: '',
     email: '',
-    password: '',
+    date: '',
+    phone: '',
+    subject: '',
+    user_id: '',
 })
 const errors = ref({})
 
 const Create = () => {
+    data.value.user_id = authStore?.user?.id
     errors.value = {}
-    usersStore.store(data.value).then(res => {
+    sectionsStore.store(data.value).then(res => {
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {

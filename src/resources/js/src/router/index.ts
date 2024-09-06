@@ -18,6 +18,31 @@ const routes: RouteRecordRaw[] = [
         name: 'users',
         component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/users/Index.vue'),
     },
+    {
+        path: '/registrants',
+        name: 'registrants',
+        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/registrants/Index.vue'),
+    },
+    {
+        path: '/students',
+        name: 'students',
+        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/students/Index.vue'),
+    },
+    {
+        path: '/teachers',
+        name: 'teachers',
+        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/teachers/Index.vue'),
+    },
+    {
+        path: '/sections',
+        name: 'sections',
+        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/sections/Index.vue'),
+    },
+    {
+        path: '/groups',
+        name: 'groups',
+        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/groups/Index.vue'),
+    },
 
     {
         path: '/pages/error404',
