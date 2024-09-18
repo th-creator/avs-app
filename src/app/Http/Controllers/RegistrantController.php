@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Models\Group;
+use App\Models\Payment;
 use App\Models\Registrant;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class RegistrantController extends Controller
 {
@@ -23,8 +26,20 @@ class RegistrantController extends Controller
         ]);
 
         $data = Registrant::create($newData);
-        
+        Log::alert($data);
         $data->student = $data->student;
+        $group = Group::where('id',$newData['group_id'])->with('section')->get()->first();
+        Log::alert($group);
+        
+        Payment::create([
+            'group' => $group['intitule'],
+            'amount' => $group['section']['price'],
+            'fullName' => $data['student']['firstName']. ' ' . $data['student']['lastName'],
+            'user_id' => $newData['user_id'],
+            'student_id' => $newData['student_id'],
+            'group_id' => $group['id'],
+            'registrant_id' => $data['id']
+        ]);
 
         if ($data) {
             return response()->json(['message' => 'Registrant created successfully', 'data' => $data], 200);

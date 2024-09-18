@@ -1,14 +1,14 @@
 <template>
     <div>
         <div class="panel pb-0 mt-6">
-            <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les élèves</h5>
+            <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Payements et Inscriptions</h5>
             <div class="flex justify-between mb-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
                 <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
             </div>
             <div class="datatable">
                 <vue3-datatable
-                    :rows="studentsStore.students"
+                    :rows="paymentsStore.studentPayments"
                     :columns="cols"
                     :totalRows="rows?.length"
                     :sortable="true"
@@ -54,17 +54,14 @@
                             <p class="font-semibold text-center">{{ data.value.level }}</p>
                         </div>
                     </template>
-                    <template #user_id="data">
+                    <!-- <template #user_id="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.user.firstName + ' ' + data.value.user.lastName }}</p>
                         </div>
-                    </template>
+                    </template> -->
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
-                            <router-link :to="`/students/${data.value.id}/payments`" class="main-logo flex items-center shrink-0">
-                                <IconComponent name="view" />
-                            </router-link>
                             <IconComponent name="delete" @click="deleteData(data.value)" />
                         </div>
                     </template>
@@ -78,7 +75,8 @@
 <script setup>
     import { ref, reactive, computed, onMounted } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
-    import { useStudentsStore } from '@/stores/students.js';
+    import { usePaymentsStore } from '@/stores/payments.js';
+    import { useRoute } from 'vue-router';
     import IconComponent from '@/components/icons/IconComponent.vue'
     import Add from './Add.vue'
     import Edit from './Edit.vue'
@@ -92,7 +90,8 @@
         sort_direction: 'asc',
     });
 
-    const studentsStore = useStudentsStore();
+    const paymentsStore = usePaymentsStore();
+    const route = useRoute();
 
     const showPopup = ref(false);
     const showEditPopup = ref(false);
@@ -100,25 +99,29 @@
     const cols =
         ref([
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'name', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'email', title: 'Email', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'phone', title: "Mobile", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'field', title: "spécialité", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'level', title: "Niveau", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'date', title: "Date d'incription", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'parent_phone', title: "Mobile du parent", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'group', title: 'Groupe', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'reduction', title: "Reduction", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'bank', title: "Bank", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'receipt', title: "Recu", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'date', title: "Date", headerClass: '!text-center flex justify-center', width: 'full' },
+            // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
 
-    const rows = computed(() => {
-        return studentsStore.students.length > 0 ? studentsStore.students : [];
+    const rows = computed(async() => {
+        console.log('paymentsStore.studentPayments', paymentsStore.studentPayments);
+        let data = await paymentsStore.studentPayments.length > 0 ? paymentsStore.studentPayments : []
+        console.log(data);
+        return data;
         });
 
 
     const editedData = ref({})
     onMounted(() => {
-        studentsStore.index()
+        paymentsStore.show(route.params.id)
     })
 
     const toggleEdit = (data) => {
@@ -149,7 +152,7 @@
         })
         .then((result) => {
             if (result.value) {
-                studentsStore.destroy(data.id).then(res => {
+                paymentsStore.destroy(data.id).then(res => {
                     swalWithBootstrapButtons.fire('supprimé!', 'il a été supprimé.', 'success');
                     rows.value = res.data.data
                 }).catch(err => {

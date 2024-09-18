@@ -5,16 +5,16 @@ import { BACKEND_URL } from "../server/app";
 
 let api = server(BACKEND_URL)
 
-export const useRegistrantsStore = defineStore("registrants", () => {
-    // Define the global state for registrants
-    const registrants = ref([]);  // This will hold the registrants globally
+export const usePaymentsStore = defineStore("payments", () => {
+    // Define the global state for payments
+    const studentPayments = ref([]);  // This will hold the payments globally
+    const payments = ref([]);  // This will hold the payments globally
 
-    // Fetch all registrants and update the state
+    // Fetch all payments and update the state
     const index = async () => {
         try {
-            const response = await api.get('api/registrants');
-            registrants.value = response.data.data.map(res => ({
-                id: res.id,
+            const response = await api.get('api/payments');
+            payments.value = response.data.data.map(res => ({
                 center: res.center,
                 name: res.student.firstName,
                 lastName: res.student.lastName,
@@ -25,19 +25,29 @@ export const useRegistrantsStore = defineStore("registrants", () => {
                 parent_phone: res.student.parent_phone,
                 field: res.student.field,
                 level: res.student.level
-            }));  // Update the registrants state with the fetched data
+            }));  // Update the payments state with the fetched data
             return response
         } catch (error) {
-            console.error("Failed to fetch registrants:", error);
+            console.error("Failed to fetch payments:", error);
+            return error
+        }
+    };
+    // Fetch all payments and update the state
+    const show = async (id) => {
+        try {
+            const response = await api.get(`api/payments/${id}`);
+            studentPayments.value = response.data.data;  // Update the payments state with the fetched data
+            return response
+        } catch (error) {
+            console.error("Failed to fetch payments:", error);
             return error
         }
     };
 
     // Store a new user and update the state
     const store = async (payload) => {
-        const response = await api.post('api/registrants', payload);
-        registrants.value.push({
-            id: response.data.data.id,
+        const response = await api.post('api/payments', payload);
+        payments.value.push({
             center: response.data.data.center,
             name: response.data.data.student.firstName,
             lastName: response.data.data.student.lastName,
@@ -48,18 +58,17 @@ export const useRegistrantsStore = defineStore("registrants", () => {
             parent_phone: response.data.data.student.parent_phone,
             field: response.data.data.student.field,
             level: response.data.data.student.level
-        });  // Add the new user to the registrants array
-        registrants.value = [...registrants.value]; // Reassign to force reactivity
+        });  // Add the new user to the payments array
+        payments.value = [...payments.value]; // Reassign to force reactivity
         return response
     };
 
     // Update an existing user and update the state
     const update = async (payload, id) => {
-        const response = await api.put(`api/registrants/${id}`, payload);
-        const index = registrants.value.findIndex(user => user.id === id);
+        const response = await api.put(`api/payments/${id}`, payload);
+        const index = payments.value.findIndex(user => user.id === id);
         if (index !== -1) {
-            registrants.value[index] = {
-                id: response.data.data.id,
+            payments.value[index] = {
                 center: response.data.data.center,
                 name: response.data.data.student.firstName,
                 lastName: response.data.data.student.lastName,
@@ -71,7 +80,7 @@ export const useRegistrantsStore = defineStore("registrants", () => {
                 field: response.data.data.student.field,
                 level: response.data.data.student.level
             };
-            registrants.value = [...registrants.value]; // Reassign to force reactivity
+            payments.value = [...payments.value]; // Reassign to force reactivity
         }
 
         return response
@@ -79,11 +88,11 @@ export const useRegistrantsStore = defineStore("registrants", () => {
 
     // Delete a user and update the state
     const destroy = async (id) => {
-        await api.delete(`api/registrants/${id}`);
-        registrants.value = registrants.value.filter(user => user.id !== id);  // Remove the deleted user from the array
+        await api.delete(`api/payments/${id}`);
+        payments.value = payments.value.filter(user => user.id !== id);  // Remove the deleted user from the array
         return response
     };
 
-    // Expose the registrants state and actions
-    return { registrants, index, store, update, destroy };
+    // Expose the payments state and actions
+    return { payments, index, store, update, destroy, studentPayments, show };
 });

@@ -43,7 +43,7 @@ class GroupController extends Controller
     {
         $data = Group::where('id',$id)->first();
 
-        $userData = $request->validate([
+        $newData = $request->validate([
             'intitule' => 'nullable',
             'n_place' => 'nullable',
             'availability' => 'nullable',
@@ -52,8 +52,11 @@ class GroupController extends Controller
             'teacher_id' => 'required',
         ]);
         
-        $data->update($userData);
+        $newData['timing'] = json_encode($request['timing']);
+        $data->update($newData);
 
+        $data->teacher = $data->teacher;
+        
         return response()->json(['message' => 'Group updated successfully', 'data' => $data], 200);
     }
 

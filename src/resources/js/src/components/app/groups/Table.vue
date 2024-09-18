@@ -40,8 +40,8 @@
                         </div>
                     </template>
                     <template #timing="data">
-                        <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center" v-for="time in data.value.timing">{{ time.day }}</p>
+                        <div v-if="data.value.timing">
+                            <div class="flex justify-around w-full items-center gap-2" v-for="time in JSON.parse(data.value.timing)"><p class="font-semibold text-center">{{ time.day + ' : ' + time.dates }}</p></div>
                         </div>
                     </template>
                     <template #salle="data">

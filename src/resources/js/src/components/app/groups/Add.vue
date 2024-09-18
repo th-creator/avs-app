@@ -41,17 +41,7 @@
                                 <span v-if="errors.n_place" class="text-red-600 text-sm">{{ errors.n_place[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <multiselect
-                                    v-model="data.availability"
-                                    :options="options"
-                                    class="custom-multiselect"
-                                    :searchable="false"
-                                    :preselect-first="true"
-                                    :allow-empty="false"
-                                    selected-label=""
-                                    select-label=""
-                                    deselect-label=""
-                                ></multiselect>
+                                <input v-model="data.availability" type="number" placeholder="Disponibilite" class="form-input" />
                                 <span v-if="errors.availability" class="text-red-600 text-sm">{{ errors.availability[0] }}</span>
                             </div>
                             <div class="relative mb-4">
@@ -84,6 +74,24 @@
                                 ></multiselect>
                                 <span v-if="errors.section_id" class="text-red-600 text-sm">{{ errors.section_id[0] }}</span>
                             </div>
+                            <div class="relative mb-4">
+                                <multiselect
+                                    v-model="data.day"
+                                    :options="options"
+                                    class="custom-multiselect [w-75%]"
+                                    :searchable="false"
+                                    :preselect-first="true"
+                                    placeholder="Jour"
+                                    :allow-empty="false"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect><div class="mt-4 flex justify-between items-center"><input type="number" v-model="data.from" placeholder="Du" class="form-input w-[42%]" /><input type="number" v-model="data.to" placeholder="A" class="form-input w-[42%]" /><span class="border px-3 py-[6px] rounded cursor-pointer" @click="attachTiming">+</span></div>
+                                <div class="mt-2">
+                                    <div class="flex justify-around w-full items-center gap-2 mt-2" v-for="time in data.timing" @click="detachTiming(time)"><p class="cursor-pointer font-semibold text-center border-gray-700 border rounded-3xl px-4 py-1 bg-white-dark">{{ time.day + ' : ' + time.dates }}</p></div>
+                                </div>
+                                <span v-if="errors.salle" class="text-red-600 text-sm">{{ errors.salle[0] }}</span>
+                            </div>
                             <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
                         </form>
                     </div>
@@ -111,8 +119,8 @@ import {useAuthStore} from '@/stores/auth.js';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
+const options = ref(['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimenche']);
 
-const options = ref(['active', 'inactive']);
 const sections = computed(() => {
         return sectionsStore.sections.length > 0 ? sectionsStore.sections.map(res => res.id + ' : ' + res.level + ' / '+ res.subject) : [];
         });
@@ -143,19 +151,33 @@ const props = defineProps({
 const data = ref({
     intitule: '',
     n_place: '',
-    availability: 'active',
+    availability: null,
     salle: '',
-    timing: [{
-        day: "monday",
-        dates: ["du 10 a 12","du 16 a 18"],
-      }],
+    timing: [],
     teacher: '',
     teacher_id: '',
     section: '',
     section_id: '',
     user_id: '',
+    day: '',
+    from: '',
+    to: '',
 })
 const errors = ref({})
+
+const attachTiming = () => {
+    console.log(data.value.day,data.value.from,data.value.to);
+    data.value.timing.push({
+        day: data.value.day,
+        dates: ["du "+data.value.from+" a "+data.value.to]
+      })
+      data.value.day = null
+      data.value.from = null
+      data.value.to = null
+}
+const detachTiming = (value) => {
+    data.value.timing = data.value.timing.filter(res => (res.dates[0] != value.dates[0] || res.day != value.day))
+}
 
 const Create = () => {
     errors.value = []

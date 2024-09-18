@@ -11,6 +11,7 @@ use App\Http\Controllers\RegistrantController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\SectionController;
+use App\Http\Controllers\PaymentController;
 
 Route::get('user', [AuthController::class, "getUser"]);
 Route::post('register',[AuthController::class,'register']);
@@ -29,3 +30,4 @@ Route::apiResource('registrants', RegistrantController::class);
 Route::apiResource('teachers', TeacherController::class);
 Route::apiResource('groups', GroupController::class);
 Route::apiResource('sections', SectionController::class);
+Route::apiResource('payments', PaymentController::class);

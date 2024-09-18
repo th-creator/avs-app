@@ -5,16 +5,24 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Registrant extends Model
+class Payment extends Model
 {
     use HasFactory;
     
     protected $fillable = [
         'date',
-        'center',
+        'fullName',
+        'amount',
+        'reduction',
+        'rest',
+        'type',
+        'bank',
+        'receipt',
+        'group',
         'user_id',
         'student_id',
         'group_id',
+        'registrant_id',
     ];
 
     public function user()

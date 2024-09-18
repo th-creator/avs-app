@@ -97,7 +97,7 @@
     const cols =
         ref([
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'name', title: 'Name', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'name', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'email', title: 'Email', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'phone', title: "Mobile", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'field', title: "spécialité", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -129,6 +129,7 @@
     }
 
     const deleteData = (data) => {
+        console.log(data);
         const swalWithBootstrapButtons = Swal.mixin({
             customClass: {
                 popup: 'sweet-alerts',
