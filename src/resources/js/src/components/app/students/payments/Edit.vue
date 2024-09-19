@@ -95,10 +95,6 @@ const registrantsStore = useRegistrantsStore();
 const studentsStore = useStudentsStore();
 const groupsStore = useGroupsStore();
 
-const students = computed(() => {
-        return studentsStore.students.length > 0 ? studentsStore.students.map(res => res.id + ' : ' + res.firstName + ' '+ res.lastName) : [];
-        });
-
 const groups = computed(() => {
         return groupsStore.groups.length > 0 ? groupsStore.groups.map(res => res.id + ' : ' + res.intitule) : [];
         });

@@ -1,6 +1,6 @@
 <template>
     <div>
-        <TransitionRoot appear :show="showPopup" as="template">
+        <TransitionRoot appear :show="showEditPopup" as="template">
             <Dialog as="div" @close="close()" class="relative z-50">
             <TransitionChild 
                 as="template"
@@ -29,7 +29,7 @@
                     <button type="button" class="absolute top-7 ltr:right-9 rtl:left-9 text-white-dark hover:text-dark outline-none" @click="close()">
                         X
                     </button>
-                    <div class="text-lg text-center font-semibold ltr:pl-5 rtl:pr-5 py-5 ltr:pr-[50px] rtl:pl-[50px]">Ajouter</div>
+                    <div class="text-lg text-center font-semibold ltr:pl-5 rtl:pr-5 py-5 ltr:pr-[50px] rtl:pl-[50px]">Modifier</div>
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
@@ -66,7 +66,7 @@
                                 <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
-                            <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
+                            <button type="button" class="btn btn-primary w-full" @click="Edit()">Submit</button>
                         </form>
                     </div>
                     </DialogPanel>
@@ -76,7 +76,6 @@
             </Dialog>
         </TransitionRoot>
     </div>
-
 </template>
 
 <script setup>
@@ -89,14 +88,16 @@ import { useStudentsStore } from '@/stores/students.js';
 import { useGroupsStore } from '@/stores/groups.js';
 import { useRegistrantsStore } from '@/stores/registrants.js';
 import { useAlert } from '@/composables/useAlert';
-import {useAuthStore} from '@/stores/auth.js';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
 const registrantsStore = useRegistrantsStore();
-const authStore = useAuthStore();
 const studentsStore = useStudentsStore();
 const groupsStore = useGroupsStore();
+
+const students = computed(() => {
+        return studentsStore.students.length > 0 ? studentsStore.students.map(res => res.id + ' : ' + res.firstName + ' '+ res.lastName) : [];
+        });
 
 const groups = computed(() => {
         return groupsStore.groups.length > 0 ? groupsStore.groups.map(res => res.id + ' : ' + res.intitule) : [];
@@ -107,8 +108,12 @@ onMounted(() => {
     groupsStore.index()
 })
 const props = defineProps({
-    showPopup: {
+    showEditPopup: {
         type: Boolean,
+        required: true,
+    },
+    editedData: {
+        type: Object,
         required: true,
     },
     close: {
@@ -118,27 +123,18 @@ const props = defineProps({
 });
 
 const data = ref({
-    date: '',
-    fullName: '',
-    group: '',
-    amount: '',
-    reduction: '',
-    rest: '',
-    type: '',
-    bank: '',
-    receipt: '',
-    user_id: '',
-    student_id: '',
-    group_id: '',
+    center: props.editedData.center,
+    date: props.editedData.date,
+    group: props.editedData.group_id,
+    group_id: props.editedData.group_id,
+    student: props.editedData.student_id,
+    student_id: props.editedData.student_id,
 })
+
 const errors = ref({})
 
-const Create = () => {
-    errors.value = []
-    data.value.user_id = authStore?.user?.id
-    data.value.group_id = data.value.group.split(':')[0].trim()
-    data.value.student_id = data.value.student.split(':')[0].trim()
-    registrantsStore.store(data.value).then(res => {
+const Edit = () => {
+    registrantsStore.update(data.value,props.editedData.id).then(res => {
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {

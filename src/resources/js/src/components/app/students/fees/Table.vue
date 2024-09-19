@@ -1,13 +1,14 @@
 <template>
     <div>
         <div class="panel pb-0 mt-6">
-            <div class="flex justify-between mb-4">    
+            <!-- <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Payements et Inscriptions</h5> -->
+            <div class="flex justify-between my-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
-                <!-- <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> -->
+                <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
             </div>
             <div class="datatable">
                 <vue3-datatable
-                    :rows="paymentsStore.studentPayments"
+                    :rows="feesStore.studentfees"
                     :columns="cols"
                     :totalRows="rows?.length"
                     :sortable="true"
@@ -21,11 +22,6 @@
                     <template #amount="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.amount }}MAD</p>
-                        </div>
-                    </template>
-                    <template #group="data">
-                        <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.group }}</p>
                         </div>
                     </template>
                     <template #rest="data">
@@ -69,7 +65,7 @@
 <script setup>
     import { ref, reactive, computed, onMounted } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
-    import { usePaymentsStore } from '@/stores/payments.js';
+    import { useFeesStore } from '@/stores/fees.js';
     import { useRoute } from 'vue-router';
     import IconComponent from '@/components/icons/IconComponent.vue'
     import Add from './Add.vue'
@@ -84,7 +80,7 @@
         sort_direction: 'asc',
     });
 
-    const paymentsStore = usePaymentsStore();
+    const feesStore = useFeesStore();
     const route = useRoute();
 
     const showPopup = ref(false);
@@ -93,10 +89,9 @@
     const cols =
         ref([
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'group', title: 'Groupe', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'reduction', title: "Reduction", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'bank', title: "Bank", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'receipt', title: "Recu", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -104,11 +99,10 @@
             // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
-        const studentName = ref('')
+
     const rows = computed(async() => {
-        console.log('paymentsStore.studentPayments', paymentsStore.studentPayments);
-        let data = await paymentsStore.studentPayments.length > 0 ? paymentsStore.studentPayments : []
-        studentName.value = await paymentsStore.studentPayments.length > 0 ? paymentsStore.studentPayments[0].fullName : []
+        console.log('feesStore.studentfees', feesStore.studentfees);
+        let data = await feesStore.studentfees.length > 0 ? feesStore.studentfees : []
         console.log(data);
         return data;
         });
@@ -116,7 +110,7 @@
 
     const editedData = ref({})
     onMounted(() => {
-        paymentsStore.show(route.params.id)
+        feesStore.show(route.params.id)
     })
 
     const toggleEdit = (data) => {
@@ -147,7 +141,7 @@
         })
         .then((result) => {
             if (result.value) {
-                paymentsStore.destroy(data.id).then(res => {
+                feesStore.destroy(data.id).then(res => {
                     swalWithBootstrapButtons.fire('supprimé!', 'il a été supprimé.', 'success');
                     rows.value = res.data.data
                 }).catch(err => {

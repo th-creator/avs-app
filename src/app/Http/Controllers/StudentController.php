@@ -11,6 +11,11 @@ class StudentController extends Controller
         $data = Student::with('user')->get();
         return response()->json(['data' => $data], 200);
     }
+
+    public function show($id) {
+        $data = Student::where('id',$id)->get()->first();
+        return response()->json(['data' => $data], 200);
+    }
     
     public function store(Request $request)
     {

@@ -14,18 +14,7 @@ export const usePaymentsStore = defineStore("payments", () => {
     const index = async () => {
         try {
             const response = await api.get('api/payments');
-            payments.value = response.data.data.map(res => ({
-                center: res.center,
-                name: res.student.firstName,
-                lastName: res.student.lastName,
-                firstName: res.student.firstName,
-                email: res.student.email,
-                date: res.date,
-                phone: res.student.phone,
-                parent_phone: res.student.parent_phone,
-                field: res.student.field,
-                level: res.student.level
-            }));  // Update the payments state with the fetched data
+            payments.value = response.data.data;   // Update the payments state with the fetched data
             return response
         } catch (error) {
             console.error("Failed to fetch payments:", error);
@@ -47,19 +36,8 @@ export const usePaymentsStore = defineStore("payments", () => {
     // Store a new user and update the state
     const store = async (payload) => {
         const response = await api.post('api/payments', payload);
-        payments.value.push({
-            center: response.data.data.center,
-            name: response.data.data.student.firstName,
-            lastName: response.data.data.student.lastName,
-            firstName: response.data.data.student.firstName,
-            email: response.data.data.student.email,
-            date: response.data.data.date,
-            phone: response.data.data.student.phone,
-            parent_phone: response.data.data.student.parent_phone,
-            field: response.data.data.student.field,
-            level: response.data.data.student.level
-        });  // Add the new user to the payments array
-        payments.value = [...payments.value]; // Reassign to force reactivity
+        students.value.push(response.data.data);  // Add the new user to the students array
+        students.value = [...students.value]; // Reassign to force reactivity
         return response
     };
 
@@ -67,20 +45,10 @@ export const usePaymentsStore = defineStore("payments", () => {
     const update = async (payload, id) => {
         const response = await api.put(`api/payments/${id}`, payload);
         const index = payments.value.findIndex(user => user.id === id);
+        
         if (index !== -1) {
-            payments.value[index] = {
-                center: response.data.data.center,
-                name: response.data.data.student.firstName,
-                lastName: response.data.data.student.lastName,
-                firstName: response.data.data.student.firstName,
-                email: response.data.data.student.email,
-                date: response.data.data.date,
-                phone: response.data.data.student.phone,
-                parent_phone: response.data.data.student.parent_phone,
-                field: response.data.data.student.field,
-                level: response.data.data.student.level
-            };
-            payments.value = [...payments.value]; // Reassign to force reactivity
+            students.value[index] = response.data.data;
+            students.value = [...students.value]; // Reassign to force reactivity
         }
 
         return response

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div>{{ student }}
         <TransitionRoot appear :show="showPopup" as="template">
             <Dialog as="div" @close="close()" class="relative z-50">
             <TransitionChild 
@@ -33,38 +33,32 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
-                                <multiselect
-                                    v-model="data.student"
-                                    :options="students"
-                                    class="custom-multiselect"
-                                    :searchable="true"
-                                    placeholder="Elève"
-                                    selected-label=""
-                                    select-label=""
-                                    deselect-label=""
-                                ></multiselect>
-                                <span v-if="errors.student_id" class="text-red-600 text-sm">{{ errors.student_id[0] }}</span>
+                                <input v-model="data.amount" type="number" placeholder="Montant" class="form-input" />
+                                <span v-if="errors.amount" class="text-red-600 text-sm">{{ errors.amount[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <multiselect
-                                    v-model="data.group"
-                                    :options="groups"
-                                    class="custom-multiselect"
-                                    :searchable="true"
-                                    placeholder="Groupe"
-                                    selected-label=""
-                                    select-label=""
-                                    deselect-label=""
-                                ></multiselect>
-                                <span v-if="errors.group_id" class="text-red-600 text-sm">{{ errors.group_id[0] }}</span>
+                                <input v-model="data.reduction" type="number" placeholder="Reduction" class="form-input" />
+                                <span v-if="errors.reduction" class="text-red-600 text-sm">{{ errors.reduction[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.center" type="text" placeholder="Centre" class="form-input" />
-                                <span v-if="errors.center" class="text-red-600 text-sm">{{ errors.center[0] }}</span>
+                                <input v-model="data.rest" type="number" placeholder="Reste" class="form-input" />
+                                <span v-if="errors.rest" class="text-red-600 text-sm">{{ errors.rest[0] }}</span>
                             </div>
                             <div class="relative mb-4">
                                 <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <input v-model="data.type" type="text" placeholder="Type de paiement" class="form-input" />
+                                <span v-if="errors.type" class="text-red-600 text-sm">{{ errors.type[0] }}</span>
+                            </div>
+                            <div v-if="data.type == 'bank'" class="relative mb-4">
+                                <input v-model="data.bank" type="text" placeholder="Bank" class="form-input" />
+                                <span v-if="errors.bank" class="text-red-600 text-sm">{{ errors.bank[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <input v-model="data.receipt" type="text" placeholder="Receipt" class="form-input" />
+                                <span v-if="errors.receipt" class="text-red-600 text-sm">{{ errors.receipt[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
                         </form>
@@ -80,32 +74,25 @@
 </template>
 
 <script setup>
-import { ref, defineProps, computed, onMounted  } from 'vue';
+import { ref, defineProps, computed } from 'vue';
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogOverlay } from '@headlessui/vue';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useStudentsStore } from '@/stores/students.js';
-import { useGroupsStore } from '@/stores/groups.js';
-import { useRegistrantsStore } from '@/stores/registrants.js';
+import { useFeesStore } from '@/stores/fees.js';
 import { useAlert } from '@/composables/useAlert';
 import {useAuthStore} from '@/stores/auth.js';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+import { useRoute } from 'vue-router';
+import { useStudentsStore } from '@/stores/students.js';
 
-const registrantsStore = useRegistrantsStore();
-const authStore = useAuthStore();
 const studentsStore = useStudentsStore();
-const groupsStore = useGroupsStore();
 
-const groups = computed(() => {
-        return groupsStore.groups.length > 0 ? groupsStore.groups.map(res => res.id + ' : ' + res.intitule) : [];
-        });
+const feesStore = useFeesStore();
+const authStore = useAuthStore();
+const route = useRoute();
 
-onMounted(() => {
-    studentsStore.index()
-    groupsStore.index()
-})
 const props = defineProps({
     showPopup: {
         type: Boolean,
@@ -123,22 +110,21 @@ const data = ref({
     group: '',
     amount: '',
     reduction: '',
-    rest: '',
+    rest: 0,
     type: '',
     bank: '',
     receipt: '',
     user_id: '',
     student_id: '',
-    group_id: '',
 })
 const errors = ref({})
 
 const Create = () => {
     errors.value = []
     data.value.user_id = authStore?.user?.id
-    data.value.group_id = data.value.group.split(':')[0].trim()
-    data.value.student_id = data.value.student.split(':')[0].trim()
-    registrantsStore.store(data.value).then(res => {
+    data.value.student_id = route.params.id
+    data.value.fullName = studentsStore.student && studentsStore.student.firstName + ' ' + studentsStore.student && studentsStore.student.lastName
+    feesStore.store(data.value).then(res => {
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {

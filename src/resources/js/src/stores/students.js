@@ -8,12 +8,23 @@ let api = server(BACKEND_URL)
 export const useStudentsStore = defineStore("students", () => {
     // Define the global state for students
     const students = ref([]);  // This will hold the students globally
+    const student = ref([]);  // This will hold the students globally
 
     // Fetch all students and update the state
     const index = async () => {
         try {
             const response = await api.get('api/students');
             students.value = response.data.data;  // Update the students state with the fetched data
+            return response
+        } catch (error) {
+            console.error("Failed to fetch students:", error);
+            return error
+        }
+    };
+    const show = async (id) => {
+        try {
+            const response = await api.get(`api/students/${id}`);
+            student.value = response.data.data;  // Update the students state with the fetched data
             return response
         } catch (error) {
             console.error("Failed to fetch students:", error);
@@ -49,5 +60,5 @@ export const useStudentsStore = defineStore("students", () => {
     };
 
     // Expose the students state and actions
-    return { students, index, store, update, destroy };
+    return { students, index, store, update, destroy, show, student };
 });

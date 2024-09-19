@@ -12,6 +12,7 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\FeeController;
 
 Route::get('user', [AuthController::class, "getUser"]);
 Route::post('register',[AuthController::class,'register']);
@@ -31,3 +32,4 @@ Route::apiResource('teachers', TeacherController::class);
 Route::apiResource('groups', GroupController::class);
 Route::apiResource('sections', SectionController::class);
 Route::apiResource('payments', PaymentController::class);
+Route::apiResource('fees', FeeController::class);
