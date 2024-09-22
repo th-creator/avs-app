@@ -33,38 +33,53 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
+                                <label class="text-sm">Montant:</label>
+                                <input @keyup="calculateRest()" v-model="data.amount" type="number" placeholder="Montant" class="form-input" />
+                                <span v-if="errors.amount" class="text-red-600 text-sm">{{ errors.amount[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Reduction:</label>
+                                <input @keyup="calculateRest()" v-model="data.reduction" type="number" placeholder="Reduction" class="form-input" />
+                                <span v-if="errors.reduction" class="text-red-600 text-sm">{{ errors.reduction[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Reste:</label>
+                                <input v-model="data.rest" type="number" placeholder="Reste" class="form-input" />
+                                <span v-if="errors.rest" class="text-red-600 text-sm">{{ errors.rest[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Date d'inscription:</label>
+                                <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
+                                <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Type de paiement:</label>
                                 <multiselect
-                                    v-model="data.student"
-                                    :options="students"
+                                    v-model="data.type"
+                                    :options="options"
                                     class="custom-multiselect"
                                     :searchable="true"
-                                    placeholder="Elève"
+                                    placeholder="Type de paiement"
                                     selected-label=""
                                     select-label=""
                                     deselect-label=""
                                 ></multiselect>
                                 <span v-if="errors.student_id" class="text-red-600 text-sm">{{ errors.student_id[0] }}</span>
                             </div>
-                            <div class="relative mb-4">
-                                <multiselect
-                                    v-model="data.group"
-                                    :options="groups"
-                                    class="custom-multiselect"
-                                    :searchable="true"
-                                    placeholder="Groupe"
-                                    selected-label=""
-                                    select-label=""
-                                    deselect-label=""
-                                ></multiselect>
-                                <span v-if="errors.group_id" class="text-red-600 text-sm">{{ errors.group_id[0] }}</span>
+                            <div v-if="data.type == 'chèque'" class="relative mb-4">
+                                <label class="text-sm">Bank:</label>
+                                <input v-model="data.bank" type="text" placeholder="Bank" class="form-input" />
+                                <span v-if="errors.bank" class="text-red-600 text-sm">{{ errors.bank[0] }}</span>
+                            </div>
+                            <div v-if="data.type == 'chèque'" class="relative mb-4">
+                                <label class="text-sm">Chèque:</label>
+                                <input v-model="data.bank_receipt" type="text" placeholder="Chèque" class="form-input" />
+                                <span v-if="errors.bank_receipt" class="text-red-600 text-sm">{{ errors.bank_receipt[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.center" type="text" placeholder="Centre" class="form-input" />
-                                <span v-if="errors.center" class="text-red-600 text-sm">{{ errors.center[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
-                                <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
+                                <label class="text-sm">Receipt:</label>
+                                <input v-model="data.receipt" type="text" placeholder="Receipt" class="form-input" />
+                                <span v-if="errors.receipt" class="text-red-600 text-sm">{{ errors.receipt[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
                         </form>
@@ -106,6 +121,10 @@ onMounted(() => {
     studentsStore.index()
     groupsStore.index()
 })
+const calculateRest = () => {
+    let reduction = data.value.reduction == null ? 0 : data.value.reduction
+    data.value.rest = data.value.amount*(100-reduction)/100
+}
 const props = defineProps({
     showPopup: {
         type: Boolean,
@@ -121,11 +140,12 @@ const data = ref({
     date: '',
     fullName: '',
     group: '',
-    amount: '',
-    reduction: '',
-    rest: '',
+    amount: 0,
+    reduction: 0,
+    rest: 0,
     type: '',
     bank: '',
+    bank_receipt: '',
     receipt: '',
     user_id: '',
     student_id: '',

@@ -12,6 +12,7 @@ class Registrant extends Model
     protected $fillable = [
         'date',
         'center',
+        'status',
         'user_id',
         'student_id',
         'group_id',
@@ -30,5 +31,10 @@ class Registrant extends Model
     public function group()
     {
         return $this->BelongsTo(Group::class);
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

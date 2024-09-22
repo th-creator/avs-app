@@ -33,22 +33,7 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
-                                <input v-model="data.intitule" type="text" placeholder="Intitule" class="form-input" />
-                                <span v-if="errors.intitule" class="text-red-600 text-sm">{{ errors.intitule[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <input v-model="data.n_place" type="number" placeholder="Nombre de places" class="form-input" />
-                                <span v-if="errors.n_place" class="text-red-600 text-sm">{{ errors.n_place[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <input v-model="data.availability" type="number" placeholder="Disponibilite" class="form-input" />
-                                <span v-if="errors.availability" class="text-red-600 text-sm">{{ errors.availability[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <input v-model="data.salle" type="text" placeholder="Salle" class="form-input" />
-                                <span v-if="errors.salle" class="text-red-600 text-sm">{{ errors.salle[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
+                                <label class="text-sm">Enseignant:</label>
                                 <multiselect
                                     v-model="data.teacher"
                                     :options="teachers"
@@ -62,6 +47,7 @@
                                 <span v-if="errors.teacher_id" class="text-red-600 text-sm">{{ errors.teacher_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Section:</label>
                                 <multiselect
                                     v-model="data.section"
                                     :options="sections"
@@ -75,13 +61,34 @@
                                 <span v-if="errors.section_id" class="text-red-600 text-sm">{{ errors.section_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Intitule:</label>
+                                <input v-model="data.intitule" type="text" placeholder="Intitule" class="form-input" />
+                                <span v-if="errors.intitule" class="text-red-600 text-sm">{{ errors.intitule[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Nombre de places:</label>
+                                <input v-model="data.n_place" type="number" placeholder="Nombre de places" class="form-input" />
+                                <span v-if="errors.n_place" class="text-red-600 text-sm">{{ errors.n_place[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Disponibilité:</label>
+                                <input v-model="data.availability" type="number" placeholder="Disponibilite" class="form-input" />
+                                <span v-if="errors.availability" class="text-red-600 text-sm">{{ errors.availability[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Salle:</label>
+                                <input v-model="data.salle" type="text" placeholder="Salle" class="form-input" />
+                                <span v-if="errors.salle" class="text-red-600 text-sm">{{ errors.salle[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Temps:</label>
                                 <multiselect
                                     v-model="data.day"
                                     :options="options"
                                     class="custom-multiselect [w-75%]"
                                     :searchable="false"
                                     :preselect-first="true"
-                                    placeholder="Jour"
+                                    placeholder="Temps"
                                     :allow-empty="false"
                                     selected-label=""
                                     select-label=""
@@ -90,7 +97,7 @@
                                 <div class="mt-2">
                                     <div class="flex justify-around w-full items-center gap-2 mt-2" v-for="time in data.timing" @click="detachTiming(time)"><p class="cursor-pointer font-semibold text-center border-gray-700 border rounded-3xl px-4 py-1 bg-white-dark">{{ time.day + ' : ' + time.dates }}</p></div>
                                 </div>
-                                <span v-if="errors.salle" class="text-red-600 text-sm">{{ errors.salle[0] }}</span>
+                                <span v-if="errors.day" class="text-red-600 text-sm">{{ errors.day[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
                         </form>
@@ -106,7 +113,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, computed, onMounted  } from 'vue';
+import { ref, defineProps, computed, onMounted, watch } from 'vue';
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogOverlay } from '@headlessui/vue';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -121,6 +128,21 @@ import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
 const options = ref(['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimenche']);
 
+const data = ref({
+    intitule: 'GR-',
+    n_place: '',
+    availability: null,
+    salle: '',
+    timing: [],
+    teacher: '',
+    teacher_id: '',
+    section: '',
+    section_id: '',
+    user_id: '',
+    day: '',
+    from: '',
+    to: '',
+})
 const sections = computed(() => {
         return sectionsStore.sections.length > 0 ? sectionsStore.sections.map(res => res.id + ' : ' + res.level + ' / '+ res.subject) : [];
         });
@@ -128,7 +150,14 @@ const sections = computed(() => {
 const teachers = computed(() => {
         return teachersStore.teachers.length > 0 ? teachersStore.teachers.map(res => res.id + ' : ' + res.firstName + ' ' + res.lastName) : [];
         });
-
+watch(() => data.value.section, (newVal, oldVal) => {
+    data.value.intitule += newVal.substring(3)
+    console.log(`Teacher changed from ${oldVal} to ${newVal}`);
+});
+watch(() => data.value.teacher, (newVal, oldVal) => {
+    data.value.intitule +=  newVal.substring(3)+' -'
+    console.log(`Teacher changed from ${oldVal} to ${newVal}`);
+});
 const teachersStore = useTeachersStore();
 const groupsStore = useGroupsStore();
 const sectionsStore = useSectionsStore();
@@ -148,21 +177,6 @@ const props = defineProps({
   },
 });
 
-const data = ref({
-    intitule: '',
-    n_place: '',
-    availability: null,
-    salle: '',
-    timing: [],
-    teacher: '',
-    teacher_id: '',
-    section: '',
-    section_id: '',
-    user_id: '',
-    day: '',
-    from: '',
-    to: '',
-})
 const errors = ref({})
 
 const attachTiming = () => {

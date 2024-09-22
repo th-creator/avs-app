@@ -1,14 +1,14 @@
 <template>
     <div>
         <div class="panel pb-0 mt-6">
-            <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Inscrits</h5>
-            <div class="flex justify-between mb-4">    
+            <!-- <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Payements et Inscriptions</h5> -->
+            <div class="flex justify-between my-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
-                <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
+                <button type="button" class="btn btn-info" @click="exportToExcel">Export to Excel</button>
             </div>
             <div class="datatable">
                 <vue3-datatable
-                    :rows="registrantsStore.registrants"
+                    :rows="registrantsStore.groupRegistrants"
                     :columns="cols"
                     :totalRows="rows?.length"
                     :sortable="true"
@@ -19,19 +19,24 @@
                     previousArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M15 5L9 12L15 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                     nextArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                 >
-                    <template #name="data">
-                        <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.firstName + ' ' + data.value.lastName }}</p>
-                        </div>
-                    </template>
                     <template #id="data">
                         <div class="flex justify-around w-full">
-                            <a :href="`mailto:${data.value.id}`" class="text-primary hover:underline">{{ data.value.student_id }}</a>
+                            <h5 class="text-primary hover:underline">{{ data.value.student.id }}</h5>
+                        </div>
+                    </template>
+                    <template #firstName="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.firstName }}</p>
+                        </div>
+                    </template>
+                    <template #lastName="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.lastName  }}</p>
                         </div>
                     </template>
                     <template #email="data">
                         <div class="flex justify-around w-full">
-                            <a :href="`mailto:${data.value.email}`" class="text-primary hover:underline">{{ data.value.email }}</a>
+                            <a class="font-semibold text-center" >{{ data.value.email }}</a>
                         </div>
                     </template>
                     <template #phone="data">
@@ -49,9 +54,9 @@
                             <p class="font-semibold text-center">{{ data.value.date }}</p>
                         </div>
                     </template>
-                    <template #field="data">
+                    <template #rest="data">
                         <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.field }}</p>
+                            <p class="font-semibold text-center">{{ data.value.rest }}</p>
                         </div>
                     </template>
                     <template #level="data">
@@ -59,53 +64,22 @@
                             <p class="font-semibold text-center">{{ data.value.level }}</p>
                         </div>
                     </template>
-                    <template #center="data">
-                        <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.center }}</p>
-                        </div>
-                    </template>
-                    <template #status="data">
-                        <div class="flex justify-around w-full">
-                            <div class="relative !p-1">
-                                <button class="absolute left-0 top-0 z-10 h-full w-full" @click="registrantsStore.toggle({user_id:authStore?.user?.id,status: data.value.status ? 0 : 1},data.value.id)"></button>
-                                <label class="!relative !inline-flex !cursor-pointer !items-center">
-                                    <div
-                                        :class="[data.value.status && '!bg-blue-600 after:!translate-x-full after:!border-white']"
-                                        class="!peer !h-6 !w-11 !rounded-full bg-gray-200 after:!absolute after:!left-[2px] after:!top-[2px] after:!h-5 after:!w-5 after:!rounded-full after:!border after:!border-gray-300 after:!bg-white after:!transition-all after:!content-[''] peer-focus:!outline-none peer-focus:!ring-4 peer-focus:!ring-blue-300 dark:!border-gray-600 dark:!bg-gray-700 dark:peer-focus:!ring-blue-800"
-                                    ></div>
-                                </label>
-                            </div>    
-                        </div>
-                    </template>
-                    <!-- <template #user_id="data">
-                        <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.user.firstName + ' ' + data.value.user.lastName }}</p>
-                        </div>
-                    </template> -->
-                    <template #actions="data">
-                        <div class="flex w-fit mx-auto justify-around gap-5">
-                            <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
-                            <IconComponent name="delete" @click="deleteData(data.value)" />
-                        </div>
-                    </template>
                 </vue3-datatable>
             </div>
         </div>
     </div>
-    <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
-    <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
 </template>
 <script setup>
     import { ref, reactive, computed, onMounted } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import { useRegistrantsStore } from '@/stores/registrants.js';
+    import { useRoute } from 'vue-router';
     import IconComponent from '@/components/icons/IconComponent.vue'
-    import Add from './Add.vue'
-    import Edit from './Edit.vue'
     import Swal from 'sweetalert2';
-import {useAuthStore} from '@/stores/auth.js';
+    import * as XLSX from 'xlsx';
+    import { useGroupsStore } from '@/stores/groups.js';
 
-const authStore = useAuthStore();
+    const groupsStore = useGroupsStore();
     
     const params = reactive({
         current_page: 1,
@@ -116,48 +90,98 @@ const authStore = useAuthStore();
     });
 
     const registrantsStore = useRegistrantsStore();
+    const route = useRoute();
 
     const showPopup = ref(false);
     const showEditPopup = ref(false);
-    
+    const studyDates = ref([]);
+
     const cols =
         ref([
-            // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'group', title: "Groupe", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'name', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
-            // { field: 'email', title: 'Email', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'firstName', title: 'Prenom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'phone', title: "Mobile", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'field', title: "spécialité", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'level', title: "Niveau", headerClass: '!text-center flex justify-center', width: 'full' },
+            // { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'date', title: "Date d'incription", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'parent_phone', title: "Mobile du parent", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'center', title: "Centre", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'status', title: "Etat", headerClass: '!text-center flex justify-center', width: 'full' },
-            // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
 
     const rows = computed(async() => {
-        console.log('registrantsStore.registrants', registrantsStore.registrants);
-        let data = await registrantsStore.registrants.length > 0 ? registrantsStore.registrants : []
-        console.log(data);
+        let data = await registrantsStore.groupRegistrants.length > 0 ? registrantsStore.groupRegistrants : []
         return data;
         });
 
 
-    const editedData = ref({})
-    onMounted(() => {
-        registrantsStore.index()
+    onMounted(async () => {
+        await registrantsStore.fetchGroupRegistrants(route.params.id)
+        setTimeout(getStudyDatesForCurrentMonth, 1000);
     })
+    const exportToExcel = () => {
+        // Get the attendance data from Vuex
+        const attendanceData = registrantsStore.groupRegistrants.map(res => ({no: res.student.id, nom: res.lastName, prenom: res.firstName,...studyDates.value}))
+        console.log(attendanceData);
+        // Create a worksheet from the attendance data
+        const worksheet = XLSX.utils.json_to_sheet(attendanceData);
 
-    const toggleEdit = (data) => {
-        editedData.value = data
-        console.log(editedData.value);
-        showEditPopup.value = true
-    }
+        // Create a new workbook and append the worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance');
+
+        // Export the workbook to an Excel file
+        XLSX.writeFile(workbook, 'attendance.xlsx');
+    };
+    // Mapping from French days to JavaScript days
+    const dayMap = {
+        "Lundi": 1,    // Monday
+        "Mardi": 2,    // Tuesday
+        "Mercredi": 3, // Wednesday
+        "Jeudi": 4,    // Thursday
+        "Vendredi": 5, // Friday
+        "Samedi": 6,   // Saturday
+        "Dimanche": 0  // Sunday (this will be excluded)
+        };
+
+// Function to get all dates for the specified days in the current month, excluding Sundays
+    const getStudyDatesForCurrentMonth = () => {
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth(); // Current month (0-based)
+        const currentYear = currentDate.getFullYear();
+        const datesToReturn = [];
+
+        // Helper function to get all days of the current month
+        function getDaysInMonth(month, year) {
+            const date = new Date(year, month, 1);
+            const days = [];
+
+            while (date.getMonth() === month) {
+            days.push(new Date(date));
+            date.setDate(date.getDate() + 1);
+            }
+            return days;
+        }
+
+        // Get all the days in the current month
+        const allDays = getDaysInMonth(currentMonth, currentYear);
+        // Loop through the studyData and find all matching dates
+        JSON.parse(groupsStore.group.timing).forEach(item => {
+            const targetDay = dayMap[item.day]; // Get the day number (0-6) from French day
+
+            // Loop through all the days of the current month
+            allDays.forEach(date => {
+            if (date.getDay() === (targetDay+1)) {
+                datesToReturn.push(date.toISOString().slice(5, 10)); // Format MM-DD
+            }
+            });
+        });
+
+        //    = datesToReturn.sort();
+        datesToReturn.sort().forEach(date => {
+            studyDates.value[date] = ''; // Initialize each date with an empty string for now
+        });
+        console.log(studyDates.value);
+    };
 
     const deleteData = (data) => {
-        console.log(data);
         const swalWithBootstrapButtons = Swal.mixin({
             customClass: {
                 popup: 'sweet-alerts',

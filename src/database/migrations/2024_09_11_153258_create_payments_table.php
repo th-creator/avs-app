@@ -20,7 +20,11 @@ return new class extends Migration
             $table->string('rest')->nullable();
             $table->string('type')->nullable();
             $table->string('bank')->nullable();
+            $table->string('bank_receipt')->nullable();
             $table->string('receipt')->nullable();
+            $table->string('month')->nullable();
+            $table->string('year')->nullable();
+            $table->integer('paid')->default(0);
             $table->date('date')->nullable();
             $table->unsignedBigInteger('student_id');
             $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');

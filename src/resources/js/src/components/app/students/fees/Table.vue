@@ -44,6 +44,11 @@
                             <p class="font-semibold text-center">{{ data.value.bank }}</p>
                         </div>
                     </template>
+                    <template #bank_receipt="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.bank_receipt }}</p>
+                        </div>
+                    </template>
                     <template #receipt="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.receipt }}</p>
@@ -94,6 +99,7 @@
             { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'bank', title: "Bank", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'bank_receipt', title: "Chèque", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'receipt', title: "Recu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'date', title: "Date", headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -103,7 +109,6 @@
     const rows = computed(async() => {
         console.log('feesStore.studentfees', feesStore.studentfees);
         let data = await feesStore.studentfees.length > 0 ? feesStore.studentfees : []
-        console.log(data);
         return data;
         });
 

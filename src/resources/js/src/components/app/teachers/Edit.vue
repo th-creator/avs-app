@@ -33,22 +33,27 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
-                                <input v-model="data.firstName" type="text" placeholder="First Name" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <label class="text-sm">Prenom:</label>
+                                <input v-model="data.firstName" type="text" placeholder="Prenom" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.lastName" type="text" placeholder="Last Name" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <label class="text-sm">Nom:</label>
+                                <input v-model="data.lastName" type="text" placeholder="Nom" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.email" type="email" placeholder="Email" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <label class="text-sm">E-mail:</label>
+                                <input v-model="data.email" type="email" placeholder="E-mail" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.email" class="text-red-600 text-sm">{{ errors.email[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Mobile:</label>
                                 <input v-model="data.phone" type="text" placeholder="Mobile" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.phone" class="text-red-600 text-sm">{{ errors.phone[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Matière:</label>
                                 <input v-model="data.subject" type="text" placeholder="Matière" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.subject" class="text-red-600 text-sm">{{ errors.subject[0] }}</span>
                             </div>

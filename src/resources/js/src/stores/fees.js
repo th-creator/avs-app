@@ -32,6 +32,17 @@ export const useFeesStore = defineStore("fees", () => {
             return error
         }
     };
+    // Fetch all fees and update the state
+    const undandledFess = async () => {
+        try {
+            const response = await api.get(`api/undandledFees`);
+            fees.value = response.data.data;  // Update the fees state with the fetched data
+            return response
+        } catch (error) {
+            console.error("Failed to fetch fees:", error);
+            return error
+        }
+    };
 
     // Store a new user and update the state
     const store = async (payload) => {
@@ -45,11 +56,15 @@ export const useFeesStore = defineStore("fees", () => {
     const update = async (payload, id) => {
         const response = await api.put(`api/fees/${id}`, payload);
         const index = fees.value.findIndex(user => user.id === id);
+        const secondIndex = studentfees.value.findIndex(user => user.id === id);
         
         if (index !== -1) {
             students.value[index] = response.data.data;
             students.value = [...students.value]; // Reassign to force reactivity
-            studentfees.value[index] = response.data.data;
+        }
+        
+        if (secondIndex !== -1) {
+            studentfees.value[secondIndex] = response.data.data;
             studentfees.value = [...studentfees.value]; // Reassign to force reactivity
         }
 
@@ -65,5 +80,5 @@ export const useFeesStore = defineStore("fees", () => {
     };
 
     // Expose the fees state and actions
-    return { fees, index, store, update, destroy, studentfees, show };
+    return { fees, index, store, update, destroy, studentfees, show, undandledFess };
 });

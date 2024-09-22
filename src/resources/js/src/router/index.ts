@@ -44,6 +44,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/groups/Index.vue'),
     },
     {
+        path: '/groups/:id/registrants',
+        name: 'groupsRegistrants',
+        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/groups/registrants/Index.vue'),
+    },
+    {
         path: '/students/:id/payments',
         name: 'studentPayments',
         component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/students/payments/Index.vue'),

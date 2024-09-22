@@ -33,38 +33,53 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
+                                <label class="text-sm">Montant:</label>
+                                <input @keyup="calculateRest()" v-model="data.amount" type="number" placeholder="Montant" class="form-input" />
+                                <span v-if="errors.amount" class="text-red-600 text-sm">{{ errors.amount[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Reduction:</label>
+                                <input @keyup="calculateRest()" v-model="data.reduction" type="number" placeholder="Reduction" class="form-input" />
+                                <span v-if="errors.reduction" class="text-red-600 text-sm">{{ errors.reduction[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Reste:</label>
+                                <input v-model="data.rest" type="number" placeholder="Reste" class="form-input" />
+                                <span v-if="errors.rest" class="text-red-600 text-sm">{{ errors.rest[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Date de paiement:</label>
+                                <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
+                                <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Type de paiement:</label>
                                 <multiselect
-                                    v-model="data.student"
-                                    :options="students"
+                                    v-model="data.type"
+                                    :options="options"
                                     class="custom-multiselect"
                                     :searchable="true"
-                                    placeholder="Elève"
+                                    placeholder="Type de paiement"
                                     selected-label=""
                                     select-label=""
                                     deselect-label=""
                                 ></multiselect>
                                 <span v-if="errors.student_id" class="text-red-600 text-sm">{{ errors.student_id[0] }}</span>
                             </div>
-                            <div class="relative mb-4">
-                                <multiselect
-                                    v-model="data.group"
-                                    :options="groups"
-                                    class="custom-multiselect"
-                                    :searchable="true"
-                                    placeholder="Groupe"
-                                    selected-label=""
-                                    select-label=""
-                                    deselect-label=""
-                                ></multiselect>
-                                <span v-if="errors.group_id" class="text-red-600 text-sm">{{ errors.group_id[0] }}</span>
+                            <div v-if="data.type == 'chèque'" class="relative mb-4">
+                                <label class="text-sm">Bank:</label>
+                                <input v-model="data.bank" type="text" placeholder="Bank" class="form-input" />
+                                <span v-if="errors.bank" class="text-red-600 text-sm">{{ errors.bank[0] }}</span>
+                            </div>
+                            <div v-if="data.type == 'chèque'" class="relative mb-4">
+                                <label class="text-sm">Chèque:</label>
+                                <input v-model="data.bank_receipt" type="text" placeholder="Chèque" class="form-input" />
+                                <span v-if="errors.bank_receipt" class="text-red-600 text-sm">{{ errors.bank_receipt[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.center" type="text" placeholder="Centre" class="form-input" />
-                                <span v-if="errors.center" class="text-red-600 text-sm">{{ errors.center[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
-                                <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
+                                <label class="text-sm">Receipt:</label>
+                                <input v-model="data.receipt" type="text" placeholder="Receipt" class="form-input" />
+                                <span v-if="errors.receipt" class="text-red-600 text-sm">{{ errors.receipt[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full" @click="Edit()">Submit</button>
                         </form>
@@ -79,30 +94,20 @@
 </template>
 
 <script setup>
-import { ref, defineProps, computed, onMounted  } from 'vue';
+import { ref, defineProps } from 'vue';
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogOverlay } from '@headlessui/vue';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useStudentsStore } from '@/stores/students.js';
-import { useGroupsStore } from '@/stores/groups.js';
-import { useRegistrantsStore } from '@/stores/registrants.js';
+import { usePaymentsStore } from '@/stores/payments.js';
 import { useAlert } from '@/composables/useAlert';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
-const registrantsStore = useRegistrantsStore();
-const studentsStore = useStudentsStore();
-const groupsStore = useGroupsStore();
+const options = ref(['espèces', 'chèque']);
 
-const groups = computed(() => {
-        return groupsStore.groups.length > 0 ? groupsStore.groups.map(res => res.id + ' : ' + res.intitule) : [];
-        });
+const paymentsStore = usePaymentsStore();
 
-onMounted(() => {
-    studentsStore.index()
-    groupsStore.index()
-})
 const props = defineProps({
     showEditPopup: {
         type: Boolean,
@@ -119,18 +124,24 @@ const props = defineProps({
 });
 
 const data = ref({
-    center: props.editedData.center,
     date: props.editedData.date,
-    group: props.editedData.group_id,
-    group_id: props.editedData.group_id,
-    student: props.editedData.student_id,
-    student_id: props.editedData.student_id,
+    amount: props.editedData.amount,
+    reduction: props.editedData.reduction,
+    rest: props.editedData.rest,
+    type: props.editedData.type,
+    bank: props.editedData.bank,
+    bank_receipt: props.editedData.bank_receipt,
+    receipt: props.editedData.receipt,
 })
 
 const errors = ref({})
-
+const calculateRest = () => {
+    let reduction = data.value.reduction == null ? 0 : data.value.reduction
+    console.log(data.value.amount*(100-reduction)/100,data.value.rest);
+    data.value.rest = data.value.amount*(100-reduction)/100
+}
 const Edit = () => {
-    registrantsStore.update(data.value,props.editedData.id).then(res => {
+    paymentsStore.update(data.value,props.editedData.id).then(res => {
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {

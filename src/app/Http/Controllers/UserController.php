@@ -5,11 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
     public function index() {
-        $users = User::get();
+        $users = User::whereDoesntHave('roles', function ($query) {
+            $query->where('name', 'admin');
+        })->get();
         return response()->json(['data' => $users], 200);
     }
     
@@ -21,7 +24,9 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
         ]);
+        $newUser['status'] = 1;
         $newUser['path'] = 'https://expertsbyab.blob.core.windows.net/expertspublic/lawyers/profiles/default_profile.png';
+        $newUser['password'] = Hash::make($request->password);
         // Create the user in the other service
         $user = User::create($newUser);
         // $user = User::where('email',$user->email)->first();

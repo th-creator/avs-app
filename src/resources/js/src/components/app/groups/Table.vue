@@ -52,6 +52,9 @@
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
+                            <router-link :to="`/groups/${data.value.id}/registrants`" class="main-logo flex items-center shrink-0">
+                                <IconComponent name="view" />
+                            </router-link>
                             <IconComponent name="delete" @click="deleteData(data.value)" />
                         </div>
                     </template>

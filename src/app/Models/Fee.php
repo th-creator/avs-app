@@ -17,6 +17,7 @@ class Fee extends Model
         'rest',
         'type',
         'bank',
+        'bank_receipt',
         'receipt',
         'user_id',
         'student_id',

@@ -182,9 +182,10 @@
 
     const logout = () => {
         authStore.logout().then((res) => {
-            if(res.status == 200) {
+            // if(res.status == 200) {
+                localStorage.setItem('isLoggedIn', 0)
                 route.push('/auth/login')
-            }
+            // }
         })
     }
 </script>

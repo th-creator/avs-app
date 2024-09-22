@@ -33,6 +33,7 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
+                                <label class="text-sm">Elève:</label>
                                 <multiselect
                                     v-model="data.student"
                                     :options="students"
@@ -46,6 +47,7 @@
                                 <span v-if="errors.student_id" class="text-red-600 text-sm">{{ errors.student_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Groupe:</label>
                                 <multiselect
                                     v-model="data.group"
                                     :options="groups"
@@ -59,10 +61,21 @@
                                 <span v-if="errors.group_id" class="text-red-600 text-sm">{{ errors.group_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.center" type="text" placeholder="Centre" class="form-input" />
+                                <label class="text-sm">Centre:</label>
+                                <multiselect
+                                    v-model="data.center"
+                                    :options="options"
+                                    class="custom-multiselect"
+                                    :searchable="true"
+                                    placeholder="Centre"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect>
                                 <span v-if="errors.center" class="text-red-600 text-sm">{{ errors.center[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Date:</label>
                                 <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
@@ -97,6 +110,8 @@ const registrantsStore = useRegistrantsStore();
 const authStore = useAuthStore();
 const studentsStore = useStudentsStore();
 const groupsStore = useGroupsStore();
+
+const options = ref(['AVS', 'ISFPT']);
 
 const students = computed(() => {
         return studentsStore.students.length > 0 ? studentsStore.students.map(res => res.id + ' : ' + res.firstName + ' '+ res.lastName) : [];

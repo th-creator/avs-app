@@ -33,44 +33,48 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
-                                <label class="text-sm">Prenom:</label>
-                                <input v-model="data.firstName" type="text" placeholder="Prenom" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName[0] }}</span>
+                                <label class="text-sm">Montant:</label>
+                                <input @keyup="calculateRest()" v-model="data.amount" type="number" placeholder="Montant" class="form-input" />
+                                <span v-if="errors.amount" class="text-red-600 text-sm">{{ errors.amount[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Nom:</label>
-                                <input v-model="data.lastName" type="text" placeholder="Nom" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName[0] }}</span>
+                                <label class="text-sm">Reduction:</label>
+                                <input @keyup="calculateRest()" v-model="data.reduction" type="number" placeholder="Reduction" class="form-input" />
+                                <span v-if="errors.reduction" class="text-red-600 text-sm">{{ errors.reduction[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">E-mail:</label>
-                                <input v-model="data.email" type="email" placeholder="E-mail" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.email" class="text-red-600 text-sm">{{ errors.email[0] }}</span>
+                                <label class="text-sm">Reste:</label>
+                                <input v-model="data.rest" type="number" placeholder="Reste" class="form-input" />
+                                <span v-if="errors.rest" class="text-red-600 text-sm">{{ errors.rest[0] }}</span>
                             </div>
                             <div class="relative mb-4">
                                 <label class="text-sm">Date d'inscription:</label>
-                                <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Mobile:</label>
-                                <input v-model="data.phone" type="text" placeholder="Mobile" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.phone" class="text-red-600 text-sm">{{ errors.phone[0] }}</span>
+                                <label class="text-sm">Type de paiement:</label>
+                                <multiselect
+                                    v-model="data.type"
+                                    :options="options"
+                                    class="custom-multiselect"
+                                    :searchable="true"
+                                    placeholder="Type de paiement"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect>
+                                <span v-if="errors.student_id" class="text-red-600 text-sm">{{ errors.student_id[0] }}</span>
+                            </div>
+                            <div v-if="data.type == 'chèque'" class="relative mb-4">
+                                <label class="text-sm">Bank:</label>
+                                <input v-model="data.bank" type="text" placeholder="Bank" class="form-input" />
+                                <span v-if="errors.bank" class="text-red-600 text-sm">{{ errors.bank[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">spécialité:</label>
-                                <input v-model="data.field" type="text" placeholder="spécialité" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.field" class="text-red-600 text-sm">{{ errors.field[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <label class="text-sm">Niveau:</label>
-                                <input v-model="data.level" type="text" placeholder="Niveau" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.level" class="text-red-600 text-sm">{{ errors.level[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <label class="text-sm">Mobile du parent:</label>
-                                <input v-model="data.parent_phone" type="text" placeholder="Mobile du parent" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.parent_phone" class="text-red-600 text-sm">{{ errors.parent_phone[0] }}</span>
+                                <label class="text-sm">Receipt:</label>
+                                <input v-model="data.receipt" type="text" placeholder="Receipt" class="form-input" />
+                                <span v-if="errors.receipt" class="text-red-600 text-sm">{{ errors.receipt[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full" @click="Edit()">Submit</button>
                         </form>
@@ -85,15 +89,19 @@
 </template>
 
 <script setup>
-import { ref, defineProps, onMounted } from 'vue';
+import { ref, defineProps } from 'vue';
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogOverlay } from '@headlessui/vue';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useStudentsStore } from '@/stores/students.js';
+import { usePaymentsStore } from '@/stores/payments.js';
 import { useAlert } from '@/composables/useAlert';
+import Multiselect from '@suadelabs/vue3-multiselect';
+import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
-const studentsStore = useStudentsStore();
+const options = ref(['espèces', 'chèque']);
+
+const paymentsStore = usePaymentsStore();
 
 const props = defineProps({
     showEditPopup: {
@@ -111,20 +119,23 @@ const props = defineProps({
 });
 
 const data = ref({
-    firstName: props.editedData.firstName,
-    lastName: props.editedData.lastName,
-    email: props.editedData.email,
     date: props.editedData.date,
-    phone: props.editedData.phone,
-    parent_phone: props.editedData.parent_phone,
-    field: props.editedData.field,
-    level: props.editedData.level,
+    amount: props.editedData.amount,
+    reduction: props.editedData.reduction,
+    rest: props.editedData.rest,
+    type: props.editedData.type,
+    bank: props.editedData.bank,
+    receipt: props.editedData.receipt,
 })
 
 const errors = ref({})
-
+const calculateRest = () => {
+    let reduction = data.value.reduction == null ? 0 : data.value.reduction
+    console.log(data.value.amount*(100-reduction)/100,data.value.rest);
+    data.value.rest = data.value.amount*(100-reduction)/100
+}
 const Edit = () => {
-    studentsStore.update(data.value,props.editedData.id).then(res => {
+    paymentsStore.update(data.value,props.editedData.id).then(res => {
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {

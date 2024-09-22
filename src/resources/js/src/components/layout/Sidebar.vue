@@ -105,7 +105,7 @@
                                     <router-link to="/users" class="group" @click="toggleMobileMenu">
                                         <div class="flex items-center">
                                             <IconComponent name="users"/>  
-                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Utilisateurs</span>
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Employés</span>
                                         </div>
                                     </router-link>
                                 </li>

@@ -33,22 +33,7 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
-                                <input v-model="data.intitule" type="text" placeholder="Intitule" class="form-input" />
-                                <span v-if="errors.intitule" class="text-red-600 text-sm">{{ errors.intitule[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <input v-model="data.n_place" type="number" placeholder="Nombre de places" class="form-input" />
-                                <span v-if="errors.n_place" class="text-red-600 text-sm">{{ errors.n_place[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <input v-model="data.availability" type="number" placeholder="Disponibilite" class="form-input" />
-                                <span v-if="errors.availability" class="text-red-600 text-sm">{{ errors.availability[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <input v-model="data.salle" type="text" placeholder="Salle" class="form-input" />
-                                <span v-if="errors.salle" class="text-red-600 text-sm">{{ errors.salle[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
+                                <label class="text-sm">Enseignant:</label>
                                 <multiselect
                                     v-model="data.teacher"
                                     :options="teachers"
@@ -62,6 +47,7 @@
                                 <span v-if="errors.teacher_id" class="text-red-600 text-sm">{{ errors.teacher_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Section:</label>
                                 <multiselect
                                     v-model="data.section"
                                     :options="sections"
@@ -75,22 +61,43 @@
                                 <span v-if="errors.section_id" class="text-red-600 text-sm">{{ errors.section_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Intitule:</label>
+                                <input v-model="data.intitule" type="text" placeholder="Intitule" class="form-input" />
+                                <span v-if="errors.intitule" class="text-red-600 text-sm">{{ errors.intitule[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Nombre de places:</label>
+                                <input v-model="data.n_place" type="number" placeholder="Nombre de places" class="form-input" />
+                                <span v-if="errors.n_place" class="text-red-600 text-sm">{{ errors.n_place[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Disponibilité:</label>
+                                <input v-model="data.availability" type="number" placeholder="Disponibilite" class="form-input" />
+                                <span v-if="errors.availability" class="text-red-600 text-sm">{{ errors.availability[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Salle:</label>
+                                <input v-model="data.salle" type="text" placeholder="Salle" class="form-input" />
+                                <span v-if="errors.salle" class="text-red-600 text-sm">{{ errors.salle[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Temps:</label>
                                 <multiselect
                                     v-model="data.day"
                                     :options="options"
                                     class="custom-multiselect [w-75%]"
                                     :searchable="false"
                                     :preselect-first="true"
-                                    placeholder="Jour"
+                                    placeholder="Temps"
                                     :allow-empty="false"
                                     selected-label=""
                                     select-label=""
                                     deselect-label=""
                                 ></multiselect><div class="mt-4 flex justify-between items-center"><input type="number" v-model="data.from" placeholder="Du" class="form-input w-[42%]" /><input type="number" v-model="data.to" placeholder="A" class="form-input w-[42%]" /><span class="border px-3 py-[6px] rounded cursor-pointer" @click="attachTiming">+</span></div>
-                                <div v-if="data.timing" class="mt-2">
+                                <div class="mt-2">
                                     <div class="flex justify-around w-full items-center gap-2 mt-2" v-for="time in data.timing" @click="detachTiming(time)"><p class="cursor-pointer font-semibold text-center border-gray-700 border rounded-3xl px-4 py-1 bg-white-dark">{{ time.day + ' : ' + time.dates }}</p></div>
                                 </div>
-                                <span v-if="errors.salle" class="text-red-600 text-sm">{{ errors.salle[0] }}</span>
+                                <span v-if="errors.day" class="text-red-600 text-sm">{{ errors.day[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full" @click="Edit()">Submit</button>
                         </form>

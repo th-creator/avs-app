@@ -33,6 +33,7 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
+                                <label class="text-sm">Elève:</label>
                                 <multiselect
                                     v-model="data.student"
                                     :options="students"
@@ -46,6 +47,7 @@
                                 <span v-if="errors.student_id" class="text-red-600 text-sm">{{ errors.student_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Groupe:</label>
                                 <multiselect
                                     v-model="data.group"
                                     :options="groups"
@@ -59,10 +61,21 @@
                                 <span v-if="errors.group_id" class="text-red-600 text-sm">{{ errors.group_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.center" type="text" placeholder="Centre" class="form-input" />
+                                <label class="text-sm">Centre:</label>
+                                <multiselect
+                                    v-model="data.center"
+                                    :options="options"
+                                    class="custom-multiselect"
+                                    :searchable="true"
+                                    placeholder="Centre"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect>
                                 <span v-if="errors.center" class="text-red-600 text-sm">{{ errors.center[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Date:</label>
                                 <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
@@ -91,16 +104,25 @@ import { useAlert } from '@/composables/useAlert';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
+const options = ref(['AVS', 'ISFPT']);
 const registrantsStore = useRegistrantsStore();
 const studentsStore = useStudentsStore();
 const groupsStore = useGroupsStore();
 
 const students = computed(() => {
-        return studentsStore.students.length > 0 ? studentsStore.students.map(res => res.id + ' : ' + res.firstName + ' '+ res.lastName) : [];
+        return studentsStore.students.length > 0 ? studentsStore.students.map(res => {
+            if(data.value.student == res.id) {
+            data.value.student = res.id + ' : ' + res.firstName + ' '+ res.lastName;
+            return res.id + ' : ' + res.firstName + ' '+ res.lastName
+        } else return res.id + ' : ' + res.firstName + ' '+ res.lastName}) : [];
         });
 
 const groups = computed(() => {
-        return groupsStore.groups.length > 0 ? groupsStore.groups.map(res => res.id + ' : ' + res.intitule) : [];
+        return groupsStore.groups.length > 0 ? groupsStore.groups.map(res => {
+            if(data.value.group == res.id) {
+            data.value.group = res.id + ' : ' + res.intitule;
+            return res.id + ' : ' + res.intitule
+        } else return res.id + ' : ' + res.intitule}) : [];
         });
 
 onMounted(() => {

@@ -33,14 +33,17 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
+                                <label class="text-sm">Matière:</label>
                                 <input v-model="data.subject" type="text" placeholder="Matière" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.subject" class="text-red-600 text-sm">{{ errors.subject[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Niveau:</label>
                                 <input v-model="data.level" type="text" placeholder="Niveau" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.level" class="text-red-600 text-sm">{{ errors.level[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Prix:</label>
                                 <input v-model="data.price" type="text" placeholder="Prix" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.price" class="text-red-600 text-sm">{{ errors.price[0] }}</span>
                             </div>

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('rest')->nullable();
             $table->string('type')->nullable();
             $table->string('bank')->nullable();
+            $table->string('bank_receipt')->nullable();
             $table->string('receipt')->nullable();
             $table->date('date')->nullable();
             $table->unsignedBigInteger('student_id');

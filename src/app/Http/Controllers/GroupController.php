@@ -60,6 +60,11 @@ class GroupController extends Controller
         return response()->json(['message' => 'Group updated successfully', 'data' => $data], 200);
     }
 
+    public function show($id) {
+        $data = Group::where('id',$id)->first();
+        return response()->json(['data' => $data], 200);
+    }
+
     
     public function destroy($id)
     {

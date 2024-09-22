@@ -17,6 +17,14 @@ class FeeController extends Controller
         return response()->json(['data' => $data], 200);
     }
 
+    public function undandledFees() {
+        $data = Fee::where(function ($query) {
+            $query->where('rest', '!=', 0)
+                  ->orWhereNull('rest');
+        })->get();
+        return response()->json(['data' => $data], 200);
+    }
+
     public function store(Request $request)
     {
         $newData = $request->validate([
@@ -27,6 +35,7 @@ class FeeController extends Controller
             'rest' => 'nullable',
             'type' => 'nullable',
             'bank' => 'nullable',
+            'bank_receipt' => 'nullable',
             'receipt' => 'nullable',
             'group' => 'nullable',
             'user_id' => 'required',
@@ -50,12 +59,12 @@ class FeeController extends Controller
 
         $userData = $request->validate([
             'date' => 'nullable',
-            'fullName' => 'required',
             'amount' => 'required',
             'reduction' => 'nullable',
             'rest' => 'required',
             'type' => 'nullable',
             'bank' => 'nullable',
+            'bank_receipt' => 'nullable',
             'receipt' => 'nullable',
         ]);
         

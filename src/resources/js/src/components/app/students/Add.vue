@@ -33,34 +33,42 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
+                                <label class="text-sm">Prenom:</label>
                                 <input v-model="data.firstName" type="text" placeholder="Prenom" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Nom:</label>
                                 <input v-model="data.lastName" type="text" placeholder="Nom" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">E-mail:</label>
                                 <input v-model="data.email" type="email" placeholder="E-mail" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.email" class="text-red-600 text-sm">{{ errors.email[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Date d'inscription:</label>
                                 <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.phone" type="tel" placeholder="Mobile" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <label class="text-sm">Mobile:</label>
+                                <input v-model="data.phone" type="text" placeholder="Mobile" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.phone" class="text-red-600 text-sm">{{ errors.phone[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">spécialité:</label>
                                 <input v-model="data.field" type="text" placeholder="spécialité" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.field" class="text-red-600 text-sm">{{ errors.field[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Niveau:</label>
                                 <input v-model="data.level" type="text" placeholder="Niveau" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.level" class="text-red-600 text-sm">{{ errors.level[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Mobile du parent:</label>
                                 <input v-model="data.parent_phone" type="text" placeholder="Mobile du parent" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.parent_phone" class="text-red-600 text-sm">{{ errors.parent_phone[0] }}</span>
                             </div>

@@ -11,11 +11,6 @@ class StudentController extends Controller
         $data = Student::with('user')->get();
         return response()->json(['data' => $data], 200);
     }
-
-    public function show($id) {
-        $data = Student::where('id',$id)->get()->first();
-        return response()->json(['data' => $data], 200);
-    }
     
     public function store(Request $request)
     {
@@ -59,9 +54,14 @@ class StudentController extends Controller
         
         $data->update($userData);
 
+        $data->user = $data->user;
         return response()->json(['message' => 'Student updated successfully', 'data' => $data], 200);
     }
 
+    public function show($id) {
+        $data = Student::where('id',$id)->get()->first();
+        return response()->json(['data' => $data], 200);
+    }
     
     public function destroy($id)
     {

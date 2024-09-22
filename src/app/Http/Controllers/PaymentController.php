@@ -8,12 +8,21 @@ use App\Models\Payment;
 class PaymentController extends Controller
 {
     public function index() {
-        $data = Payment::with('student')->get();
+        $data = Payment::where(function ($query) {
+            $query->where('rest', '!=', 0)
+                  ->orWhereNull('rest');
+        })
+        ->get();
         return response()->json(['data' => $data], 200);
     }
 
     public function show($id) {
         $data = Payment::where('student_id',$id)->with('student')->get();
+        return response()->json(['data' => $data], 200);
+    }
+
+    public function groupPayments($id) {
+        $data = Payment::where('group_id',$id)->get();
         return response()->json(['data' => $data], 200);
     }
     
@@ -25,8 +34,10 @@ class PaymentController extends Controller
             'amount' => 'required',
             'reduction' => 'required',
             'rest' => 'required',
+            'month' => 'nullable',
             'type' => 'nullable',
             'bank' => 'nullable',
+            'bank_receipt' => 'nullable',
             'receipt' => 'nullable',
             'group' => 'nullable',
             'user_id' => 'required',
@@ -52,18 +63,16 @@ class PaymentController extends Controller
 
         $userData = $request->validate([
             'date' => 'nullable',
-            'fullName' => 'required',
             'amount' => 'required',
             'reduction' => 'nullable',
             'rest' => 'required',
             'type' => 'nullable',
             'bank' => 'nullable',
+            'bank_receipt' => 'nullable',
             'receipt' => 'nullable',
         ]);
-        
+        $userData['paid'] = 1;
         $data->update($userData);
-
-        $data->student = $data->student;
         
         return response()->json(['message' => 'Payment updated successfully', 'data' => $data], 200);
     }

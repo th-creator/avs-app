@@ -33,19 +33,23 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
+                                <label class="text-sm">Prenom:</label>
                                 <input v-model="data.firstName" type="text" placeholder="Prenom" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Nom:</label>
                                 <input v-model="data.lastName" type="text" placeholder="Nom" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">E-mail:</label>
                                 <input v-model="data.email" type="email" placeholder="E-mail" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.email" class="text-red-600 text-sm">{{ errors.email[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <input v-model="data.password" type="password" placeholder="Password" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <label class="text-sm">Mot de passe:</label>
+                                <input v-model="data.password" type="password" placeholder="Mot de passe" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.password" class="text-red-600 text-sm">{{ errors.password[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full" @click="Edit()">Submit</button>

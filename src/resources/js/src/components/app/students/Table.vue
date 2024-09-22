@@ -18,7 +18,12 @@
                     lastArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M11 19L17 12L11 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M6.99976 19L12.9998 12L6.99976 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg> '
                     previousArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M15 5L9 12L15 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                     nextArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
-                >
+                    >
+                    <template #id="data">
+                        <div class="flex justify-around w-full">
+                            <h5 class="text-primary hover:underline">{{ data.value.id }}</h5>
+                        </div>
+                    </template>
                     <template #name="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.firstName + ' ' + data.value.lastName }}</p>
@@ -26,7 +31,7 @@
                     </template>
                     <template #email="data">
                         <div class="flex justify-around w-full">
-                            <a :href="`mailto:${data.value.email}`" class="text-primary hover:underline">{{ data.value.email }}</a>
+                            <a class="font-semibold text-center" >{{ data.value.email }}</a>
                         </div>
                     </template>
                     <template #phone="data">
@@ -89,7 +94,7 @@
         search: '',
         pagesize: 10,
         sort_column: 'id',
-        sort_direction: 'asc',
+        sort_direction: 'desc',
     });
 
     const studentsStore = useStudentsStore();
@@ -99,7 +104,7 @@
     
     const cols =
         ref([
-            // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'name', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'email', title: 'Email', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'phone', title: "Mobile", headerClass: '!text-center flex justify-center', width: 'full' },

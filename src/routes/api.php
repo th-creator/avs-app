@@ -28,8 +28,12 @@ Route::post('user/{id}/profile', [ProfileController::class, 'editProfilePicture'
 Route::post('user/{id}/password', [ProfileController::class, 'changePassword']);
 Route::apiResource('students', StudentController::class);
 Route::apiResource('registrants', RegistrantController::class);
+Route::put('registrant/{id}/toggle', [RegistrantController::class, 'toggle']);
+Route::get('group/{id}/registrants', [RegistrantController::class, 'groupRegistrants']);
+Route::get('group/{id}/payments', [PaymentController::class, 'groupPayments']);
 Route::apiResource('teachers', TeacherController::class);
 Route::apiResource('groups', GroupController::class);
 Route::apiResource('sections', SectionController::class);
 Route::apiResource('payments', PaymentController::class);
 Route::apiResource('fees', FeeController::class);
+Route::get('undandledFees', [FeeController::class, 'undandledFees']);

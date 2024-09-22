@@ -8,12 +8,24 @@ let api = server(BACKEND_URL)
 export const useGroupsStore = defineStore("groups", () => {
     // Define the global state for groups
     const groups = ref([]);  // This will hold the groups globally
+    const group = ref([]);  // This will hold the groups globally
 
     // Fetch all groups and update the state
     const index = async () => {
         try {
             const response = await api.get('api/groups');
             groups.value = response.data.data;  // Update the groups state with the fetched data
+            return response
+        } catch (error) {
+            console.error("Failed to fetch groups:", error);
+            return error
+        }
+    };
+
+    const show = async (id) => {
+        try {
+            const response = await api.get(`api/groups/${id}`);
+            group.value = response.data.data;  // Update the students state with the fetched data
             return response
         } catch (error) {
             console.error("Failed to fetch groups:", error);
@@ -49,5 +61,5 @@ export const useGroupsStore = defineStore("groups", () => {
     };
 
     // Expose the groups state and actions
-    return { groups, index, store, update, destroy };
+    return { groups, index, store, update, destroy, show, group };
 });
