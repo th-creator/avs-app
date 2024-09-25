@@ -53,7 +53,7 @@ const routes: RouteRecordRaw[] = [
         name: 'studentPayments',
         component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/students/payments/Index.vue'),
     },
-
+ 
     {
         path: '/pages/error404',
         name: 'error404',
