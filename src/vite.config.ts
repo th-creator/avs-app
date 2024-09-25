@@ -5,6 +5,7 @@ import vueI18n from "@intlify/vite-plugin-vue-i18n";
 import laravel from "laravel-vite-plugin";
 
 export default defineConfig({
+    base: '/build/',  // Set base URL for assets in production.
     plugins: [
         laravel({
             input: ["resources/js/src/main.ts"],
@@ -25,6 +26,10 @@ export default defineConfig({
         alias: {
             "@": path.resolve("./resources/js/src"),
         },
+    },
+    build: {
+        outDir: 'public/build',  // Ensure the build output is in the right directory.
+        manifest: true,          // Ensure manifest.json is generated for Laravel.
     },
     optimizeDeps: {
         include: ["quill"],
