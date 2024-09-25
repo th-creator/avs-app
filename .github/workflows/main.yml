@@ -14,22 +14,29 @@ jobs:
       - name: Get the latest code
         uses: actions/checkout@v2.3.2
 
-      - name: Setup Node
+      # Step to install Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v2
+        with:
+          node-version: '16'  # Use the Node.js version compatible with your project
+
+      - name: Install Node.js dependencies
+        run: npm install --prefix src
+
+      # Step to build assets with Vite
+      - name: Build assets using Vite
+        run: npm run build --prefix src
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2.0'
+          php-version: '8.2'
 
-      - name: Install Composer
-        run: sudo apt-get install composer
+      - name: Install Composer dependencies
+        run: composer install --working-dir=src --ignore-platform-reqs
 
       - name: Copy .env
         run: php -r "file_exists('src/.env') || copy('src/.env.example', 'src/.env');"
-
-      - name: Install Dependencies
-        run: composer install --working-dir=src --ignore-platform-reqs
 
       - name: Generate Laravel Key
         run: php src/artisan key:generate
@@ -40,6 +47,7 @@ jobs:
       - name: Set Directory Permissions
         run: chmod -R 777 src/storage src/bootstrap/cache
 
+      # Step to deploy the project via FTP
       - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
