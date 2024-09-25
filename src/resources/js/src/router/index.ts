@@ -11,47 +11,47 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/settings',
         name: 'settings',
-        component: () => import('../pages/settings/Index.vue'),
+        component: () => import('../pages/settings/index.vue'),
     },
     {
         path: '/users',
         name: 'users',
-        component: () => import('../pages/users/Index.vue'),
+        component: () => import('../pages/users/index.vue'),
     },
     {
         path: '/registrants',
         name: 'registrants',
-        component: () => import('../pages/registrants/Index.vue'),
+        component: () => import('../pages/registrants/index.vue'),
     },
     {
         path: '/students',
         name: 'students',
-        component: () => import('../pages/students/Index.vue'),
+        component: () => import('../pages/students/index.vue'),
     },
     {
         path: '/teachers',
         name: 'teachers',
-        component: () => import('../pages/teachers/Index.vue'),
+        component: () => import('../pages/teachers/index.vue'),
     },
     {
         path: '/sections',
         name: 'sections',
-        component: () => import('../pages/sections/Index.vue'),
+        component: () => import('../pages/sections/index.vue'),
     },
     {
         path: '/groups',
         name: 'groups',
-        component: () => import('../pages/groups/Index.vue'),
+        component: () => import('../pages/groups/index.vue'),
     },
     {
         path: '/groups/:id/registrants',
         name: 'groupsRegistrants',
-        component: () => import('../pages/groups/registrants/Index.vue'),
+        component: () => import('../pages/groups/registrants/index.vue'),
     },
     {
         path: '/students/:id/payments',
         name: 'studentPayments',
-        component: () => import('../pages/students/payments/Index.vue'),
+        component: () => import('../pages/students/payments/index.vue'),
     },
  
     {
