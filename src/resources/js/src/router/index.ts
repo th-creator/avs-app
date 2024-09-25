@@ -11,47 +11,47 @@ const routes: RouteRecordRaw[] = [
     {
         path: '/settings',
         name: 'settings',
-        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/settings/Index.vue'),
+        component: () => import('../pages/settings/Index.vue'),
     },
     {
         path: '/users',
         name: 'users',
-        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/users/Index.vue'),
+        component: () => import('../pages/users/Index.vue'),
     },
     {
         path: '/registrants',
         name: 'registrants',
-        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/registrants/Index.vue'),
+        component: () => import('../pages/registrants/Index.vue'),
     },
     {
         path: '/students',
         name: 'students',
-        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/students/Index.vue'),
+        component: () => import('../pages/students/Index.vue'),
     },
     {
         path: '/teachers',
         name: 'teachers',
-        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/teachers/Index.vue'),
+        component: () => import('../pages/teachers/Index.vue'),
     },
     {
         path: '/sections',
         name: 'sections',
-        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/sections/Index.vue'),
+        component: () => import('../pages/sections/Index.vue'),
     },
     {
         path: '/groups',
         name: 'groups',
-        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/groups/Index.vue'),
+        component: () => import('../pages/groups/Index.vue'),
     },
     {
         path: '/groups/:id/registrants',
         name: 'groupsRegistrants',
-        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/groups/registrants/Index.vue'),
+        component: () => import('../pages/groups/registrants/Index.vue'),
     },
     {
         path: '/students/:id/payments',
         name: 'studentPayments',
-        component: () => import(/* webpackChunkName: "users-user-account-settings" */ '../pages/students/payments/Index.vue'),
+        component: () => import('../pages/students/payments/Index.vue'),
     },
  
     {
