@@ -61,7 +61,7 @@
                                 <span v-if="errors.group_id" class="text-red-600 text-sm">{{ errors.group_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Centre:</label>
+                                <label class="text-sm">Centre:</label> 
                                 <multiselect
                                     v-model="data.center"
                                     :options="options"
