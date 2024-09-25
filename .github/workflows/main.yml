@@ -47,11 +47,22 @@ jobs:
       - name: Set Directory Permissions
         run: chmod -R 777 src/storage src/bootstrap/cache
 
-      # Step to deploy the project via FTP
-      - name: Deploy via FTP
+      # Deploy Laravel application (excluding the Vite assets)
+      - name: Deploy Laravel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.YOURSITE_FTP_SERVER }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.YOUR_PASSWORD }}
           local-dir: src/
+          server-dir: /public_html/  # Adjust this based on your server directory
+
+      # Deploy Vite build assets via FTP
+      - name: Deploy Vite assets via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.YOURSITE_FTP_SERVER }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.YOUR_PASSWORD }}
+          local-dir: src/public/build/  # Deploy Vite assets
+          server-dir: /public_html/build/  # Adjust this based on your server directory
