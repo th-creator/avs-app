@@ -20,27 +20,27 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2.0' # Specify your PHP version
+          php-version: '8.2.0'
 
-      - name: Change directory to src
-        run: cd src
-        
+      - name: Install Composer
+        run: sudo apt-get install composer
+
       - name: Copy .env
         run: php -r "file_exists('src/.env') || copy('src/.env.example', 'src/.env');"
 
       - name: Install Dependencies
-        run: cd src && composer update --ignore-platform-reqs
+        run: composer install --working-dir=src --ignore-platform-reqs
 
-      - name: Generate key
-        run: cd src && php artisan key:generate
+      - name: Generate Laravel Key
+        run: php src/artisan key:generate
 
-      - name: Generate storage link
-        run: cd src && php artisan storage:link
-        
-      - name: Directory Permissions
-        run: cd src && chmod -R 777 storage bootstrap/cache
+      - name: Create Storage Symlink
+        run: php src/artisan storage:link
 
-      - name: Sync files
+      - name: Set Directory Permissions
+        run: chmod -R 777 src/storage src/bootstrap/cache
+
+      - name: Deploy via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.YOURSITE_FTP_SERVER }}
