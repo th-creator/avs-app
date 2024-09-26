@@ -67,6 +67,7 @@
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
                             <IconComponent name="delete" @click="deleteData(data.value)" />
+                            <IconComponent name="print" @click="printPayment(data.value)" />
                         </div>
                     </template>
                 </vue3-datatable>
@@ -75,9 +76,70 @@
     </div>
     <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
     <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
+    <!-- Hidden element to use for printing -->
+    <div id="receipt" class="receipt-container hidden">
+        <div class="reciept-wrapper">
+            <div>
+                <p><strong>Date :</strong> {{ new Date().toLocaleDateString() }}</p>
+                <h3><strong>Facture Mois :</strong> {{ selectedPayment?.month }}</h3>
+                <p><strong>Nom :</strong> {{ selectedPayment?.fullName }}</p>
+                <p><strong>Reçu :</strong> {{ selectedPayment?.receipt }}</p>    
+                <p><strong>Groupe :</strong> {{ selectedPayment?.group }}</p>    
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Montant</th>
+                        <th>Reste</th>
+                        <th>Type de reglement</th>
+                        <th>Recu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr :key="selectedPayment?.id">
+                        <td>{{ selectedPayment?.amount }}</td>
+                        <td>{{ selectedPayment?.rest }}</td>
+                        <td>{{ selectedPayment?.type }}</td>
+                        <td>{{ selectedPayment?.receipt }}</td>
+                    </tr>
+                </tbody>
+            </table>    
+        </div>
+        <br>
+        <hr>
+        <br>
+        <div class="reciept-wrapper">
+            <div>
+                <p><strong>Date :</strong> {{ new Date().toLocaleDateString() }}</p>
+                <h3><strong>Facture Mois :</strong> {{ selectedPayment?.month }}</h3>
+                <p><strong>Nom :</strong> {{ selectedPayment?.fullName }}</p>
+                <p><strong>Reçu :</strong> {{ selectedPayment?.receipt }}</p>    
+                <p><strong>Groupe :</strong> {{ selectedPayment?.group }}</p>    
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Montant</th>
+                        <th>Reste</th>
+                        <th>Type de reglement</th>
+                        <th>Recu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr :key="selectedPayment?.id">
+                        <td>{{ selectedPayment?.amount }}</td>
+                        <td>{{ selectedPayment?.rest }}</td>
+                        <td>{{ selectedPayment?.type }}</td>
+                        <td>{{ selectedPayment?.receipt }}</td>
+                    </tr>
+                </tbody>
+            </table>    
+        </div>
+        
+    </div>
 </template>
 <script setup>
-    import { ref, reactive, computed, onMounted } from 'vue';
+    import { ref, reactive, computed, onMounted, nextTick } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import { usePaymentsStore } from '@/stores/payments.js';
     import { useRoute } from 'vue-router';
@@ -85,6 +147,7 @@
     import Add from './Add.vue'
     import Edit from './Edit.vue'
     import Swal from 'sweetalert2';
+    import html2pdf from "html2pdf.js";
     
     const params = reactive({
         current_page: 1,
@@ -167,5 +230,71 @@
             }
         });
     }
+    const selectedPayment = ref({
+        month:'',
+        name:'',
+        firstName:'',
+        date:'',
+        receipt:'',
+        amount:'',
+    });
+// Print function using html2pdf.js
+const printPayment = (payment) => {
+  selectedPayment.value = payment;
 
+  // Temporarily remove the hidden class to display the receipt
+  const element = document.getElementById('receipt');
+  element.classList.remove('hidden');
+
+  // Wait for the DOM to update
+  nextTick(() => {
+    const options = {
+      margin: 1,
+      filename: `receipt-${payment.id}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    };
+
+    html2pdf().from(element).set(options).save().then(() => {
+      // Add the hidden class again after printing
+      element.classList.add('hidden');
+    });
+  });
+};
 </script>
+
+
+<style scoped>
+.hidden {
+  display: none;
+}
+
+.receipt-container {
+  padding: 5px;
+}
+.reciept-wrapper {
+padding: 20px;
+  border: 1px solid #000;
+  /* width: 700px; */
+  margin: 90px 20px;
+
+}
+.receipt-container table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+
+.receipt-container table th,
+.receipt-container table td {
+  border: 1px solid #000;
+  padding: 10px;
+  text-align: left;
+}
+
+.receipt-container table th {
+  background-color: #f2f2f2;
+}
+
+</style>

@@ -102,10 +102,12 @@ export const useAuthStore = defineStore("auth", () => {
     };
     const logout = async () => {
         var response = await api.post('api/logout');
+        return response;
+    };
+    const emptyLogout = async () => {
         setIsLoggedIn(0);
         setUser(null);
         setToken(null);
-        return response;
     };
     const editInfo = async (payload, id) => {
         const response = await api.post(`api/user/${id}/update`, payload).then(res => {
@@ -132,5 +134,5 @@ export const useAuthStore = defineStore("auth", () => {
     const isAuth = async () => {
         await api.get("/api/user").then(res => console.log(res));
     }
-    return { user, isLoggedIn, login, logout, setIsLoggedIn, setUser, setProfile, setToken, editInfo, editPassword, editUserProfile, isAuth };
+    return { user, isLoggedIn, login, logout, setIsLoggedIn, setUser, setProfile, setToken, editInfo, editPassword, editUserProfile, isAuth, emptyLogout };
   }); 

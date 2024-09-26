@@ -3,9 +3,10 @@
         <nav class="sidebar fixed min-h-screen h-full top-0 bottom-0 w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] z-50 transition-all duration-300">
             <div class="bg-white dark:bg-[#0e1726] h-full">
                 <div class="flex justify-between items-center px-4 py-3">
-                    <router-link to="/" class="main-logo flex items-center shrink-0">
-                        <img class="w-8 ml-[5px] flex-none" src="/assets/images/logo.svg" alt="" />
-                        <span class="text-2xl ltr:ml-1.5 rtl:mr-1.5 font-semibold align-middle lg:inline dark:text-white-light">AVS</span>
+                    <div></div>
+                    <router-link to="/" class="main-logo flex items-center justify-center shrink-0">
+                        <img class="w-32 ml-[5px] flex-none" src="/assets/images/avs-logo.png" alt="" />
+                        <!-- <span class="text-2xl ltr:ml-1.5 rtl:mr-1.5 font-semibold align-middle lg:inline dark:text-white-light">AVS</span> -->
                     </router-link>
                     <a
                         href="javascript:;"
@@ -80,7 +81,7 @@
                                 <li class="nav-item">
                                     <router-link to="/students" class="group" @click="toggleMobileMenu">
                                         <div class="flex items-center">
-                                            <IconComponent name="users"/>                                            
+                                            <IconComponent name="students"/>                                            
                                             <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">élèves</span>
                                         </div>
                                     </router-link>
@@ -92,19 +93,19 @@
                                 <li class="nav-item">
                                     <router-link to="/teachers" class="group" @click="toggleMobileMenu">
                                         <div class="flex items-center">
-                                            <IconComponent name="users"/>                                            
+                                            <IconComponent name="teachers"/>                                            
                                             <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Enseignants</span>
                                         </div>
                                     </router-link>
                                 </li>
                             </ul>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item" v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'">
                             <ul>
                                 <li class="nav-item">
                                     <router-link to="/users" class="group" @click="toggleMobileMenu">
                                         <div class="flex items-center">
-                                            <IconComponent name="users"/>  
+                                            <IconComponent name="employees"/>  
                                             <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Employés</span>
                                         </div>
                                     </router-link>
@@ -116,7 +117,7 @@
                                 <li class="nav-item">
                                     <router-link to="/sections" class="group" @click="toggleMobileMenu">
                                         <div class="flex items-center">
-                                            <IconComponent name="users"/>  
+                                            <IconComponent name="sections"/>  
                                             <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Sections</span>
                                         </div>
                                     </router-link>
@@ -128,7 +129,7 @@
                                 <li class="nav-item">
                                     <router-link to="/groups" class="group" @click="toggleMobileMenu">
                                         <div class="flex items-center">
-                                            <IconComponent name="users"/>  
+                                            <IconComponent name="groups"/>  
                                             <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Groups</span>
                                         </div>
                                     </router-link>
@@ -160,6 +161,9 @@
     import { useAppStore } from '@/stores/index';
     import VueCollapsible from 'vue-height-collapsible/vue3';
     import IconComponent from '@/components/icons/IconComponent.vue'
+    import {useAuthStore} from '@/stores/auth.js';
+
+    const authStore = useAuthStore();
     const store = useAppStore(); 
     const activeDropdown = ref('');
     const subActive = ref('');

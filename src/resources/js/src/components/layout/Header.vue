@@ -4,11 +4,11 @@
             <div class="relative bg-white flex w-full items-center px-5 py-2.5 dark:bg-[#0e1726]">
                 <div class="horizontal-logo flex lg:hidden justify-between items-center ltr:mr-2 rtl:ml-2">
                     <router-link to="/" class="main-logo flex items-center shrink-0">
-                        <img class="w-8 ltr:-ml-1 rtl:-mr-1 inline" src="/assets/images/logo.svg" alt="" />
-                        <span
+                        <img class="w-20 ltr:-ml-1 rtl:-mr-1 inline" src="/assets/images/avs-logo-short.png" alt="" />
+                        <!-- <span
                             class="text-2xl ltr:ml-1.5 rtl:mr-1.5 font-semibold align-middle hidden md:inline dark:text-white-light transition-all duration-300"
                             >VRISTO</span
-                        >
+                        > -->
                     </router-link>
 
                     <a
@@ -129,7 +129,7 @@
                                         </router-link>
                                     </li>
                                     <li class="border-t border-white-light dark:border-white-light/10">
-                                        <router-link to="/auth/login" class="text-danger !py-3" @click="logout()">
+                                        <router-link to="/" class="text-danger !py-3" @click="logout()">
                                             <svg
                                                 class="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 rotate-90 shrink-0"
                                                 width="18"
@@ -180,12 +180,10 @@
     const route = useRouter();
     const search = ref(false);
 
-    const logout = () => {
-        authStore.logout().then((res) => {
-            // if(res.status == 200) {
-                localStorage.setItem('isLoggedIn', 0)
-                route.push('/auth/login')
-            // }
-        })
+    const logout = async () => {
+        localStorage.setItem('isLoggedIn', 0);
+        window.location.href = '/auth/login';
+        await authStore.logout()
+        authStore.emptyLogout()
     }
 </script>
