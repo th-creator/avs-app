@@ -21,13 +21,13 @@ jobs:
         with:
           node-version: '16'  # Adjust this to the version of Node.js you need
 
-      # Step to install Node.js dependencies (for Vue.js)
+      # Step to install Node.js dependencies (for Vue.js) in the src folder
       - name: Install Node.js dependencies
-        run: npm install --prefix resources/js
+        run: npm install --prefix src
 
-      # Step to build assets using Vite (Vue.js)
+      # Step to build assets using Vite (Vue.js) in the src folder
       - name: Build assets using Vite
-        run: npm run build --prefix resources/js
+        run: npm run build --prefix src
 
       # Step to set up PHP (required for Laravel)
       - name: Set up PHP
@@ -35,25 +35,25 @@ jobs:
         with:
           php-version: '8.2'
 
-      # Step to install Composer dependencies (for Laravel)
+      # Step to install Composer dependencies (for Laravel) in the src folder
       - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs
+        run: composer install --working-dir=src --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs
 
-      # Step to copy .env file if it does not exist
+      # Step to copy .env file if it does not exist in the src folder
       - name: Copy .env
-        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+        run: php -r "file_exists('src/.env') || copy('src/.env.example', 'src/.env');"
 
       # Step to generate Laravel app key
       - name: Generate Laravel key
-        run: php artisan key:generate
+        run: php src/artisan key:generate
 
       # Step to create storage symlink for Laravel
       - name: Create storage symlink
-        run: php artisan storage:link
+        run: php src/artisan storage:link
 
       # Step to set directory permissions (for Laravel)
       - name: Set directory permissions
-        run: chmod -R 777 storage bootstrap/cache
+        run: chmod -R 777 src/storage src/bootstrap/cache
 
       # Step to deploy the Laravel application (excluding the Vite assets)
       - name: Deploy Laravel via FTP
@@ -63,6 +63,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.YOUR_PASSWORD }}
           local-dir: src/  # Adjust this if needed
+          server-dir: /public_html/  # Adjust this to the correct path on your server
 
       # Step to deploy the Vite build assets (Vue.js) via FTP
       - name: Deploy Vite assets via FTP
@@ -71,5 +72,5 @@ jobs:
           server: ${{ secrets.YOURSITE_FTP_SERVER }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.YOUR_PASSWORD }}
-          local-dir: src/resources/js/public/build/  # Path to Vite build output
-          server-dir: /build/  # Adjust this to the correct path for assets on your server
+          local-dir: src/public/build/  # Path to Vite build output
+          server-dir: /public_html/build/  # Adjust this to the correct path for assets on your server
