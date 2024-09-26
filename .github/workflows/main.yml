@@ -1,4 +1,4 @@
-name: Deploy Laravel Project on push
+name: Deploy Laravel Project with Vue.js on push
 
 on:
   push:
@@ -11,58 +11,66 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step to get the latest code
       - name: Get the latest code
         uses: actions/checkout@v2.3.2
 
-      # Step to install Node.js
+      # Step to set up Node.js (required for building Vue.js assets)
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'  # Use the Node.js version compatible with your project
+          node-version: '16'  # Adjust this to the version of Node.js you need
 
+      # Step to install Node.js dependencies (for Vue.js) in the src folder
       - name: Install Node.js dependencies
         run: npm install --prefix src
 
-      # Step to build assets with Vite
+      # Step to build assets using Vite (Vue.js) in the src folder
       - name: Build assets using Vite
         run: npm run build --prefix src
 
+      # Step to set up PHP (required for Laravel)
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
 
+      # Step to install Composer dependencies (for Laravel) in the src folder
       - name: Install Composer dependencies
-        run: composer install --working-dir=src --ignore-platform-reqs
+        run: composer install --working-dir=src --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs
 
+      # Step to copy .env file if it does not exist in the src folder
       - name: Copy .env
         run: php -r "file_exists('src/.env') || copy('src/.env.example', 'src/.env');"
 
-      - name: Generate Laravel Key
+      # Step to generate Laravel app key
+      - name: Generate Laravel key
         run: php src/artisan key:generate
 
-      - name: Create Storage Symlink
+      # Step to create storage symlink for Laravel
+      - name: Create storage symlink
         run: php src/artisan storage:link
 
-      - name: Set Directory Permissions
+      # Step to set directory permissions (for Laravel)
+      - name: Set directory permissions
         run: chmod -R 777 src/storage src/bootstrap/cache
 
-      # Deploy Laravel application (excluding the Vite assets)
+      # Step to deploy the Laravel application (excluding the Vite assets)
       - name: Deploy Laravel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.YOURSITE_FTP_SERVER }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.YOUR_PASSWORD }}
-          local-dir: src/
-          server-dir: /public_html/  # Adjust this based on your server directory
+          local-dir: src/  # Adjust this if needed
+          server-dir: /public_html/  # Adjust this to the correct path on your server
 
-      # Deploy Vite build assets via FTP
+      # Step to deploy the Vite build assets (Vue.js) via FTP
       - name: Deploy Vite assets via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.YOURSITE_FTP_SERVER }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.YOUR_PASSWORD }}
-          local-dir: src/public/build/  # Deploy Vite assets
-          server-dir: /public_html/build/  # Adjust this based on your server directory
+          local-dir: src/public/build/  # Path to Vite build output
+          server-dir: /public_html/build/  # Adjust this to the correct path for assets on your server
