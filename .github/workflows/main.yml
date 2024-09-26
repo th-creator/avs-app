@@ -1,4 +1,4 @@
-name: Deploy Laravel Project on push
+name: Deploy Laravel Project with Vue.js on push
 
 on:
   push:
@@ -11,68 +11,66 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step to get the latest code
       - name: Get the latest code
         uses: actions/checkout@v2.3.2
 
-      # Step to install Node.js
+      # Step to set up Node.js (required for building Vue.js assets)
       - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'  # Adjust to the Node.js version compatible with your project
+          node-version: '16'  # Adjust this to the version of Node.js you need
 
+      # Step to install Node.js dependencies (for Vue.js)
       - name: Install Node.js dependencies
-        run: npm install --prefix src
+        run: npm install --prefix resources/js
 
-      # Step to build assets with Vite
+      # Step to build assets using Vite (Vue.js)
       - name: Build assets using Vite
-        run: npm run build --prefix src
+        run: npm run build --prefix resources/js
 
-      # Set up PHP
+      # Step to set up PHP (required for Laravel)
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
 
-      # Cache Composer dependencies
-      - name: Cache Composer dependencies
-        uses: actions/cache@v2
-        with:
-          path: vendor
-          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-composer-
-
-      # Install Composer dependencies
+      # Step to install Composer dependencies (for Laravel)
       - name: Install Composer dependencies
-        run: composer install --working-dir=src --ignore-platform-reqs
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader --ignore-platform-reqs
 
+      # Step to copy .env file if it does not exist
       - name: Copy .env
-        run: php -r "file_exists('src/.env') || copy('src/.env.example', 'src/.env');"
+        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
 
-      - name: Generate Laravel Key
-        run: php src/artisan key:generate
+      # Step to generate Laravel app key
+      - name: Generate Laravel key
+        run: php artisan key:generate
 
-      - name: Create Storage Symlink
-        run: php src/artisan storage:link
+      # Step to create storage symlink for Laravel
+      - name: Create storage symlink
+        run: php artisan storage:link
 
-      - name: Set Directory Permissions
-        run: chmod -R 777 src/storage src/bootstrap/cache
+      # Step to set directory permissions (for Laravel)
+      - name: Set directory permissions
+        run: chmod -R 777 storage bootstrap/cache
 
-      # Deploy Laravel application (excluding the Vite assets)
+      # Step to deploy the Laravel application (excluding the Vite assets)
       - name: Deploy Laravel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.YOURSITE_FTP_SERVER }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.YOUR_PASSWORD }}
-          local-dir: src/
+          local-dir: ./  # Adjust this if needed
+          server-dir: /public_html/  # Adjust this to the correct path on your server
 
-      # Deploy Vite build assets via FTP
+      # Step to deploy the Vite build assets (Vue.js) via FTP
       - name: Deploy Vite assets via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: ${{ secrets.YOURSITE_FTP_SERVER }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.YOUR_PASSWORD }}
-          local-dir: src/public/build/  # Deploy Vite assets
-          server-dir: /public_html/build/  # Adjust this based on your server directory
+          local-dir: resources/js/public/build/  # Path to Vite build output
+          server-dir: /public_html/build/  # Adjust this to the correct path for assets on your server
