@@ -62,8 +62,7 @@ jobs:
           server: ${{ secrets.YOURSITE_FTP_SERVER }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.YOUR_PASSWORD }}
-          local-dir: ./  # Adjust this if needed
-          server-dir: /public_html/  # Adjust this to the correct path on your server
+          local-dir: src/  # Adjust this if needed
 
       # Step to deploy the Vite build assets (Vue.js) via FTP
       - name: Deploy Vite assets via FTP
@@ -72,5 +71,5 @@ jobs:
           server: ${{ secrets.YOURSITE_FTP_SERVER }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.YOUR_PASSWORD }}
-          local-dir: resources/js/public/build/  # Path to Vite build output
-          server-dir: /public_html/build/  # Adjust this to the correct path for assets on your server
+          local-dir: src/resources/js/public/build/  # Path to Vite build output
+          server-dir: /build/  # Adjust this to the correct path for assets on your server
