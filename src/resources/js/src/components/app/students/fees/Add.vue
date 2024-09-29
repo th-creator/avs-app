@@ -48,6 +48,11 @@
                                 <span v-if="errors.total" class="text-red-600 text-sm">{{ errors.total[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Montant reçu:</label>
+                                <input v-model="data.amount_paid" @keyup="calculatePayer()" type="number" placeholder="Montant reçu" class="form-input" />
+                                <span v-if="errors.amount_paid" class="text-red-600 text-sm">{{ errors.amount_paid[0] }}</span>
+                            </div>  
+                            <div class="relative mb-4">
                                 <label class="text-sm">Reste a payer:</label>
                                 <input v-model="data.rest" type="number" placeholder="Reste a payer" class="form-input" />
                                 <span v-if="errors.rest" class="text-red-600 text-sm">{{ errors.rest[0] }}</span>
@@ -121,6 +126,9 @@ const calculateRest = () => {
     let reduction = data.value.reduction == null ? 0 : data.value.reduction
     data.value.total = data.value.amount*(100-reduction)/100
 }
+const calculatePayer = () => {
+    data.value.rest = data.value.total - data.value.amount_paid
+}
 
 const feesStore = useFeesStore();
 const authStore = useAuthStore();
@@ -144,6 +152,7 @@ const data = ref({
     amount: 0,
     reduction: 0,
     rest: 0,
+    amount_paid: 0,
     type: '',
     total: '',
     bank: '',

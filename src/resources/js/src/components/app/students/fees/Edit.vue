@@ -48,6 +48,11 @@
                                 <span v-if="errors.total" class="text-red-600 text-sm">{{ errors.total[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Montant reçu:</label>
+                                <input v-model="data.amount_paid" type="number" placeholder="Montant reçu" class="form-input" />
+                                <span v-if="errors.amount_paid" class="text-red-600 text-sm">{{ errors.amount_paid[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
                                 <label class="text-sm">Reste a payer:</label>
                                 <input v-model="data.rest" type="number" placeholder="Reste a payer" class="form-input" />
                                 <span v-if="errors.rest" class="text-red-600 text-sm">{{ errors.rest[0] }}</span>
@@ -133,6 +138,7 @@ const data = ref({
     amount: props.editedData.amount,
     reduction: props.editedData.reduction,
     rest: props.editedData.rest,
+    amount_paid: props.editedData.amount_paid,
     type: props.editedData.type,
     bank: props.editedData.bank,
     total: props.editedData.total,

@@ -1,7 +1,7 @@
 <template>
     <div class="panel  my-6">
         <TabGroup as="div" class="mb-5">
-            <h3 class="font-semibold text-lg dark:text-white-light mb-5">L'etudient: {{ studentsStore.student.firstName + ' ' + studentsStore.student.lastName }}</h3>
+            <h3 class="font-semibold text-lg dark:text-white-light mb-5">L'etudiant: {{ studentsStore.student.firstName + ' ' + studentsStore.student.lastName }}</h3>
     <TabList class="flex flex-wrap mt-3 border-b border-white-light dark:border-[#191e3a]">
         <Tab as="template" v-slot="{ selected }">
             <a

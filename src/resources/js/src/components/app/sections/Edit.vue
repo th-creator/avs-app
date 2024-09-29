@@ -36,7 +36,7 @@
                                 <label class="text-sm">Matière:</label>
                                 <multiselect
                                     v-model="data.subject"
-                                    :options="subjects"
+                                    :options="options"
                                     class="custom-multiselect"
                                     :searchable="true"
                                     placeholder="Matière"
@@ -88,7 +88,7 @@ import { useAlert } from '@/composables/useAlert';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
-const subjects = ref(['PC', 'Math', 'SVT', 'Comptabilitéa', 'Economie générale', 'Gestion de entreprise', 'Philosophie', 'Anglais', 'Francais', 'Arabe', 'Education islamique', 'Sciences de l\'inpenieurie', 'Allemend', 'Histoire peopraphie']);
+const options = ref(['PC', 'Math', 'SVT', 'Comptabilité', 'Economie générale', 'Gestion d\'entreprise', 'Philosophie', 'Anglais', 'Francais', 'Arabe', 'Education islamique', 'Sciences de l\'ingénieurie', 'Allemend', 'Histoire géographie']);
 const levels = ref(['6em primaire', '1 AC', '2 AC', '3 AC', 'Tronc commun', '1 Bac', '2 Bac']);
 
 const sectionsStore = useSectionsStore();

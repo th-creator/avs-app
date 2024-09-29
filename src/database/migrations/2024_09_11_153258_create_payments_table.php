@@ -18,7 +18,8 @@ return new class extends Migration
             $table->decimal('amount', total: 8, places: 2);
             $table->integer('reduction')->nullable();
             $table->string('rest')->nullable();
-            $table->string('total', total: 8, places: 2)->nullable();
+            $table->decimal('total', total: 8, places: 2)->nullable();
+            $table->decimal('amount_paid', total: 8, places: 2)->nullable();
             $table->string('type')->nullable();
             $table->string('bank')->nullable();
             $table->string('bank_receipt')->nullable();
@@ -27,14 +28,14 @@ return new class extends Migration
             $table->string('year')->nullable();
             $table->integer('paid')->default(0);
             $table->date('date')->nullable();
-            $table->unsignedBigInteger('student_id');
-            $table->foreign('student_id')->references('id')->on('students')->onDelete('cascade');
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->unsignedBigInteger('group_id');
-            $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
-            $table->unsignedBigInteger('registrant_id');
-            $table->foreign('registrant_id')->references('id')->on('registrants')->onDelete('cascade');
+            $table->unsignedBigInteger('student_id')->nullable();
+            $table->foreign('student_id')->references('id')->on('students')->onDelete('set null');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->unsignedBigInteger('group_id')->nullable();
+            $table->foreign('group_id')->references('id')->on('groups')->onDelete('set null');
+            $table->unsignedBigInteger('registrant_id')->nullable();
+            $table->foreign('registrant_id')->references('id')->on('registrants')->onDelete('set null');
             $table->timestamps();
         });
     }

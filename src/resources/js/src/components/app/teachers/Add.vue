@@ -94,7 +94,7 @@ import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 const teachersStore = useTeachersStore();
 const authStore = useAuthStore();
 
-const options = ref(['PC', 'Math', 'SVT', 'Comptabilité', 'Economie générale', 'Gestion de entreprise', 'Philosophie', 'Anglais', 'Francais', 'Arabe', 'Education islamique', 'Sciences de l\'inpenieurie', 'Allemend', 'Histoire peopraphie']);
+const options = ref(['PC', 'Math', 'SVT', 'Comptabilité', 'Economie générale', 'Gestion d\'entreprise', 'Philosophie', 'Anglais', 'Francais', 'Arabe', 'Education islamique', 'Sciences de l\'ingénieurie', 'Allemend', 'Histoire géographie']);
 
 const props = defineProps({
     showPopup: {

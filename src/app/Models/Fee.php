@@ -16,6 +16,7 @@ class Fee extends Model
         'reduction',
         'rest',
         'total',
+        'amount_paid',
         'type',
         'bank',
         'bank_receipt',

@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('subject');
             $table->string('level');
             $table->decimal('price', total: 8, places: 2);
-            $table->string('user_id');
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->timestamps();
         });
     }

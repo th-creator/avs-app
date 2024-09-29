@@ -19,6 +19,7 @@ class Student extends Model
         'field',
         'level',
         'user_id',
+        'school',
     ];
 
     

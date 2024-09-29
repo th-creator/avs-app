@@ -27,7 +27,7 @@
                     class="sm:flex-1 ltr:sm:ml-0 ltr:ml-auto sm:rtl:mr-0 rtl:mr-auto flex items-center space-x-1.5 lg:space-x-2 rtl:space-x-reverse dark:text-[#d0d2d6]"
                 >
                     <div class="sm:ltr:mr-auto sm:rtl:ml-auto">
-                        <form
+                        <!-- <form
                             class="sm:relative absolute inset-x-0 sm:top-0 top-1/2 sm:translate-y-0 -translate-y-1/2 sm:mx-0 mx-4 z-10 sm:block hidden"
                             :class="{ '!block': search }"
                             @submit.prevent="search = false"
@@ -60,9 +60,9 @@
                                     </svg>
                                 </button>
                             </div>
-                        </form>
+                        </form> -->
 
-                        <button
+                        <!-- <button
                             type="button"
                             class="search_btn sm:hidden p-2 rounded-full bg-white-light/40 dark:bg-dark/40 hover:bg-white-light/90 dark:hover:bg-dark/60"
                             @click="search = !search"
@@ -78,7 +78,7 @@
                                 <circle cx="11.5" cy="11.5" r="9.5" stroke="currentColor" stroke-width="1.5" opacity="0.5" />
                                 <path d="M18.5 18.5L22 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                             </svg>
-                        </button>
+                        </button> -->
                     </div>
                     <div class="dropdown shrink-0">
                         <Popper :placement="store.rtlClass === 'rtl' ? 'bottom-end' : 'bottom-start'" offsetDistance="8" class="!block">

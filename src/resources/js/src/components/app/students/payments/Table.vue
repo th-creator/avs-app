@@ -53,6 +53,11 @@
                             <p class="font-semibold text-center">{{ data.value.total }}MAD</p>
                         </div>
                     </template>
+                    <template #amount_paid="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.amount_paid }}MAD</p>
+                        </div>
+                    </template>
                     <template #reduction="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.reduction }}%</p>
@@ -81,8 +86,8 @@
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
-                            <IconComponent name="delete" @click="deleteData(data.value)" />
                             <IconComponent name="print" @click="printPayment(data.value)" />
+                            <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
                         </div>
                     </template>
                 </vue3-datatable>
@@ -99,25 +104,22 @@
                 <h3><strong>Facture Mois :</strong> {{ selectedPayment?.month }}</h3>
                 <p><strong>Nom :</strong> {{ selectedPayment?.fullName }}</p>
                 <p><strong>Reçu :</strong> {{ selectedPayment?.receipt }}</p>    
-                <p><strong>Groupe :</strong> {{ selectedPayment?.group }}</p>    
             </div>
             <table>
                 <thead>
                     <tr>
-                        <th>Montant</th>
+                        <th>Groupe</th>
                         <th>Montant a payer</th>
                         <th>Reste a payer</th>
                         <th>Type de reglement</th>
-                        <th>Recu</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr :key="selectedPayment?.id">
-                        <td>{{ selectedPayment?.amount }}</td>
+                        <td>{{ selectedPayment?.group }}</td>
                         <td>{{ selectedPayment?.total }}</td>
                         <td>{{ selectedPayment?.rest }}</td>
                         <td>{{ selectedPayment?.type }}</td>
-                        <td>{{ selectedPayment?.receipt }}</td>
                     </tr>
                 </tbody>
             </table>    
@@ -136,18 +138,18 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Montant</th>
-                        <th>Reste</th>
+                        <th>Groupe</th>
+                        <th>Montant a payer</th>
+                        <th>Reste a payer</th>
                         <th>Type de reglement</th>
-                        <th>Recu</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr :key="selectedPayment?.id">
-                        <td>{{ selectedPayment?.amount }}</td>
+                        <td>{{ selectedPayment?.group }}</td>
+                        <td>{{ selectedPayment?.total }}</td>
                         <td>{{ selectedPayment?.rest }}</td>
                         <td>{{ selectedPayment?.type }}</td>
-                        <td>{{ selectedPayment?.receipt }}</td>
                     </tr>
                 </tbody>
             </table>    
@@ -165,6 +167,9 @@
     import Edit from './Edit.vue'
     import Swal from 'sweetalert2';
     import html2pdf from "html2pdf.js";
+import {useAuthStore} from '@/stores/auth.js';
+
+const authStore = useAuthStore();
     
     import Multiselect from '@suadelabs/vue3-multiselect';
     import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
@@ -199,6 +204,7 @@
             { field: 'month', title: 'Mois', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'reduction', title: "Réduction", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -273,7 +279,7 @@
         firstName:'',
         date:'',
         receipt:'',
-        totlal:'',
+        total:'',
         rest:'',
         amount:'',
     });

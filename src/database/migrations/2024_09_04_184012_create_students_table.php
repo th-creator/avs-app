@@ -21,8 +21,9 @@ return new class extends Migration
             $table->string('parent_phone')->nullable();
             $table->string('field')->nullable();
             $table->string('level')->nullable();
-            $table->unsignedBigInteger('user_id');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->string('school')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->timestamps();
         });
     }

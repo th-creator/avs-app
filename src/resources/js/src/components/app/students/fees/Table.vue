@@ -39,6 +39,11 @@
                             <p class="font-semibold text-center">{{ data.value.total }}MAD</p>
                         </div>
                     </template>
+                    <template #amount_paid="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.amount_paid }}MAD</p>
+                        </div>
+                    </template>
                     <template #date="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.date }}</p>
@@ -62,7 +67,7 @@
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
-                            <IconComponent name="delete" @click="deleteData(data.value)" />
+                            <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
                         </div>
                     </template>
                 </vue3-datatable>
@@ -81,6 +86,9 @@
     import Add from './Add.vue'
     import Edit from './Edit.vue'
     import Swal from 'sweetalert2';
+    import {useAuthStore} from '@/stores/auth.js';
+
+    const authStore = useAuthStore();
     
     const params = reactive({
         current_page: 1,
@@ -101,8 +109,9 @@
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'reduction', title: "Reduction", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'bank', title: "Bank", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'bank_receipt', title: "Chèque", headerClass: '!text-center flex justify-center', width: 'full' },

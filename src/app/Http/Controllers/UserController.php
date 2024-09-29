@@ -21,6 +21,7 @@ class UserController extends Controller
         $newUser = $request->validate([
             'firstName' => 'required',
             'lastName' => 'required',
+            'center' => 'nullable',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6',
         ]);
@@ -46,6 +47,7 @@ class UserController extends Controller
         $userData = $request->validate([
             'firstName' => 'required',
             'lastName' => 'required',
+            'center' => 'nullable',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id, // Ignore the unique constraint for the current user
         ]);
         if($request->filled('password')){

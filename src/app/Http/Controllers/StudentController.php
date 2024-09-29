@@ -23,6 +23,7 @@ class StudentController extends Controller
             'parent_phone' => 'nullable|min:10',
             'field' => 'nullable',
             'level' => 'nullable',
+            'school' => 'nullable',
             'user_id' => 'required',
         ]);
 
@@ -50,6 +51,7 @@ class StudentController extends Controller
             'parent_phone' => 'nullable|min:10',
             'field' => 'nullable',
             'level' => 'nullable',
+            'school' => 'nullable',
         ]);
         
         $data->update($userData);

@@ -34,8 +34,8 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/teachers/Teachers.vue'),
     },
     {
-        path: '/sections',
-        name: 'sections',
+        path: '/options',
+        name: 'options',
         component: () => import('../pages/sections/Sections.vue'),
     },
     {

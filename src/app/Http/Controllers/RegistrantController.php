@@ -73,7 +73,7 @@ class RegistrantController extends Controller
                 return response()->json(['message' => 'Failed to create Registrant'], 500);
             }
         }
-        return response()->json(['message' => 'Registrant created successfully', 'data' => $newRegistrants], 200);
+        return response()->json(['message' => 'Registrant created successfully', 'data' => $data], 200);
         $newData['status'] = 1;
         $data = Registrant::create($newData);
         $data->student = $data->student;

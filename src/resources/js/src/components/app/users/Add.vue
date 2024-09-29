@@ -52,6 +52,20 @@
                                 <input v-model="data.password" type="password" placeholder="Mot de passe" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.password" class="text-red-600 text-sm">{{ errors.password[0] }}</span>
                             </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Centre:</label>
+                                <multiselect
+                                    v-model="data.center"
+                                    :options="options"
+                                    class="custom-multiselect"
+                                    :searchable="true"
+                                    placeholder="Centre"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect>
+                                <span v-if="errors.center" class="text-red-600 text-sm">{{ errors.center[0] }}</span>
+                            </div>
                             <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
                         </form>
                     </div>
@@ -73,7 +87,10 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { useUsersStore } from '@/stores/users.js';
 import { useAlert } from '@/composables/useAlert';
+import Multiselect from '@suadelabs/vue3-multiselect';
+import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
+const options = ref(['AVS', 'ISFPT']);
 const usersStore = useUsersStore();
 
 const props = defineProps({
@@ -91,6 +108,7 @@ const data = ref({
     firstName: '',
     lastName: '',
     email: '',
+    center: '',
     password: '',
 })
 const errors = ref({})

@@ -115,10 +115,10 @@
                         <li class="nav-item">
                             <ul>
                                 <li class="nav-item">
-                                    <router-link to="/sections" class="group" @click="toggleMobileMenu">
+                                    <router-link to="/options" class="group" @click="toggleMobileMenu">
                                         <div class="flex items-center">
                                             <IconComponent name="sections"/>  
-                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Sections</span>
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Options</span>
                                         </div>
                                     </router-link>
                                 </li>
@@ -130,7 +130,7 @@
                                     <router-link to="/groups" class="group" @click="toggleMobileMenu">
                                         <div class="flex items-center">
                                             <IconComponent name="groups"/>  
-                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Groups</span>
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Groupes</span>
                                         </div>
                                     </router-link>
                                 </li>

@@ -47,7 +47,7 @@
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
-                            <IconComponent name="delete" @click="deleteData(data.value)" />
+                            <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
                         </div>
                     </template>
                 </vue3-datatable>
@@ -65,6 +65,9 @@
     import Add from './Add.vue'
     import Edit from './Edit.vue'
     import Swal from 'sweetalert2';
+import {useAuthStore} from '@/stores/auth.js';
+
+const authStore = useAuthStore();
     
     const params = reactive({
         current_page: 1,
