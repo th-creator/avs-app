@@ -21,7 +21,7 @@
                                 />
                                 <path d="M12 15L12 18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
                             </svg>
-                            Home
+                            Accueil
                         </a>
                     </Tab>
                 </TabList>
@@ -29,7 +29,7 @@
                     <TabPanel>
                         <div>
                             <form class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 mb-5 bg-white dark:bg-[#0e1726]">
-                                <h6 class="text-lg font-bold mb-5">General Information</h6>
+                                <h6 class="text-lg font-bold mb-5">Informations Générales</h6>
                                 <div class="flex flex-col sm:flex-row">
                                     <div class="ltr:sm:mr-4 rtl:sm:ml-4 w-full sm:w-2/12 mb-5">
                                         <img :src="user.path" alt="" class="w-20 h-20 md:w-32 md:h-32 rounded-full object-cover mx-auto" />
@@ -42,11 +42,11 @@
                                     </div>
                                     <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-5">
                                         <div>
-                                            <label for="name">First Name</label>
+                                            <label for="name">Prénom</label>
                                             <input id="name" type="text" v-model="user.firstName" class="form-input" />
                                         </div>
                                         <div>
-                                            <label for="name">Last Name</label>
+                                            <label for="name">Nom</label>
                                             <input id="name" type="text" v-model="user.lastName" class="form-input" />
                                         </div>
                                         <div>
@@ -61,25 +61,25 @@
                                 </div>
                                 <div class="flex justify-end">
                                     <div class="sm:col-span-2 mt-3">
-                                        <button type="button" class="btn btn-primary" @click="Edit">Save</button>
+                                        <button type="button" class="btn btn-primary" @click="Edit">Enregistrer</button>
                                     </div>
                                 </div>
                             </form>
                             <form class="border border-[#ebedf2] dark:border-[#191e3a] rounded-md p-4 bg-white dark:bg-[#0e1726]">
-                                <h6 class="text-lg font-bold mb-5">Security</h6>
+                                <h6 class="text-lg font-bold mb-5">Sécurité</h6>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     <div>
-                                        <label for="profession">New Password</label>
+                                        <label for="profession">Nouveau mot de passe</label>
                                         <input id="profession" type="text" v-model="user.password" class="form-input"  :class="[!!errors.password && '!border-rose-500']"/>
                                         <span v-if="errors.password" :class="[!!errors.password[0] && '!opacity-100']" class="text-xs text-rose-500 opacity-0 duration-200 h-2 block mt-1">{{ errors.password[0] }}</span>
                                     </div>
                                     <div>
-                                        <label for="profession">Repeat Password</label>
+                                        <label for="profession">Répéter le mot de passe</label>
                                         <input id="profession" type="text" v-model="user.password_confirmation" class="form-input"  :class="[!!errors.password && '!border-rose-500']"/>
                                         <span v-if="errors.password" :class="[!!errors.password[0] && '!opacity-100']" class="text-xs text-rose-500 opacity-0 duration-200 h-2 block mt-1">{{ errors.password[0] }}</span>
                                     </div>
                                     <div>
-                                        <label for="profession">Old Password</label>
+                                        <label for="profession">Ancien mot de passe</label>
                                         <input id="profession" type="text" v-model="user.oldPassword" class="form-input"  :class="[!!errors.oldPassword || !!errors.ifOldPasswordNoMatch ? 'border-rose-500' : '']"/>
                                         <span v-if="errors.oldPassword" :class="[!!errors.oldPassword[0] && '!opacity-100']" class="text-xs text-rose-500 opacity-0 duration-200 h-2 block mt-1">{{ errors.oldPassword[0] }}</span>
                                         <span v-if="errors.ifOldPasswordNoMatch" :class="[!!errors.ifOldPasswordNoMatch[0] && '!opacity-100']" class="text-xs text-rose-500 opacity-0 duration-200 h-2 block mt-1">{{ errors.ifOldPasswordNoMatch }}</span>
@@ -87,7 +87,7 @@
                                 </div>
                                 <div class="flex justify-end">
                                     <div class="sm:col-span-2 mt-3">
-                                        <button type="button" class="btn btn-primary" @click="EditPassword">Save</button>
+                                        <button type="button" class="btn btn-primary" @click="EditPassword">Enregistrer</button>
                                     </div>
                                 </div>
                             </form>
@@ -156,6 +156,9 @@
         await authStore.editPassword(payload,authStore.user.id)
         .then( (response) =>
         {
+            user.value.password = ''
+            user.value.password_confirmation = ''
+            user.value.oldPassword = ''
             console.log(response);
             useAlert('success', 'Updated succussfully')
         })

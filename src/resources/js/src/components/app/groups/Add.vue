@@ -1,7 +1,7 @@
 <template>
     <div>
         <TransitionRoot appear :show="showPopup" as="template">
-            <Dialog as="div" @close="close()" class="relative z-50">
+            <Dialog as="div"  class="relative z-50">
             <TransitionChild 
                 as="template"
                 enter="duration-300 ease-out"
@@ -25,7 +25,7 @@
                     leave-from="opacity-100 scale-100"
                     leave-to="opacity-0 scale-95"
                 >
-                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg overflow-hidden w-full max-w-sm text-black dark:text-white-dark">
+                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg w-full max-w-sm text-black dark:text-white-dark">
                     <button type="button" class="absolute top-7 ltr:right-9 rtl:left-9 text-white-dark hover:text-dark outline-none" @click="close()">
                         X
                     </button>
@@ -93,7 +93,12 @@
                                     selected-label=""
                                     select-label=""
                                     deselect-label=""
-                                ></multiselect><div class="mt-4 flex justify-between items-center"><input type="number" v-model="data.from" placeholder="Du" class="form-input w-[42%]" /><input type="number" v-model="data.to" placeholder="A" class="form-input w-[42%]" /><span class="border px-3 py-[6px] rounded cursor-pointer" @click="attachTiming">+</span></div>
+                                ></multiselect>
+                                <div class="mt-4 flex justify-between items-center">
+                                    <input type="text" v-model="data.from" placeholder="Du" class="form-input w-[42%]" />
+                                    <input type="text" v-model="data.to" placeholder="A" class="form-input w-[42%]" />
+                                    <span class="border px-3 py-[6px] rounded cursor-pointer" @click="attachTiming">+</span>
+                                </div>
                                 <div class="mt-2">
                                     <div class="flex justify-around w-full items-center gap-2 mt-2" v-for="time in data.timing" @click="detachTiming(time)"><p class="cursor-pointer font-semibold text-center border-gray-700 border rounded-3xl px-4 py-1 bg-white-dark">{{ time.day + ' : ' + time.dates }}</p></div>
                                 </div>

@@ -1,7 +1,7 @@
 <template>
     <div>
         <TransitionRoot appear :show="showPopup" as="template">
-            <Dialog as="div" @close="close()" class="relative z-50">
+            <Dialog as="div" class="relative z-50">
             <TransitionChild 
                 as="template"
                 enter="duration-300 ease-out"
@@ -25,7 +25,7 @@
                     leave-from="opacity-100 scale-100"
                     leave-to="opacity-0 scale-95"
                 >
-                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg overflow-hidden w-full max-w-sm text-black dark:text-white-dark">
+                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg w-full max-w-sm text-black dark:text-white-dark">
                     <button type="button" class="absolute top-7 ltr:right-9 rtl:left-9 text-white-dark hover:text-dark outline-none" @click="close()">
                         X
                     </button>
@@ -43,6 +43,20 @@
                                 <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Matière:</label>
+                                <multiselect
+                                    v-model="data.subject"
+                                    :options="options"
+                                    class="custom-multiselect"
+                                    :searchable="true"
+                                    placeholder="Matière"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect>
+                                <span v-if="errors.subject" class="text-red-600 text-sm">{{ errors.subject[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
                                 <label class="text-sm">E-mail:</label>
                                 <input v-model="data.email" type="email" placeholder="E-mail" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.email" class="text-red-600 text-sm">{{ errors.email[0] }}</span>
@@ -51,11 +65,6 @@
                                 <label class="text-sm">Mobile:</label>
                                 <input v-model="data.phone" type="text" placeholder="Mobile" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.phone" class="text-red-600 text-sm">{{ errors.phone[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <label class="text-sm">Matière:</label>
-                                <input v-model="data.subject" type="text" placeholder="Matière" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.subject" class="text-red-600 text-sm">{{ errors.subject[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
                         </form>
@@ -79,9 +88,13 @@ import 'swiper/css/pagination';
 import { useTeachersStore } from '@/stores/teachers.js';
 import { useAlert } from '@/composables/useAlert';
 import {useAuthStore} from '@/stores/auth.js';
+import Multiselect from '@suadelabs/vue3-multiselect';
+import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
 const teachersStore = useTeachersStore();
 const authStore = useAuthStore();
+
+const options = ref(['PC', 'Math', 'SVT', 'Comptabilité', 'Economie générale', 'Gestion de entreprise', 'Philosophie', 'Anglais', 'Francais', 'Arabe', 'Education islamique', 'Sciences de l\'inpenieurie', 'Allemend', 'Histoire peopraphie']);
 
 const props = defineProps({
     showPopup: {

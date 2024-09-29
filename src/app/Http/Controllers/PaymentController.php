@@ -2,16 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Payment;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
     public function index() {
+        $currentMonth = date('n'); // Get the current month as a number (1-12)
+        $currentYear = date('Y'); // Get the current year
+        $months = ['Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet'];
+        // Adjust the index for the academic year starting in August
+        if ($currentMonth >= 8) {
+            $currentMonth -= 8; // For Aug to Dec, subtract 8 to get index 0-4
+        } else {
+            $currentMonth += 4; // For Jan to July, add 4 to get index 5-11
+        }
+        $monthsToGet = array_slice($months, 0, $currentMonth + 1);
+        Log::alert($monthsToGet);
         $data = Payment::where(function ($query) {
             $query->where('rest', '!=', 0)
                   ->orWhereNull('rest');
-        })
+        })->whereIn('month', $monthsToGet)
         ->get();
         return response()->json(['data' => $data], 200);
     }
@@ -34,6 +46,7 @@ class PaymentController extends Controller
             'amount' => 'required',
             'reduction' => 'required',
             'rest' => 'required',
+            'total' => 'required',
             'month' => 'nullable',
             'type' => 'nullable',
             'bank' => 'nullable',
@@ -66,6 +79,7 @@ class PaymentController extends Controller
             'amount' => 'required',
             'reduction' => 'nullable',
             'rest' => 'required',
+            'total' => 'required',
             'type' => 'nullable',
             'bank' => 'nullable',
             'bank_receipt' => 'nullable',

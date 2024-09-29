@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="panel pb-0 mt-6">
-            <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Sections</h5>
+            <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Options</h5>
             <div class="flex justify-between mb-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
                 <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
@@ -19,6 +19,11 @@
                     previousArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M15 5L9 12L15 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                     nextArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                 >
+                    <template #id="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.id }}</p>
+                        </div>
+                    </template>
                     <template #level="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.level }}</p>
@@ -76,7 +81,7 @@
     
     const cols =
         ref([
-            // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'subject', title: "Matière", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'level', title: "Niveau", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'price', title: 'Prix', headerClass: '!text-center flex justify-center', width: 'full' },

@@ -41,6 +41,7 @@ export const useRegistrantsStore = defineStore("registrants", () => {
     // Store a new user and update the state
     const store = async (payload) => {
         const response = await api.post('api/registrants', payload);
+        
         registrants.value.push({
             id: response.data.data.id,
             center: response.data.data.center,

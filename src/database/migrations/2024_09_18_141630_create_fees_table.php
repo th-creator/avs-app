@@ -17,6 +17,7 @@ return new class extends Migration
             $table->decimal('amount', total: 8, places: 2)->nullable();
             $table->integer('reduction')->nullable();
             $table->string('rest')->nullable();
+            $table->string('total', total: 8, places: 2)->nullable();
             $table->string('type')->nullable();
             $table->string('bank')->nullable();
             $table->string('bank_receipt')->nullable();

@@ -1,7 +1,7 @@
 <template>
     <div>
         <TransitionRoot appear :show="showPopup" as="template">
-            <Dialog as="div" @close="close()" class="relative z-50">
+            <Dialog as="div"  class="relative z-50">
             <TransitionChild 
                 as="template"
                 enter="duration-300 ease-out"
@@ -58,19 +58,37 @@
                                 <span v-if="errors.phone" class="text-red-600 text-sm">{{ errors.phone[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">spécialité:</label>
-                                <input v-model="data.field" type="text" placeholder="spécialité" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.field" class="text-red-600 text-sm">{{ errors.field[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <label class="text-sm">Niveau:</label>
-                                <input v-model="data.level" type="text" placeholder="Niveau" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.level" class="text-red-600 text-sm">{{ errors.level[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
                                 <label class="text-sm">Mobile du parent:</label>
                                 <input v-model="data.parent_phone" type="text" placeholder="Mobile du parent" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.parent_phone" class="text-red-600 text-sm">{{ errors.parent_phone[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Niveau:</label>
+                                <multiselect
+                                    v-model="data.level"
+                                    :options="levels"
+                                    class="custom-multiselect"
+                                    :searchable="true"
+                                    placeholder="Niveau"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect>
+                                <span v-if="errors.level" class="text-red-600 text-sm">{{ errors.level[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">option:</label>
+                                <multiselect
+                                    v-model="data.field"
+                                    :options="options"
+                                    class="custom-multiselect"
+                                    :searchable="true"
+                                    placeholder="option"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect>
+                                <span v-if="errors.field" class="text-red-600 text-sm">{{ errors.field[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
                         </form>
@@ -94,6 +112,11 @@ import 'swiper/css/pagination';
 import { useStudentsStore } from '@/stores/students.js';
 import { useAlert } from '@/composables/useAlert';
 import {useAuthStore} from '@/stores/auth.js';
+import Multiselect from '@suadelabs/vue3-multiselect';
+import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+
+const levels = ref(['6em primaire', '1 AC', '2 AC', '3 AC', 'Tronc commun', '1 Bac', '2 Bac']);
+const options = ref(['SP', 'SVT', 'SMA', 'SMB', 'S. ECO', 'S. EXP', 'Science']);
 
 const studentsStore = useStudentsStore();
 const authStore = useAuthStore();

@@ -1,7 +1,7 @@
 <template>
     <div>
         <TransitionRoot appear :show="showPopup" as="template">
-            <Dialog as="div" @close="close()" class="relative z-50">
+            <Dialog as="div"  class="relative z-50">
             <TransitionChild 
                 as="template"
                 enter="duration-300 ease-out"
@@ -38,13 +38,18 @@
                                 <span v-if="errors.amount" class="text-red-600 text-sm">{{ errors.amount[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Reduction:</label>
+                                <label class="text-sm">Réduction:</label>
                                 <input @keyup="calculateRest()" v-model="data.reduction" type="number" placeholder="Reduction" class="form-input" />
                                 <span v-if="errors.reduction" class="text-red-600 text-sm">{{ errors.reduction[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Reste:</label>
-                                <input v-model="data.rest" type="number" placeholder="Reste" class="form-input" />
+                                <label class="text-sm">Montant a payer:</label>
+                                <input v-model="data.total" type="number" placeholder="Montant a payer" class="form-input" />
+                                <span v-if="errors.total" class="text-red-600 text-sm">{{ errors.total[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Reste a payer:</label>
+                                <input v-model="data.rest" type="number" placeholder="Reste a payer" class="form-input" />
                                 <span v-if="errors.rest" class="text-red-600 text-sm">{{ errors.rest[0] }}</span>
                             </div>
                             <div class="relative mb-4">
@@ -77,7 +82,7 @@
                                 <span v-if="errors.bank_receipt" class="text-red-600 text-sm">{{ errors.bank_receipt[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Receipt:</label>
+                                <label class="text-sm">Reçu:</label>
                                 <input v-model="data.receipt" type="text" placeholder="Receipt" class="form-input" />
                                 <span v-if="errors.receipt" class="text-red-600 text-sm">{{ errors.receipt[0] }}</span>
                             </div>
@@ -144,6 +149,7 @@ const data = ref({
     reduction: 0,
     rest: 0,
     type: '',
+    total: '',
     bank: '',
     bank_receipt: '',
     receipt: '',

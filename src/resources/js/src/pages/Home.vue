@@ -1,12 +1,12 @@
 <template>
     <div class="p-">
-        <div class="">
+        <!-- <div class="">
             <div class="grid grid-cols-2 gap-2 text-sm text-[#515365] font-bold p-[10px]">
                 <Kpi title="total" value="120"/>
-                <!-- <Kpi title="total" value="120"/> -->
+                <Kpi title="total" value="120"/>
                 <Kpi title="total" value="120"/>
             </div>
-        </div>
+        </div> -->
         <div>
           <paymentTable />
         </div>

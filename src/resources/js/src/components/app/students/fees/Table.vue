@@ -34,6 +34,11 @@
                             <p class="font-semibold text-center">{{ data.value.reduction }}%</p>
                         </div>
                     </template>
+                    <template #total="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.total }}MAD</p>
+                        </div>
+                    </template>
                     <template #date="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.date }}</p>
@@ -97,6 +102,7 @@
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'reduction', title: "Reduction", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'bank', title: "Bank", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'bank_receipt', title: "Chèque", headerClass: '!text-center flex justify-center', width: 'full' },

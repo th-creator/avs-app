@@ -15,6 +15,7 @@ class Payment extends Model
         'amount',
         'reduction',
         'rest',
+        'total',
         'type',
         'bank',
         'receipt',

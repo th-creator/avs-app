@@ -1,7 +1,7 @@
 <template>
     <div>{{ student }}
         <TransitionRoot appear :show="showPopup" as="template">
-            <Dialog as="div" @close="close()" class="relative z-50">
+            <Dialog as="div"  class="relative z-50">
             <TransitionChild 
                 as="template"
                 enter="duration-300 ease-out"
@@ -43,8 +43,13 @@
                                 <span v-if="errors.reduction" class="text-red-600 text-sm">{{ errors.reduction[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Reste:</label>
-                                <input v-model="data.rest" type="number" placeholder="Reste" class="form-input" />
+                                <label class="text-sm">Montant a payer:</label>
+                                <input v-model="data.total" type="number" placeholder="Montant a payer" class="form-input" />
+                                <span v-if="errors.total" class="text-red-600 text-sm">{{ errors.total[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Reste a payer:</label>
+                                <input v-model="data.rest" type="number" placeholder="Reste a payer" class="form-input" />
                                 <span v-if="errors.rest" class="text-red-600 text-sm">{{ errors.rest[0] }}</span>
                             </div>
                             <div class="relative mb-4">
@@ -114,7 +119,7 @@ const studentsStore = useStudentsStore();
 
 const calculateRest = () => {
     let reduction = data.value.reduction == null ? 0 : data.value.reduction
-    data.value.rest = data.value.amount*(100-reduction)/100
+    data.value.total = data.value.amount*(100-reduction)/100
 }
 
 const feesStore = useFeesStore();
@@ -140,6 +145,7 @@ const data = ref({
     reduction: 0,
     rest: 0,
     type: '',
+    total: '',
     bank: '',
     bank_receipt: '',
     receipt: '',

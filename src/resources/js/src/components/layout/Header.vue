@@ -125,7 +125,7 @@
                                                 />
                                             </svg>
 
-                                            Profile
+                                            Profil
                                         </router-link>
                                     </li>
                                     <li class="border-t border-white-light dark:border-white-light/10">
@@ -154,7 +154,7 @@
                                                 />
                                             </svg>
 
-                                            Sign Out
+                                            Se déconnecter
                                         </router-link>
                                     </li>
                                 </ul>

@@ -1,7 +1,7 @@
 <template>
     <div>
         <TransitionRoot appear :show="showPopup" as="template">
-            <Dialog as="div" @close="close()" class="relative z-50">
+            <Dialog as="div"  class="relative z-50">
             <TransitionChild 
                 as="template"
                 enter="duration-300 ease-out"
@@ -52,12 +52,24 @@
                                     v-model="data.group"
                                     :options="groups"
                                     class="custom-multiselect"
+                                    :multiple="true"
                                     :searchable="true"
                                     placeholder="Groupe"
                                     selected-label=""
                                     select-label=""
                                     deselect-label=""
-                                ></multiselect>
+                                    >
+                                    </multiselect>
+                                <!-- <multiselect
+                                    v-model="data.group"
+                                    :options="groups"
+                                    class="custom-multiselect"
+                                    :searchable="true"
+                                    placeholder="Groupe"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect> -->
                                 <span v-if="errors.group_id" class="text-red-600 text-sm">{{ errors.group_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">
@@ -150,8 +162,9 @@ const errors = ref({})
 const Create = () => {
     errors.value = []
     data.value.user_id = authStore?.user?.id
-    data.value.group_id = data.value.group.split(':')[0].trim()
+    data.value.group_id = data.value.group.map(res => res.split(':')[0].trim())
     data.value.student_id = data.value.student.split(':')[0].trim()
+    console.log(data.value.group_id);
     registrantsStore.store(data.value).then(res => {
         useAlert('success', 'Créé avec succès!');
         props.close()

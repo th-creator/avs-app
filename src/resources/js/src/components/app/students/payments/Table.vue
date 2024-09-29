@@ -4,10 +4,20 @@
             <div class="flex justify-between mb-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
                 <!-- <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> -->
+                <multiselect
+                    v-model="choosenMonth"
+                    :options="options"
+                    class="custom-multiselect  max-w-xs"
+                    :searchable="true"
+                    placeholder="Le mois"
+                    selected-label=""
+                    select-label=""
+                    deselect-label=""
+                ></multiselect>
             </div>
             <div class="datatable">
                 <vue3-datatable
-                    :rows="paymentsStore.studentPayments"
+                    :rows="choosenData"
                     :columns="cols"
                     :totalRows="rows?.length"
                     :sortable="true"
@@ -36,6 +46,11 @@
                     <template #rest="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.rest }}MAD</p>
+                        </div>
+                    </template>
+                    <template #total="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.total }}MAD</p>
                         </div>
                     </template>
                     <template #reduction="data">
@@ -90,7 +105,8 @@
                 <thead>
                     <tr>
                         <th>Montant</th>
-                        <th>Reste</th>
+                        <th>Montant a payer</th>
+                        <th>Reste a payer</th>
                         <th>Type de reglement</th>
                         <th>Recu</th>
                     </tr>
@@ -98,6 +114,7 @@
                 <tbody>
                     <tr :key="selectedPayment?.id">
                         <td>{{ selectedPayment?.amount }}</td>
+                        <td>{{ selectedPayment?.total }}</td>
                         <td>{{ selectedPayment?.rest }}</td>
                         <td>{{ selectedPayment?.type }}</td>
                         <td>{{ selectedPayment?.receipt }}</td>
@@ -139,7 +156,7 @@
     </div>
 </template>
 <script setup>
-    import { ref, reactive, computed, onMounted, nextTick } from 'vue';
+    import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import { usePaymentsStore } from '@/stores/payments.js';
     import { useRoute } from 'vue-router';
@@ -149,12 +166,24 @@
     import Swal from 'sweetalert2';
     import html2pdf from "html2pdf.js";
     
+    import Multiselect from '@suadelabs/vue3-multiselect';
+    import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+
+    const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
+    const choosenMonth = ref('Septembre');
+    const choosenData = ref([]);
+
     const params = reactive({
         current_page: 1,
         search: '',
         pagesize: 10,
         sort_column: 'id',
         sort_direction: 'asc',
+    });
+
+    watch(choosenMonth, (newVal, oldVal) => {
+        console.log(`Month changed from ${oldVal} to ${newVal}`);
+        choosenData.value = paymentsStore.studentPayments.filter(payment => payment.month.toLowerCase() === newVal.toLowerCase());
     });
 
     const paymentsStore = usePaymentsStore();
@@ -169,8 +198,9 @@
             { field: 'group', title: 'Groupe', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'month', title: 'Mois', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'reduction', title: "Reduction", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'reduction', title: "Réduction", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'bank', title: "Bank", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'bank_receipt', title: "Chèque", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -185,10 +215,17 @@
         return data;
         });
 
+    watch(rows, (newVal, oldVal) => {
+        console.log(`Month changed from ${oldVal} to ${newVal}`);
+        choosenData.value = paymentsStore.studentPayments.filter(payment => payment.month.toLowerCase() === choosenMonth.value.toLowerCase());
+    });
 
     const editedData = ref({})
-    onMounted(() => {
-        paymentsStore.show(route.params.id)
+    onMounted(async () => {
+        const currentMonth = new Date().getMonth();
+        choosenMonth.value = options.value[currentMonth];
+        await paymentsStore.show(route.params.id)
+        choosenData.value = paymentsStore.studentPayments.filter(payment => payment.month.toLowerCase() === choosenMonth.value.toLowerCase());
     })
 
     const toggleEdit = (data) => {
@@ -236,6 +273,8 @@
         firstName:'',
         date:'',
         receipt:'',
+        totlal:'',
+        rest:'',
         amount:'',
     });
 // Print function using html2pdf.js
