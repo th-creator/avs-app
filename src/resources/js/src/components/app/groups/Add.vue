@@ -47,13 +47,13 @@
                                 <span v-if="errors.teacher_id" class="text-red-600 text-sm">{{ errors.teacher_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Section:</label>
+                                <label class="text-sm">Option:</label>
                                 <multiselect
                                     v-model="data.section"
                                     :options="sections"
                                     class="custom-multiselect"
                                     :searchable="true"
-                                    placeholder="Section"
+                                    placeholder="Option"
                                     selected-label=""
                                     select-label=""
                                     deselect-label=""
