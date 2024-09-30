@@ -90,8 +90,8 @@ import {useAuthStore} from '@/stores/auth.js';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
-const options = ref(['PC', 'Math', 'SVT', 'Comptabilité', 'Economie générale', 'Gestion d\'entreprise', 'Philosophie', 'Anglais', 'Francais', 'Arabe', 'Education islamique', 'Sciences de l\'ingénieurie', 'Allemend', 'Histoire géographie']);
-const levels = ref(['6em primaire', '1 AC', '2 AC', '3 AC', 'Tronc commun', '1 Bac', '2 Bac']);
+const options = ref(['PC', 'Math', 'SVT', 'Comptabilité', 'Economie générale', 'Gestion d\'entreprise', 'Philosophie', 'Anglais', 'Francais', 'Arabe', 'Education islamique', 'Sciences de l\'ingénieurie', 'Allemend', 'Histoire géographie', 'Anglais communication', 'Français comminication']);
+const levels = ref(['6em primaire', '1 AC', '2 AC', '3 AC', 'TC', '1 Bac SC ECO', '1 Bac SM1', '1 Bac SC EXP', '1Bac SM2', '2 Bac SP', '2 Bac SP', '2 Bac SM', '2 Bac SC ECO']);
 
 const sectionsStore = useSectionsStore();
 const authStore = useAuthStore();
