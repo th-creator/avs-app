@@ -34,4 +34,9 @@ class Group extends Model
     {
         return $this->BelongsTo(Section::class);
     }
+    
+    public function registrants()
+    {
+        return $this->hasMany(Registrant::class);
+    }
 }

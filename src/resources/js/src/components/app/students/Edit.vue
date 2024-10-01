@@ -25,7 +25,7 @@
                     leave-from="opacity-100 scale-100"
                     leave-to="opacity-0 scale-95"
                 >
-                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg overflow-hidden w-full max-w-sm text-black dark:text-white-dark">
+                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg overflow-hidden w-full max-w-lg text-black dark:text-white-dark">
                     <button type="button" class="absolute top-7 ltr:right-9 rtl:left-9 text-white-dark hover:text-dark outline-none" @click="close()">
                         X
                     </button>
@@ -61,6 +61,11 @@
                                 <label class="text-sm">spécialité:</label>
                                 <input v-model="data.field" type="text" placeholder="spécialité" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.field" class="text-red-600 text-sm">{{ errors.field[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">École:</label>
+                                <input v-model="data.school" type="text" placeholder="École" class="form-input ltr:pl-10 rtl:pr-10" />
+                                <span v-if="errors.school" class="text-red-600 text-sm">{{ errors.school[0] }}</span>
                             </div>
                             <div class="relative mb-4">
                                 <label class="text-sm">Niveau:</label>
@@ -118,6 +123,7 @@ const data = ref({
     phone: props.editedData.phone,
     parent_phone: props.editedData.parent_phone,
     field: props.editedData.field,
+    school: props.editedData.school,
     level: props.editedData.level,
 })
 

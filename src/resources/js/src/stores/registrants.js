@@ -37,6 +37,15 @@ export const useRegistrantsStore = defineStore("registrants", () => {
             return error
         }
     };
+    const show = async (id) => {
+        try {
+            const response = await api.get(`api/registrants/${id}`);
+            return response.data.data
+        } catch (error) {
+            console.error("Failed to fetch registrants:", error);
+            return error
+        }
+    };
 
     // Store a new user and update the state
     const store = async (payload) => {
@@ -147,5 +156,5 @@ export const useRegistrantsStore = defineStore("registrants", () => {
     };
 
     // Expose the registrants state and actions
-    return { registrants, index, store, update, destroy, groupRegistrants, fetchGroupRegistrants, toggle };
+    return { registrants, index, store, update, destroy, groupRegistrants, fetchGroupRegistrants, toggle, show };
 });

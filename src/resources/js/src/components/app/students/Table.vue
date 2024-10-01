@@ -24,9 +24,14 @@
                             <h5 class="text-primary hover:underline">{{ data.value.id }}</h5>
                         </div>
                     </template>
-                    <template #name="data">
+                    <template #firstName="data">
                         <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.firstName + ' ' + data.value.lastName }}</p>
+                            <p class="font-semibold text-center">{{ data.value.firstName }}</p>
+                        </div>
+                    </template>
+                    <template #lastName="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.lastName }}</p>
                         </div>
                     </template>
                     <template #email="data">
@@ -70,6 +75,7 @@
                             <router-link :to="`/students/${data.value.id}/payments`" class="main-logo flex items-center shrink-0">
                                 <IconComponent name="view" />
                             </router-link>
+                            <IconComponent name="print" @click="printPayment(data.value)" />
                             <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
                         </div>
                     </template>
@@ -79,9 +85,46 @@
     </div>
     <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
     <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
+    <!-- Hidden element to use for printing -->
+    <div id="receipt" class="receipt-container hidden m-4">
+        <div class="reciept-wrapper">
+            <div class="flex justify-start p-10">
+                <img src="/assets/images/avs-logo.png" alt="Image description" class="w-1/4">
+            </div>
+            <p class="text-center">------------------------------------------------------------------------------------------------------------------------</p>
+            <br>
+            <div>
+                <p class="text-center text-2xl font-bold underline"><strong>RENFORCEMENT ET SOUTIEN SCOLAIRE</strong></p>
+                <br>
+            </div>
+            <table class="border-collapse border-2 border-gray-500 my-4">
+                <thead>
+                    <tr>
+                        <th class="border-2 border-gray-500">Jour</th>
+                        <th class="border-2 border-gray-500">Matière</th>
+                        <th class="border-2 border-gray-500">Professeur</th>
+                        <th class="border-2 border-gray-500">Heure</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(payment, index) in selectedPayment" :key="index" class="border-2 border-gray-500">
+                        <td class="border-2 border-gray-500">{{ payment.day }}</td>
+                        <td class="border-2 border-gray-500">{{ payment.subject }}</td>
+                        <td class="border-2 border-gray-500">{{ payment.teacher }}</td>
+                        <td class="border-2 border-gray-500">{{ payment.timing }}</td>
+                    </tr>
+                </tbody>
+            </table>    
+        </div>
+        <div>
+            <p class="text-center p-2">Centre AVS MA, Avenue Allal Al Fassi - à côté de la boulangerie Alpha 2000 - Marrakech</p>
+            <p class="text-center p-2">Centre AVS2 MA, 5ème étage, siège du parti ISTIQLAL, AV AL MOZDALIFA - Marrakech</p>
+            <p class="text-center p-2">Tel: 0524311982 / 0661843332 / 0662265561</p>
+        </div>
+    </div>
 </template>
 <script setup>
-    import { ref, reactive, computed, onMounted } from 'vue';
+    import { ref, reactive, computed, onMounted, nextTick } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import { useStudentsStore } from '@/stores/students.js';
     import IconComponent from '@/components/icons/IconComponent.vue'
@@ -89,6 +132,8 @@
     import Edit from './Edit.vue'
     import Swal from 'sweetalert2';
     import {useAuthStore} from '@/stores/auth.js';
+    import html2pdf from "html2pdf.js";
+    import { useRegistrantsStore } from '@/stores/registrants.js';
 
     const authStore = useAuthStore();
     
@@ -101,17 +146,19 @@
     });
 
     const studentsStore = useStudentsStore();
+    const registrantsStore = useRegistrantsStore();
 
     const showPopup = ref(false);
     const showEditPopup = ref(false);
-    
+    const selectedPayment = ref([]);
     const cols =
         ref([
             { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'name', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'firstName', title: 'Prenom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'email', title: 'Email', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'phone', title: "Mobile", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'field', title: "spécialité", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'field', title: "Option", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'level', title: "Niveau", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'date', title: "Date d'incription", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'parent_phone', title: "Mobile du parent", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -168,5 +215,41 @@
             }
         });
     }
+// Print function using html2pdf.js
+const printPayment = async (payment) => {
+    let response = await registrantsStore.show(payment.id)
+    await response.map(res => {
+        JSON.parse(res.timing).map(time => {console.log(time); selectedPayment.value.push({
+        id: payment.id,
+        day: time.day,
+        subject: res.section.subject,
+        teacher: res.teacher.firstName + ' ' + res.teacher.lastName,
+        timing: time.dates[0]
+    })})
+    })
+    console.log(selectedPayment.value);
+    // return
+  
 
+  // Temporarily remove the hidden class to display the receipt
+  const element = document.getElementById('receipt');
+  element.classList.remove('hidden');
+
+  // Wait for the DOM to update
+  nextTick(() => {
+    const options = {
+      margin: 1,
+      filename: `receipt-${payment.firstName + '_' + payment.lastName}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    };
+
+    html2pdf().from(element).set(options).save().then(() => {
+      // Add the hidden class again after printing
+      element.classList.add('hidden');
+    });
+    selectedPayment.value = []
+  });
+};
 </script>

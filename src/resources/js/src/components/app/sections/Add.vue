@@ -25,7 +25,7 @@
                     leave-from="opacity-100 scale-100"
                     leave-to="opacity-0 scale-95"
                 >
-                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg w-full max-w-sm text-black dark:text-white-dark">
+                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg w-full max-w-lg text-black dark:text-white-dark">
                     <button type="button" class="absolute top-7 ltr:right-9 rtl:left-9 text-white-dark hover:text-dark outline-none" @click="close()">
                         X
                     </button>
@@ -90,7 +90,7 @@ import {useAuthStore} from '@/stores/auth.js';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
-const options = ref(['PC', 'Math', 'SVT', 'Comptabilité', 'Economie générale', 'Gestion d\'entreprise', 'Philosophie', 'Anglais', 'Francais', 'Arabe', 'Education islamique', 'Sciences de l\'ingénieurie', 'Allemend', 'Histoire géographie']);
+const options = ref(['PC', 'Maths', 'SVT', 'Comptabilité', 'Economie générale', 'Gestion d\'entreprise', 'Philosophie', 'Anglais', 'Francais', 'Arabe', 'Education islamique', 'Sciences de l\'ingénieurie', 'Allemend', 'Histoire géographie']);
 const levels = ref(['6em primaire', '1 AC', '2 AC', '3 AC', 'Tronc commun', '1 Bac', '2 Bac']);
 
 const sectionsStore = useSectionsStore();

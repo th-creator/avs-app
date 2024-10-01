@@ -14,6 +14,13 @@ class RegistrantController extends Controller
         $data = Registrant::with('student')->with('group')->orderBy('student_id', 'desc')->get();
         return response()->json(['data' => $data], 200);
     }
+
+    public function show($id) {
+        $data = Group::whereDoesntHave('registrants', function ($query) use ($id) {
+            $query->where('student_id', $id);
+        })->with('teacher')->with('section')->get();
+        return response()->json(['data' => $data], 200);
+    }
     
     public function store(Request $request)
     {

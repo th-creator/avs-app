@@ -1,19 +1,22 @@
 <template>
     <div>
         <div class="panel pb-0 mt-6">
-            <div class="flex justify-between mb-4">    
-                <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
+            <div class="flex justify-between items-end mb-4"> 
+                <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." />
+                <div class="flex flex-col gap-4">  
+                    <button type="button" class="btn btn-info" @click="printPayment()">Exporter</button> 
+                    <multiselect
+                        v-model="choosenMonth"
+                        :options="options"
+                        class="custom-multiselect  max-w-xs"
+                        :searchable="true"
+                        placeholder="Le mois"
+                        selected-label=""
+                        select-label=""
+                        deselect-label=""
+                    ></multiselect> 
+                </div>
                 <!-- <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> -->
-                <multiselect
-                    v-model="choosenMonth"
-                    :options="options"
-                    class="custom-multiselect  max-w-xs"
-                    :searchable="true"
-                    placeholder="Le mois"
-                    selected-label=""
-                    select-label=""
-                    deselect-label=""
-                ></multiselect>
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -21,7 +24,13 @@
                     :columns="cols"
                     :totalRows="rows?.length"
                     :sortable="true"
+                    :loading="isloading"
+                    :sortColumn="params.sort_column"
+                    :sortDirection="params.sort_direction"
+                    :hasCheckbox="true"
                     :search="params.search"
+                     ref="datatable"
+                    :paginationInfo="'{0} à {1} de {2}'"
                     skin="whitespace-nowrap bh-table-hover"
                     firstArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M13 19L7 12L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M16.9998 19L10.9998 12L16.9998 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                     lastArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M11 19L17 12L11 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M6.99976 19L12.9998 12L6.99976 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg> '
@@ -99,6 +108,11 @@
     <!-- Hidden element to use for printing -->
     <div id="receipt" class="receipt-container hidden">
         <div class="reciept-wrapper">
+            <div class="flex justify-start p-">
+                <img src="/assets/images/avs-logo.png" alt="Image description" class="w-1/4">
+            </div>
+            <p class="text-center">------------------------------------------------------------------------------------------------------------------------</p>
+            <br>
             <div>
                 <p><strong>Date :</strong> {{ new Date().toLocaleDateString() }}</p>
                 <h3><strong>Facture Mois :</strong> {{ selectedPayment?.month }}</h3>
@@ -110,16 +124,16 @@
                     <tr>
                         <th>Groupe</th>
                         <th>Montant a payer</th>
+                        <th>Montant reçu</th>
                         <th>Reste a payer</th>
-                        <th>Type de reglement</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr :key="selectedPayment?.id">
-                        <td>{{ selectedPayment?.group }}</td>
-                        <td>{{ selectedPayment?.total }}</td>
-                        <td>{{ selectedPayment?.rest }}</td>
-                        <td>{{ selectedPayment?.type }}</td>
+                    <tr v-for="(payment, index) in selectedPayment.payments" :key="index">
+                        <td>{{ payment.group }}</td>
+                        <td>{{ payment.total }}</td>
+                        <td>{{ payment.amount_paid }}</td>
+                        <td>{{ payment.rest }}</td>
                     </tr>
                 </tbody>
             </table>    
@@ -128,28 +142,32 @@
         <hr>
         <br>
         <div class="reciept-wrapper">
+            <div class="flex justify-start">
+                <img src="/assets/images/avs-logo.png" alt="Image description" class="w-1/4">
+            </div>
+            <p class="text-center">------------------------------------------------------------------------------------------------------------------------</p>
+            <br>
             <div>
                 <p><strong>Date :</strong> {{ new Date().toLocaleDateString() }}</p>
                 <h3><strong>Facture Mois :</strong> {{ selectedPayment?.month }}</h3>
                 <p><strong>Nom :</strong> {{ selectedPayment?.fullName }}</p>
                 <p><strong>Reçu :</strong> {{ selectedPayment?.receipt }}</p>    
-                <p><strong>Groupe :</strong> {{ selectedPayment?.group }}</p>    
             </div>
             <table>
                 <thead>
                     <tr>
                         <th>Groupe</th>
                         <th>Montant a payer</th>
+                        <th>Montant reçu</th>
                         <th>Reste a payer</th>
-                        <th>Type de reglement</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr :key="selectedPayment?.id">
-                        <td>{{ selectedPayment?.group }}</td>
-                        <td>{{ selectedPayment?.total }}</td>
-                        <td>{{ selectedPayment?.rest }}</td>
-                        <td>{{ selectedPayment?.type }}</td>
+                    <tr v-for="(payment, index) in selectedPayment.payments" :key="index">
+                        <td>{{ payment.group }}</td>
+                        <td>{{ payment.total }}</td>
+                        <td>{{ payment.amount_paid }}</td>
+                        <td>{{ payment.rest }}</td>
                     </tr>
                 </tbody>
             </table>    
@@ -167,23 +185,26 @@
     import Edit from './Edit.vue'
     import Swal from 'sweetalert2';
     import html2pdf from "html2pdf.js";
-import {useAuthStore} from '@/stores/auth.js';
-
-const authStore = useAuthStore();
-    
+    import {useAuthStore} from '@/stores/auth.js';
     import Multiselect from '@suadelabs/vue3-multiselect';
     import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+
+    const authStore = useAuthStore();
+    
 
     const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
     const choosenMonth = ref('Septembre');
     const choosenData = ref([]);
+    const isloading = ref(true);
+
+    const datatable = ref([]);
 
     const params = reactive({
         current_page: 1,
         search: '',
         pagesize: 10,
         sort_column: 'id',
-        sort_direction: 'asc',
+        sort_direction: 'desc',
     });
 
     watch(choosenMonth, (newVal, oldVal) => {
@@ -218,6 +239,7 @@ const authStore = useAuthStore();
     const rows = computed(async() => {
         console.log('paymentsStore.studentPayments', paymentsStore.studentPayments);
         let data = await paymentsStore.studentPayments.length > 0 ? paymentsStore.studentPayments : []
+        
         return data;
         });
 
@@ -231,6 +253,7 @@ const authStore = useAuthStore();
         const currentMonth = new Date().getMonth();
         choosenMonth.value = options.value[currentMonth];
         await paymentsStore.show(route.params.id)
+        isloading.value =false
         choosenData.value = paymentsStore.studentPayments.filter(payment => payment.month.toLowerCase() === choosenMonth.value.toLowerCase());
     })
 
@@ -282,11 +305,23 @@ const authStore = useAuthStore();
         total:'',
         rest:'',
         amount:'',
+        payments:[],
     });
 // Print function using html2pdf.js
-const printPayment = (payment) => {
-  selectedPayment.value = payment;
-
+const printPayment = async (payment) => {
+    const selected = datatable.value.getSelectedRows();
+    if(selected.length == 0) {
+        return
+    }
+    selectedPayment.value = selected[0];
+    selectedPayment.value.payments = await selected.map((item) => ({
+        group:item.group,
+        total:item.total,
+        amount_paid:item.amount_paid,
+        rest:item.rest,
+    }));
+    console.log(selected,selectedPayment.value);
+    
   // Temporarily remove the hidden class to display the receipt
   const element = document.getElementById('receipt');
   element.classList.remove('hidden');
@@ -295,7 +330,7 @@ const printPayment = (payment) => {
   nextTick(() => {
     const options = {
       margin: 1,
-      filename: `receipt-${payment.id}.pdf`,
+      filename: `receipt-${selectedPayment.value.id}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
@@ -319,10 +354,10 @@ const printPayment = (payment) => {
   padding: 5px;
 }
 .reciept-wrapper {
-padding: 20px;
+padding: 10px 20px;
   border: 1px solid #000;
   /* width: 700px; */
-  margin: 90px 20px;
+  margin: 30px 20px;
 
 }
 .receipt-container table {

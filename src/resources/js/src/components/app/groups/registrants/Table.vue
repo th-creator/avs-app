@@ -4,7 +4,7 @@
             <!-- <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Payements et Inscriptions</h5> -->
             <div class="flex justify-between my-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
-                <button type="button" class="btn btn-info" @click="exportToExcel">Export to Excel</button>
+                <button type="button" class="btn btn-info" @click="exportToExcel">Exporter</button>
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -13,6 +13,7 @@
                     :totalRows="rows?.length"
                     :sortable="true"
                     :search="params.search"
+                    :loading="isloading"
                     skin="whitespace-nowrap bh-table-hover"
                     firstArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M13 19L7 12L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M16.9998 19L10.9998 12L16.9998 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                     lastArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M11 19L17 12L11 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M6.99976 19L12.9998 12L6.99976 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg> '
@@ -95,6 +96,7 @@
     const showPopup = ref(false);
     const showEditPopup = ref(false);
     const studyDates = ref([]);
+    const isloading = ref(true);
 
     const cols =
         ref([
@@ -114,6 +116,7 @@
 
     onMounted(async () => {
         await registrantsStore.fetchGroupRegistrants(route.params.id)
+        isloading.value =false
         setTimeout(getStudyDatesForCurrentMonth, 1000);
     })
     const exportToExcel = () => {
