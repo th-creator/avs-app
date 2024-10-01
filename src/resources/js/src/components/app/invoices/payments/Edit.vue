@@ -25,7 +25,7 @@
                     leave-from="opacity-100 scale-100"
                     leave-to="opacity-0 scale-95"
                 >
-                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg overflow-hidden w-full max-w-lg text-black dark:text-white-dar">
+                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg overflow-hidden w-full max-w-lg text-black dark:text-white-dark">
                     <button type="button" class="absolute top-7 ltr:right-9 rtl:left-9 text-white-dark hover:text-dark outline-none" @click="close()">
                         X
                     </button>
@@ -34,21 +34,31 @@
                         <form>
                             <div class="relative mb-4">
                                 <label class="text-sm">Montant:</label>
-                                <input v-model="data.amount" type="number" placeholder="Montant" class="form-input" />
+                                <input @keyup="calculateRest()" v-model="data.amount" type="number" placeholder="Montant" class="form-input" />
                                 <span v-if="errors.amount" class="text-red-600 text-sm">{{ errors.amount[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Reduction:</label>
-                                <input v-model="data.reduction" type="number" placeholder="Reduction" class="form-input" />
+                                <label class="text-sm">Réduction:</label>
+                                <input @keyup="calculateRest()" v-model="data.reduction" type="number" placeholder="Reduction" class="form-input" />
                                 <span v-if="errors.reduction" class="text-red-600 text-sm">{{ errors.reduction[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Reste:</label>
-                                <input v-model="data.rest" type="number" placeholder="Reste" class="form-input" />
+                                <label class="text-sm">Montant a payer:</label>
+                                <input v-model="data.total" type="number" placeholder="Montant a payer" class="form-input" />
+                                <span v-if="errors.total" class="text-red-600 text-sm">{{ errors.total[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Montant reçu:</label>
+                                <input v-model="data.amount_paid" @keyup="calculatePayer()" type="number" placeholder="Montant reçu" class="form-input" />
+                                <span v-if="errors.amount_paid" class="text-red-600 text-sm">{{ errors.amount_paid[0] }}</span>
+                            </div>  
+                            <div class="relative mb-4">
+                                <label class="text-sm">Reste a payer:</label>
+                                <input v-model="data.rest" type="number" placeholder="Reste a payer" class="form-input" />
                                 <span v-if="errors.rest" class="text-red-600 text-sm">{{ errors.rest[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Date d'inscription:</label>
+                                <label class="text-sm">Date de paiement:</label>
                                 <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
@@ -77,7 +87,7 @@
                                 <span v-if="errors.bank_receipt" class="text-red-600 text-sm">{{ errors.bank_receipt[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Receipt:</label>
+                                <label class="text-sm">Reçu:</label>
                                 <input v-model="data.receipt" type="text" placeholder="Receipt" class="form-input" />
                                 <span v-if="errors.receipt" class="text-red-600 text-sm">{{ errors.receipt[0] }}</span>
                             </div>
@@ -99,15 +109,18 @@ import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogOverlay } f
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useFeesStore } from '@/stores/fees.js';
+import { usePaymentsStore } from '@/stores/payments.js';
 import { useAlert } from '@/composables/useAlert';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
 const options = ref(['espèces', 'chèque']);
 
-const feesStore = useFeesStore();
+const paymentsStore = usePaymentsStore();
 
+const calculatePayer = () => {
+    data.value.rest = data.value.total - data.value.amount_paid
+}
 const props = defineProps({
     showEditPopup: {
         type: Boolean,
@@ -128,6 +141,8 @@ const data = ref({
     amount: props.editedData.amount,
     reduction: props.editedData.reduction,
     rest: props.editedData.rest,
+    amount_paid: props.editedData.amount_paid,
+    total: props.editedData.total,
     type: props.editedData.type,
     bank: props.editedData.bank,
     bank_receipt: props.editedData.bank_receipt,
@@ -135,9 +150,12 @@ const data = ref({
 })
 
 const errors = ref({})
-
+const calculateRest = () => {
+    let reduction = data.value.reduction == null ? 0 : data.value.reduction
+    data.value.total = data.value.amount*(100-reduction)/100
+}
 const Edit = () => {
-    feesStore.update(data.value,props.editedData.id).then(res => {
+    paymentsStore.update(data.value,props.editedData.id).then(res => {
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {

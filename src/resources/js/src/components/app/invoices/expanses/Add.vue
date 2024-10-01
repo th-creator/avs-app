@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div>{{ student }}
         <TransitionRoot appear :show="showPopup" as="template">
             <Dialog as="div"  class="relative z-50">
             <TransitionChild 
@@ -25,7 +25,7 @@
                     leave-from="opacity-100 scale-100"
                     leave-to="opacity-0 scale-95"
                 >
-                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg overflow-hidden w-full max-w-lg text-black dark:text-white-dar">
+                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg overflow-hidden w-full max-w-lg text-black dark:text-white-dark">
                     <button type="button" class="absolute top-7 ltr:right-9 rtl:left-9 text-white-dark hover:text-dark outline-none" @click="close()">
                         X
                     </button>
@@ -33,38 +33,19 @@
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4">
-                                <label class="text-sm">Prenom:</label>
-                                <input v-model="data.firstName" type="text" placeholder="Prenom" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.firstName" class="text-red-600 text-sm">{{ errors.firstName[0] }}</span>
+                                <label class="text-sm">Titre:</label>
+                                <input v-model="data.title" type="text" placeholder="Titre" class="form-input" />
+                                <span v-if="errors.title" class="text-red-600 text-sm">{{ errors.title[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Nom:</label>
-                                <input v-model="data.lastName" type="text" placeholder="Nom" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.lastName" class="text-red-600 text-sm">{{ errors.lastName[0] }}</span>
+                                <label class="text-sm">Montant:</label>
+                                <input v-model="data.amount" type="number" placeholder="Montant" class="form-input" />
+                                <span v-if="errors.amount" class="text-red-600 text-sm">{{ errors.amount[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">E-mail:</label>
-                                <input v-model="data.email" type="email" placeholder="E-mail" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.email" class="text-red-600 text-sm">{{ errors.email[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <label class="text-sm">Mot de passe:</label>
-                                <input v-model="data.password" type="password" placeholder="Mot de passe" class="form-input ltr:pl-10 rtl:pr-10" />
-                                <span v-if="errors.password" class="text-red-600 text-sm">{{ errors.password[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <label class="text-sm">Centre:</label>
-                                <multiselect
-                                    v-model="data.center"
-                                    :options="options"
-                                    class="custom-multiselect"
-                                    :searchable="true"
-                                    placeholder="Centre"
-                                    selected-label=""
-                                    select-label=""
-                                    deselect-label=""
-                                ></multiselect>
-                                <span v-if="errors.center" class="text-red-600 text-sm">{{ errors.center[0] }}</span>
+                                <label class="text-sm">Date:</label>
+                                <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
+                                <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
                         </form>
@@ -80,18 +61,17 @@
 </template>
 
 <script setup>
-import { ref, defineProps } from 'vue';
+import { ref, defineProps, computed } from 'vue';
 import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogOverlay } from '@headlessui/vue';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useUsersStore } from '@/stores/users.js';
+import { useExpansesStore } from '@/stores/expanses.js';
 import { useAlert } from '@/composables/useAlert';
-import Multiselect from '@suadelabs/vue3-multiselect';
-import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+import {useAuthStore} from '@/stores/auth.js';
 
-const options = ref(['AVS', 'ISFPT']);
-const usersStore = useUsersStore();
+const expansesStore = useExpansesStore();
+const authStore = useAuthStore();
 
 const props = defineProps({
     showPopup: {
@@ -105,17 +85,17 @@ const props = defineProps({
 });
 
 const data = ref({
-    firstName: '',
-    lastName: '',
-    email: '',
-    center: '',
-    password: '',
+    date: '',
+    title: '',
+    group: '',
+    user_id: '',
 })
 const errors = ref({})
 
 const Create = () => {
-    errors.value = {}
-    usersStore.store(data.value).then(res => {
+    errors.value = []
+    data.value.user_id = authStore?.user?.id
+    expansesStore.store(data.value).then(res => {
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {

@@ -28,6 +28,11 @@ class PaymentController extends Controller
         return response()->json(['data' => $data], 200);
     }
 
+    public function all() {
+        $data = Payment::get();
+        return response()->json(['data' => $data], 200);
+    }
+
     public function show($id) {
         $data = Payment::where('student_id',$id)->with('student')->get();
         return response()->json(['data' => $data], 200);

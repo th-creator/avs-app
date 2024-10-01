@@ -13,6 +13,7 @@ use App\Http\Controllers\GroupController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\FeeController;
+use App\Http\Controllers\ExpanseController;
 
 Route::get('user', [AuthController::class, "getUser"]);
 Route::post('register',[AuthController::class,'register']);
@@ -28,6 +29,7 @@ Route::post('user/{id}/profile', [ProfileController::class, 'editProfilePicture'
 Route::post('user/{id}/password', [ProfileController::class, 'changePassword']);
 Route::apiResource('students', StudentController::class);
 Route::apiResource('registrants', RegistrantController::class);
+Route::apiResource('expanses', ExpanseController::class);
 Route::put('registrant/{id}/toggle', [RegistrantController::class, 'toggle']);
 Route::get('group/{id}/registrants', [RegistrantController::class, 'groupRegistrants']);
 Route::get('group/{id}/payments', [PaymentController::class, 'groupPayments']);
@@ -35,5 +37,6 @@ Route::apiResource('teachers', TeacherController::class);
 Route::apiResource('groups', GroupController::class);
 Route::apiResource('sections', SectionController::class);
 Route::apiResource('payments', PaymentController::class);
+Route::get('all/paymens', [PaymentController::class, 'all']);
 Route::apiResource('fees', FeeController::class);
 Route::get('undandledFees', [FeeController::class, 'undandledFees']);
