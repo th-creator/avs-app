@@ -47,6 +47,40 @@
                                 <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Type de paiement:</label>
+                                <multiselect
+                                    v-model="data.type"
+                                    :options="options"
+                                    class="custom-multiselect"
+                                    :searchable="true"
+                                    placeholder="Type de paiement"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect>
+                                <span v-if="errors.student_id" class="text-red-600 text-sm">{{ errors.student_id[0] }}</span>
+                            </div>
+                            <div v-if="data.type == 'chèque'" class="relative mb-4">
+                                <label class="text-sm">Bank:</label>
+                                <input v-model="data.bank" type="text" placeholder="Bank" class="form-input" />
+                                <span v-if="errors.bank" class="text-red-600 text-sm">{{ errors.bank[0] }}</span>
+                            </div>
+                            <div v-if="data.type == 'chèque'" class="relative mb-4">
+                                <label class="text-sm">Chèque:</label>
+                                <input v-model="data.bank_receipt" type="text" placeholder="Chèque" class="form-input" />
+                                <span v-if="errors.bank_receipt" class="text-red-600 text-sm">{{ errors.bank_receipt[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Document:</label>
+                                <input
+                                    @change="handleFileChange"
+                                    type="file"
+                                    placeholder="Document"
+                                    class="form-input"
+                                />
+                                <span v-if="errors.file" class="text-red-600 text-sm">{{ errors.file[0] }}</span>
+                            </div>
                             <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
                         </form>
                     </div>
@@ -69,6 +103,10 @@ import 'swiper/css/pagination';
 import { useExpansesStore } from '@/stores/expanses.js';
 import { useAlert } from '@/composables/useAlert';
 import {useAuthStore} from '@/stores/auth.js';
+import Multiselect from '@suadelabs/vue3-multiselect';
+import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+
+const options = ref(['espèces', 'chèque']);
 
 const expansesStore = useExpansesStore();
 const authStore = useAuthStore();
@@ -87,15 +125,35 @@ const props = defineProps({
 const data = ref({
     date: '',
     title: '',
-    group: '',
+    amount: '',
+    bank: '',
+    bank_receipt: '',
+    type: 'espèces',
     user_id: '',
+    file: '',
 })
 const errors = ref({})
 
+const handleFileChange = ($e) => {
+  const file = $e.target.files[0];
+
+  if (!file) return;
+
+  data.value.file = file;
+};
 const Create = () => {
     errors.value = []
+    const formData = new FormData();
+    formData.append('file', data.value.file);
+    formData.append('date', data.value.date);
+    formData.append('amount', data.value.amount);
+    formData.append('title', data.value.title);
+    formData.append('bank', data.value.bank);
+    formData.append('bank_receipt', data.value.bank_receipt);
+    formData.append('type', data.value.type);
+    formData.append('user_id', authStore?.user?.id);
     data.value.user_id = authStore?.user?.id
-    expansesStore.store(data.value).then(res => {
+    expansesStore.store(formData).then(res => {
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {

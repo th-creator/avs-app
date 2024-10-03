@@ -92,6 +92,9 @@
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
+                            <router-link :to="`/students/${data.value.student_id}/payments`" class="main-logo flex items-center shrink-0">
+                                <IconComponent name="view" />
+                            </router-link>
                             <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
                         </div>
                     </template>

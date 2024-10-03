@@ -47,6 +47,30 @@
                                 <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Type de paiement:</label>
+                                <multiselect
+                                    v-model="data.type"
+                                    :options="options"
+                                    class="custom-multiselect"
+                                    :searchable="true"
+                                    placeholder="Type de paiement"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect>
+                                <span v-if="errors.student_id" class="text-red-600 text-sm">{{ errors.student_id[0] }}</span>
+                            </div>
+                            <div v-if="data.type == 'chèque'" class="relative mb-4">
+                                <label class="text-sm">Bank:</label>
+                                <input v-model="data.bank" type="text" placeholder="Bank" class="form-input" />
+                                <span v-if="errors.bank" class="text-red-600 text-sm">{{ errors.bank[0] }}</span>
+                            </div>
+                            <div v-if="data.type == 'chèque'" class="relative mb-4">
+                                <label class="text-sm">Chèque:</label>
+                                <input v-model="data.bank_receipt" type="text" placeholder="Chèque" class="form-input" />
+                                <span v-if="errors.bank_receipt" class="text-red-600 text-sm">{{ errors.bank_receipt[0] }}</span>
+                            </div>
                             <button type="button" class="btn btn-primary w-full" @click="Edit()">Submit</button>
                         </form>
                     </div>
@@ -67,6 +91,11 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { useExpansesStore } from '@/stores/expanses.js';
 import { useAlert } from '@/composables/useAlert';
+import Multiselect from '@suadelabs/vue3-multiselect';
+import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+
+const options = ref(['espèces', 'chèque']);
+
 
 const expansesStore = useExpansesStore();
 
@@ -89,6 +118,9 @@ const data = ref({
     date: props.editedData.date,
     amount: props.editedData.amount,
     title: props.editedData.title,
+    type: props.editedData.type,
+    bank: props.editedData.bank,
+    bank_receipt: props.editedData.bank_receipt,
 })
 
 const errors = ref({})

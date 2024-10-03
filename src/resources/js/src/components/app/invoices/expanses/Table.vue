@@ -37,6 +37,21 @@
                             <p class="font-semibold text-center">{{ data.value.date }}</p>
                         </div>
                     </template>
+                    <template #bank="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.bank }}</p>
+                        </div>
+                    </template>
+                    <template #bank_receipt="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.bank_receipt }}</p>
+                        </div>
+                    </template>
+                    <template #type="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.type }}</p>
+                        </div>
+                    </template>
                     <template #user_id="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.user.firstName + ' ' + data.value.user.lastName }}</p>
@@ -45,6 +60,9 @@
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
+                            <a target="_blank" href="" @click="openPdf(data.value.file)" class="main-logo flex items-center shrink-0" rel="noopener noreferrer">
+                                <IconComponent name="view" />
+                            </a>
                             <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
                         </div>
                     </template>
@@ -97,6 +115,9 @@
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'title', title: "Titre", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'bank', title: "Bank", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'bank_receipt', title: "Chèque", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'date', title: "Date", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
@@ -115,6 +136,9 @@
         isloading.value = false
     })
 
+    function openPdf(pdf) {
+      window.open(pdf, '_blank');
+    }
     const toggleEdit = (data) => {
         editedData.value = data
         console.log(editedData.value);

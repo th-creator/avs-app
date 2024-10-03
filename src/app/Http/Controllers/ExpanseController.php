@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Expanse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\File; 
+use Illuminate\Support\Facades\Storage;
 
 class ExpanseController extends Controller
 {   
@@ -18,9 +21,19 @@ class ExpanseController extends Controller
             'date' => 'nullable',
             'title' => 'required',
             'amount' => 'required',
+            'type' => 'nullable',
+            'bank' => 'nullable',
+            'bank_receipt' => 'nullable',
             'user_id' => 'required',
         ]);
+        if($request->hasFile('file')) {
+            $path = $request->file('file')->store('files', 'public');
+            
+            $url = config('services.app.url');
+            $urlFile = Storage::url($path);
 
+            $newData['file'] = $url.$urlFile;
+        }
         $data = Expanse::create($newData);
         
         $data->user = $data->user;
@@ -40,6 +53,9 @@ class ExpanseController extends Controller
             'date' => 'nullable',
             'amount' => 'required',
             'title' => 'required',
+            'type' => 'nullable',
+            'bank' => 'nullable',
+            'bank_receipt' => 'nullable',
         ]);
         
         $data->update($userData);
@@ -58,7 +74,13 @@ class ExpanseController extends Controller
             return response()->json(['message' => 'Expanse not found'], 404);
         }
 
-        // Delete the data
+        $fileUrl = $data->file;
+        
+        $filename = basename($fileUrl);
+        $filePath = 'files/' . $filename;
+        if (Storage::disk('public')->exists($filePath)) {
+            Storage::disk('public')->delete($filePath);
+        }
         $data->delete();
 
         return response()->json(['message' => 'Expanse deleted successfully'], 200);

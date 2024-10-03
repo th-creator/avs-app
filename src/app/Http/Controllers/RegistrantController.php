@@ -16,7 +16,7 @@ class RegistrantController extends Controller
     }
 
     public function show($id) {
-        $data = Group::whereDoesntHave('registrants', function ($query) use ($id) {
+        $data = Group::whereHas('registrants', function ($query) use ($id) {
             $query->where('student_id', $id);
         })->with('teacher')->with('section')->get();
         return response()->json(['data' => $data], 200);

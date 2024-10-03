@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('title')->nullable();
             $table->decimal('amount', total: 8, places: 2)->nullable();
             $table->date('date')->nullable();
+            $table->string('type')->nullable();
+            $table->string('bank')->nullable();
+            $table->string('bank_receipt')->nullable();
+            $table->string('file')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->timestamps();

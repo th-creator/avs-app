@@ -31,26 +31,23 @@ class ProfileController extends Controller
                 'image'=>'required|image'
             ]);
         try{
-            if($request->hasFile('image')) {
-                $DestinationPath = public_path('/profile');
-                $file = $request->file('image');
-                
-                
-                $imageName = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-                $file->move($DestinationPath, $imageName);
-            } else {
-                return response()->json(['message'=>'no photo was found','path'=>$imageName], 204);
-            }
+            
+        if($request->hasFile('image')) {
+            $path = $request->file('image')->store('profile', 'public');
+            
             $url = config('services.app.url');
-            $imageName = $url.'profile'.'/'.$imageName;
+            $urlFile = Storage::url($path);
+
+            $imageName = $url.$urlFile;
+        }            
             $user = User::where('id',$id)->get()->first();
-            $file = $user->path;
-            $filename = basename($file);
-            $filePath = public_path('profile/' . $filename);
-            if (File::exists($filePath)) {
-                File::delete($filePath);
+            $fileUrl = $user->path;
+            
+            $filename = basename($fileUrl);
+            $filePath = 'profile/' . $filename;
+            if (Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
             }
-            $img=File::delete($filename);
             
             $user->update([
                 'path'=>$imageName

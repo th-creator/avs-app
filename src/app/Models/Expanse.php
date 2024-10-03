@@ -13,6 +13,10 @@ class Expanse extends Model
         'date',
         'title',
         'amount',
+        'type',
+        'bank',
+        'bank_receipt',
+        'file',
         'user_id',
     ];
 
