@@ -99,6 +99,33 @@ export const useRegistrantsStore = defineStore("registrants", () => {
 
         return response
     };
+    // Update an existing user and update the state
+    const transfer = async (payload, id) => {
+        const response = await api.post(`api/registrant/${id}/transfer`, payload);
+        const index = registrants.value.findIndex(user => user.id === id);
+        if (index !== -1) {
+            registrants.value[index] = {
+                id: response.data.data.id,
+                center: response.data.data.center,
+                status: response.data.data.status,
+                name: response.data.data.student.firstName,
+                lastName: response.data.data.student.lastName,
+                firstName: response.data.data.student.firstName,
+                group_id: response.group_id,
+                student_id: response.student_id,
+                email: response.data.data.student.email,
+                date: response.data.data.date,
+                phone: response.data.data.student.phone,
+                group: response.data.data.group.intitule,
+                parent_phone: response.data.data.student.parent_phone,
+                field: response.data.data.student.field,
+                level: response.data.data.student.level
+            };
+            registrants.value = [...registrants.value]; // Reassign to force reactivity
+        }
+
+        return response
+    };
     const fetchGroupRegistrants = async (id) => {
         try {
             const response = await api.get(`api/group/${id}/registrants`);
@@ -156,5 +183,5 @@ export const useRegistrantsStore = defineStore("registrants", () => {
     };
 
     // Expose the registrants state and actions
-    return { registrants, index, store, update, destroy, groupRegistrants, fetchGroupRegistrants, toggle, show };
+    return { registrants, index, store, update, destroy, groupRegistrants, fetchGroupRegistrants, toggle, show, transfer };
 });

@@ -31,6 +31,7 @@ Route::apiResource('students', StudentController::class);
 Route::apiResource('registrants', RegistrantController::class);
 Route::apiResource('expanses', ExpanseController::class);
 Route::put('registrant/{id}/toggle', [RegistrantController::class, 'toggle']);
+Route::post('registrant/{id}/transfer', [RegistrantController::class, 'transfer']);
 Route::get('group/{id}/registrants', [RegistrantController::class, 'groupRegistrants']);
 Route::get('group/{id}/payments', [PaymentController::class, 'groupPayments']);
 Route::apiResource('teachers', TeacherController::class);

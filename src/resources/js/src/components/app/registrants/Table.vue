@@ -92,9 +92,10 @@
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
-                            <router-link :to="`/students/${data.value.student_id}/payments`" class="main-logo flex items-center shrink-0">
+                            <IconComponent name="transfer" @click="() => transfer(data.value)" />
+                            <!-- <router-link :to="`/students/${data.value.student_id}/payments`" class="main-logo flex items-center shrink-0">
                                 <IconComponent name="view" />
-                            </router-link>
+                            </router-link> -->
                             <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
                         </div>
                     </template>
@@ -103,6 +104,7 @@
         </div>
     </div>
     <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
+    <Transfer :close="() => showTransferPopup = false" :showTransferPopup="showTransferPopup" v-bind:editedData="editedData" v-if="showTransferPopup"/>
     <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
 </template>
 <script setup>
@@ -112,6 +114,7 @@
     import IconComponent from '@/components/icons/IconComponent.vue'
     import Add from './Add.vue'
     import Edit from './Edit.vue'
+    import Transfer from './Transfer.vue'
     import Swal from 'sweetalert2';
 import {useAuthStore} from '@/stores/auth.js';
 
@@ -129,6 +132,7 @@ const authStore = useAuthStore();
 
     const showPopup = ref(false);
     const showEditPopup = ref(false);
+    const showTransferPopup = ref(false);
     
     const cols =
         ref([
@@ -150,7 +154,6 @@ const authStore = useAuthStore();
         ]) || [];
 
     const rows = computed(async() => {
-        console.log('registrantsStore.registrants', registrantsStore.registrants);
         let data = await registrantsStore.registrants.length > 0 ? registrantsStore.registrants : []
         console.log(data);
         return data;
@@ -164,8 +167,11 @@ const authStore = useAuthStore();
 
     const toggleEdit = (data) => {
         editedData.value = data
-        console.log(editedData.value);
         showEditPopup.value = true
+    }
+    const transfer = (data) => {
+        editedData.value = data
+        showTransferPopup.value = true
     }
 
     const deleteData = (data) => {
