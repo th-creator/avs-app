@@ -65,7 +65,10 @@
                                 <input v-model="data.price" type="text" placeholder="Prix" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.price" class="text-red-600 text-sm">{{ errors.price[0] }}</span>
                             </div>
-                            <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
+                            <button type="button" class="btn btn-primary w-full h-10" @click="Create()">
+                                <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
+                                <span v-else>Soumettre</span>
+                            </button>
                         </form>
                     </div>
                     </DialogPanel>
@@ -89,6 +92,9 @@ import { useAlert } from '@/composables/useAlert';
 import {useAuthStore} from '@/stores/auth.js';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+import IconComponent from '@/components/icons/IconComponent.vue'
+
+const isLoading = ref(false)
 
 const options = ref(['PC', 'Maths', 'SVT', 'Comptabilité', 'Economie générale', 'Gestion d\'entreprise', 'Philosophie', 'Anglais', 'Francais', 'Arabe', 'Education islamique', 'Sciences de l\'ingénieurie', 'Allemend', 'Histoire géographie', 'Anglais communication', 'Français comminication']);
 const levels = ref(['6em primaire', '1 AC', '2 AC', '3 AC', 'TC', '1 Bac SC ECO', '1 Bac SM1', '1 Bac SC EXP', '1Bac SM2', '2 Bac SP', '2 Bac SP', '2 Bac SM', '2 Bac SC ECO']);
@@ -119,12 +125,15 @@ const data = ref({
 const errors = ref({})
 
 const Create = () => {
+    isLoading.value = true
     data.value.user_id = authStore?.user?.id
     errors.value = {}
     sectionsStore.store(data.value).then(res => {
+        isLoading.value = true
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {
+        isLoading.value = true
         if(err.status == 422) {
             errors.value =  err.response.data.errors;
         }

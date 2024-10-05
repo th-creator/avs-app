@@ -24,6 +24,7 @@ class ExpanseController extends Controller
             'type' => 'nullable',
             'bank' => 'nullable',
             'bank_receipt' => 'nullable',
+            'paid_by' => 'nullable',
             'user_id' => 'required',
         ]);
         if($request->hasFile('file')) {
@@ -56,6 +57,7 @@ class ExpanseController extends Controller
             'type' => 'nullable',
             'bank' => 'nullable',
             'bank_receipt' => 'nullable',
+            'paid_by' => 'nullable',
         ]);
         
         $data->update($userData);

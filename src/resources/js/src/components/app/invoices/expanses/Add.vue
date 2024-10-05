@@ -81,7 +81,10 @@
                                 />
                                 <span v-if="errors.file" class="text-red-600 text-sm">{{ errors.file[0] }}</span>
                             </div>
-                            <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
+                            <button type="button" class="btn btn-primary w-full h-10" @click="Create()">
+                                <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
+                                <span v-else>Soumettre</span>
+                            </button>
                         </form>
                     </div>
                     </DialogPanel>
@@ -105,6 +108,9 @@ import { useAlert } from '@/composables/useAlert';
 import {useAuthStore} from '@/stores/auth.js';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+import IconComponent from '@/components/icons/IconComponent.vue'
+
+const isLoading = ref(false)
 
 const options = ref(['espèces', 'chèque']);
 
@@ -142,6 +148,7 @@ const handleFileChange = ($e) => {
   data.value.file = file;
 };
 const Create = () => {
+    isLoading.value = true
     errors.value = []
     const formData = new FormData();
     formData.append('file', data.value.file);
@@ -154,9 +161,11 @@ const Create = () => {
     formData.append('user_id', authStore?.user?.id);
     data.value.user_id = authStore?.user?.id
     expansesStore.store(formData).then(res => {
+        isLoading.value = false
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {
+        isLoading.value = false
         if(err.status == 422) {
             errors.value =  err.response.data.errors;
         }

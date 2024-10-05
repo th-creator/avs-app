@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="panel pb-0 mt-6">
-            <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Inscriptions</h5>
+            <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les paiements à régler</h5>
             <div class="flex justify-between mb-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
                 <!-- <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> -->
@@ -22,6 +22,16 @@
                     <template #month="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.month }}</p>
+                        </div>
+                    </template>
+                    <template #total="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.total }}MAD</p>
+                        </div>
+                    </template>
+                    <template #amount_paid="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.amount_paid }}MAD</p>
                         </div>
                     </template>
                     <template #amount="data">
@@ -57,6 +67,30 @@
                     <template #receipt="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.receipt }}</p>
+                        </div>
+                    </template>
+                    <template #paid="data">
+                        <div class="flex justify-center w-full">
+                            <div v-if="data.value.paid == 1 && data.value.total == data.value.amount_paid">
+                                <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
+                                    Payé
+                                </div>
+                            </div>
+                            <div v-else-if="data.value.paid == 1">
+                                <div class="px-4 py-2 rounded-full bg-orange-100 text-orange-600 w-[120px] text-center text-sm">
+                                    En cours
+                                </div>
+                            </div>
+                            <div v-else-if="data.value.paid == -1">
+                                <div class="px-4 py-2 rounded-full bg-blue-100 text-blue-600 w-[120px] text-center text-sm">
+                                    Remboursé
+                                </div>
+                            </div>
+                            <div v-else>
+                                <div class="px-4 py-2 rounded-full bg-rose-100 text-rose-600 w-[120px] text-center text-sm">
+                                    Non payé
+                                </div>
+                            </div>
                         </div>
                     </template>
                     <template #actions="data">
@@ -98,7 +132,10 @@
             { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'group', title: 'Groupe', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'month', title: 'Mois', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'reduction', title: "Reduction", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -106,7 +143,7 @@
             { field: 'receipt', title: "Recu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'date', title: "Date", headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
+            // { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
     const rows = computed(async() => {
         console.log('paymentsStore.payments', paymentsStore.payments);

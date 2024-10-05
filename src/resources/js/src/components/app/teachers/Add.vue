@@ -66,7 +66,10 @@
                                 <input v-model="data.phone" type="text" placeholder="Mobile" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.phone" class="text-red-600 text-sm">{{ errors.phone[0] }}</span>
                             </div>
-                            <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
+                            <button type="button" class="btn btn-primary w-full h-10" @click="Create()">
+                                <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
+                                <span v-else>Soumettre</span>
+                            </button>
                         </form>
                     </div>
                     </DialogPanel>
@@ -90,6 +93,9 @@ import { useAlert } from '@/composables/useAlert';
 import {useAuthStore} from '@/stores/auth.js';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+import IconComponent from '@/components/icons/IconComponent.vue'
+
+const isLoading = ref(false)
 
 const teachersStore = useTeachersStore();
 const authStore = useAuthStore();
@@ -119,12 +125,15 @@ const data = ref({
 const errors = ref({})
 
 const Create = () => {
+    isLoading.value = true
     data.value.user_id = authStore?.user?.id
     errors.value = {}
     teachersStore.store(data.value).then(res => {
+        isLoading.value = false
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {
+        isLoading.value = false
         if(err.status == 422) {
             errors.value =  err.response.data.errors;
         }

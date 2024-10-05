@@ -93,8 +93,6 @@
     const registrantsStore = useRegistrantsStore();
     const route = useRoute();
 
-    const showPopup = ref(false);
-    const showEditPopup = ref(false);
     const studyDates = ref([]);
     const isloading = ref(true);
 
@@ -104,6 +102,7 @@
             { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'firstName', title: 'Prenom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'phone', title: "Mobile", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'parent_phone', title: "Mobile du parent", headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'date', title: "Date d'incription", headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
@@ -131,7 +130,7 @@
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance');
 
         // Export the workbook to an Excel file
-        XLSX.writeFile(workbook, 'attendance.xlsx');
+        XLSX.writeFile(workbook, 'présence_'+groupsStore.group.intitule+'.xlsx');
     };
     // Mapping from French days to JavaScript days
     const dayMap = {

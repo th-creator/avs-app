@@ -112,7 +112,19 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="nav-item" v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'">
+                        <li class="nav-item">
+                            <ul>
+                                <li class="nav-item">
+                                    <router-link to="/expanses" class="group" @click="toggleMobileMenu">
+                                        <div class="flex items-center">
+                                            <IconComponent name="expanses"/>  
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Dépenses</span>
+                                        </div>
+                                    </router-link>
+                                </li>
+                            </ul>
+                        </li>
+                        <!-- <li class="nav-item" v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'">
                             <ul>
                                 <li class="nav-item">
                                     <router-link to="/facturation" class="group" @click="toggleMobileMenu">
@@ -123,7 +135,7 @@
                                     </router-link>
                                 </li>
                             </ul>
-                        </li>
+                        </li> -->
                         <li class="nav-item">
                             <ul>
                                 <li class="nav-item">

@@ -31,7 +31,7 @@
                     </template>
                     <template #price="data">
                         <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.price }}</p>
+                            <p class="font-semibold text-center">{{ data.value.price }} MAD</p>
                         </div>
                     </template>
                     <template #subject="data">

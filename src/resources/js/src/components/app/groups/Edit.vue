@@ -104,7 +104,10 @@
                                 </div>
                                 <span v-if="errors.day" class="text-red-600 text-sm">{{ errors.day[0] }}</span>
                             </div>
-                            <button type="button" class="btn btn-primary w-full" @click="Edit()">Submit</button>
+                            <button type="button" class="btn btn-primary w-full h-10" @click="Edit()">
+                                <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
+                                <span v-else>Soumettre</span>
+                            </button>
                         </form>
                     </div>
                     </DialogPanel>
@@ -125,6 +128,9 @@ import { useGroupsStore } from '@/stores/groups.js';
 import { useSectionsStore } from '@/stores/sections.js';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+import IconComponent from '@/components/icons/IconComponent.vue'
+
+const isLoading = ref(false)
 
 const options = ref(['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimenche']);
 const sections = computed(() => {
@@ -193,13 +199,16 @@ const detachTiming = (value) => {
     data.value.timing = data.value.timing.filter(res => (res.dates[0] != value.dates[0] || res.day != value.day))
 }
 const Edit = () => {
+    isLoading.value = true
     errors.value = []
     data.value.teacher_id = data.value.teacher.split(':')[0].trim()
     data.value.section_id = data.value.section.split(':')[0].trim()
     groupsStore.update(data.value,props.editedData.id).then(res => {
+        isLoading.value = false
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {
+        isLoading.value = false
         if(err.status == 422) {
             errors.value =  err.response.data.errors;
         }

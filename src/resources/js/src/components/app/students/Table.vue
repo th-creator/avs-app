@@ -157,11 +157,11 @@
             { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'firstName', title: 'Prenom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'email', title: 'Email', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'phone', title: "Mobile", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'field', title: "Option", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'level', title: "Niveau", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'date', title: "Date d'incription", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'phone', title: "Mobile", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'parent_phone', title: "Mobile du parent", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'date', title: "Date d'incription", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];

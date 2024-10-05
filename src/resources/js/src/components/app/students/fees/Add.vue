@@ -91,7 +91,10 @@
                                 <input v-model="data.receipt" type="text" placeholder="Receipt" class="form-input" />
                                 <span v-if="errors.receipt" class="text-red-600 text-sm">{{ errors.receipt[0] }}</span>
                             </div>
-                            <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
+                            <button type="button" class="btn btn-primary w-full h-10" @click="Create()">
+                                <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
+                                <span v-else>Soumettre</span>
+                            </button>
                         </form>
                     </div>
                     </DialogPanel>
@@ -117,6 +120,9 @@ import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 import { useRoute } from 'vue-router';
 import { useStudentsStore } from '@/stores/students.js';
+import IconComponent from '@/components/icons/IconComponent.vue'
+
+const isLoading = ref(false)
 
 const options = ref(['espèces', 'chèque']);
 
@@ -153,7 +159,7 @@ const data = ref({
     reduction: 0,
     rest: 0,
     amount_paid: 0,
-    type: '',
+    type: 'espèces',
     total: '',
     bank: '',
     bank_receipt: '',
@@ -164,14 +170,17 @@ const data = ref({
 const errors = ref({})
 
 const Create = () => {
+    isLoading.value = true
     errors.value = []
     data.value.user_id = authStore?.user?.id
     data.value.student_id = route.params.id
     data.value.fullName = studentsStore.student.firstName + ' ' +  studentsStore.student.lastName
     feesStore.store(data.value).then(res => {
+        isLoading.value = false
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {
+        isLoading.value = false
         if(err.status == 422) {
             errors.value =  err.response.data.errors;
         }

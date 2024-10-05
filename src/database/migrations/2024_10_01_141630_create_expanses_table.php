@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('bank')->nullable();
             $table->string('bank_receipt')->nullable();
             $table->string('file')->nullable();
+            $table->string('paid_by')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->timestamps();

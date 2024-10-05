@@ -77,7 +77,10 @@
                                 <input v-model="data.parent_phone" type="text" placeholder="Mobile du parent" class="form-input ltr:pl-10 rtl:pr-10" />
                                 <span v-if="errors.parent_phone" class="text-red-600 text-sm">{{ errors.parent_phone[0] }}</span>
                             </div>
-                            <button type="button" class="btn btn-primary w-full" @click="Edit()">Submit</button>
+                            <button type="button" class="btn btn-primary w-full h-10" @click="Edit()">
+                                <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
+                                <span v-else>Soumettre</span>
+                            </button>
                         </form>
                     </div>
                     </DialogPanel>
@@ -97,6 +100,9 @@ import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { useStudentsStore } from '@/stores/students.js';
 import { useAlert } from '@/composables/useAlert';
+import IconComponent from '@/components/icons/IconComponent.vue'
+
+const isLoading = ref(false)
 
 const studentsStore = useStudentsStore();
 
@@ -130,10 +136,13 @@ const data = ref({
 const errors = ref({})
 
 const Edit = () => {
+    isLoading.value = true
     studentsStore.update(data.value,props.editedData.id).then(res => {
+        isLoading.value = false
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {
+        isLoading.value = false
         if(err.status == 422) {
             errors.value =  err.response.data.errors;
         }

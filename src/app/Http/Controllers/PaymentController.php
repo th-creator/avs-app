@@ -20,7 +20,7 @@ class PaymentController extends Controller
         }
         $monthsToGet = array_slice($months, 0, $currentMonth + 1);
         Log::alert($monthsToGet);
-        $data = Payment::where(function ($query) {
+        $data = Payment::whereNot('paid',-1)->where(function ($query) {
             $query->where('rest', '!=', 0)
                   ->orWhereNull('rest');
         })->whereIn('month', $monthsToGet)
@@ -39,7 +39,7 @@ class PaymentController extends Controller
     }
 
     public function groupPayments($id) {
-        $data = Payment::where('group_id',$id)->get();
+        $data = Payment::whereNot('paid',-1)->where('group_id',$id)->get();
         return response()->json(['data' => $data], 200);
     }
     

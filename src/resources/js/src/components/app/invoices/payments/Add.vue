@@ -43,13 +43,13 @@
                                 <span v-if="errors.reduction" class="text-red-600 text-sm">{{ errors.reduction[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Montant a payer:</label>
-                                <input v-model="data.total" type="number" placeholder="Montant a payer" class="form-input" />
+                                <label class="text-sm">Montant à payer:</label>
+                                <input v-model="data.total" type="number" placeholder="Montant à payer" class="form-input" />
                                 <span v-if="errors.total" class="text-red-600 text-sm">{{ errors.total[0] }}</span>
                             </div>
                             <div class="relative mb-4">
                                 <label class="text-sm">Reste a payer:</label>
-                                <input v-model="data.rest" type="number" placeholder="Reste a payer" class="form-input" />
+                                <input v-model="data.rest" type="number" placeholder="Reste à payer" class="form-input" />
                                 <span v-if="errors.rest" class="text-red-600 text-sm">{{ errors.rest[0] }}</span>
                             </div>
                             <div class="relative mb-4">

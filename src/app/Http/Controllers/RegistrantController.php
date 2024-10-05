@@ -136,8 +136,35 @@ class RegistrantController extends Controller
         $userData = $request->validate([
             'date' => 'nullable',
             'center' => 'required',
+            'status' => 'required',
         ]);
-        
+        if($request->status == -1) {
+            $currentMonth = date('n'); // Get the current month as a number (1-12)
+            $currentYear = date('Y'); // Get the current year
+            $months = ['Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'];
+
+            // Adjust the index for the academic year starting in September
+            if ($currentMonth >= 9) {
+                $currentMonth -= 9; // For Sept to Dec, subtract 9 to get index 0-3
+            } else {
+                $currentMonth += 3; // For Jan to June, add 3 to get index 4-9
+            }
+            if ($currentMonth == count($months) - 1) {
+                return;
+            }
+            $monthsToDelete = array_slice($months, $currentMonth + 1); // Get the months to delete
+
+            Payment::where('registrant_id', $id)
+                ->where('group_id', $data->group_id)
+                ->whereIn('month', $monthsToDelete)
+                ->where('year', '>=', $currentYear)
+                ->delete();
+
+            $monthName = $months[$currentMonth];
+            $newPayment = Payment::where('group_id',$data->group_id)->where('registrant_id', $data->id)->where('month', $monthName)->where('year', $currentYear)->update([
+                'paid' => -1,
+            ]);
+        }
         $data->update($userData);
 
         $data->student = $data->student;
@@ -161,86 +188,73 @@ class RegistrantController extends Controller
         $currentYear = date('Y');
         $months = ['Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'];
         $currentMonth = date('n'); // Get current month as a number (1-12)
-        // Adjust the index for the academic year starting in September
-        $flag = false;
-        if ($currentMonth >= 9) {
-            $flag = true;
-            
+        // // Adjust the index for the academic year starting in September
+        // $flag = false;
+        if ($currentMonth >= 9) {            
             $currentMonth -= 9; // For Sept to Dec, subtract 9 to get index 0-3
         } else {
             $currentMonth += 3; // For Jan to June, add 3 to get index 4-9
         }
-        for ($i = $currentMonth; $i < count($months); $i++) { // Loop until June
-            if ($i > 3 && $flag == true) {
-                $monthName = $months[$i];
-                $yearName = $currentYear+1;
-            } else {
-                $yearName = $currentYear;
-                $monthName = $months[$i];
-            }
-            Log::alert('monthsToAdd'.$monthName);
-            Payment::create([
-                'group' => $group['intitule'],
-                'month' => $monthName,
-                'year' => $yearName,
-                'amount' => $group['section']['price'],
-                'fullName' => $data['student']['firstName']. ' ' . $data['student']['lastName'],
-                'user_id' => $userData['user_id'],
-                'student_id' => $data['student_id'],
-                'group_id' => $group['id'],
-                'registrant_id' => $data['id']
-            ]);
-        }
+        // for ($i = $currentMonth; $i < count($months); $i++) { // Loop until June
+        //     if ($i > 3 && $flag == true) {
+        //         $monthName = $months[$i];
+        //         $yearName = $currentYear+1;
+        //     } else {
+        //         $yearName = $currentYear;
+        //         $monthName = $months[$i];
+        //     }
+        //     Log::alert('monthsToAdd'.$monthName);
+        //     Payment::create([
+        //         'group' => $group['intitule'],
+        //         'month' => $monthName,
+        //         'year' => $yearName,
+        //         'amount' => $group['section']['price'],
+        //         'fullName' => $data['student']['firstName']. ' ' . $data['student']['lastName'],
+        //         'user_id' => $userData['user_id'],
+        //         'student_id' => $data['student_id'],
+        //         'group_id' => $group['id'],
+        //         'registrant_id' => $data['id']
+        //     ]);
+        // }
 
-        $monthName = $months[$currentMonth];
-        $currentYear;
-        $oldPayment = Payment::where('group_id',$data->group_id)->where('registrant_id', $data->id)->where('month', $monthName)->where('year', $currentYear)->first();
-        $newPayment = Payment::where('group_id',$group->id)->where('registrant_id', $data->id)->where('month', $monthName)->where('year', $currentYear)->first();
-        Log::alert('monthsToDelete'.$monthName);
-        Log::alert('monthsToDelete'.$currentYear);
-        Log::alert($oldPayment);
-        Log::alert($newPayment);
-        $reduction = isset($oldPayment->reduction) ? $oldPayment->reduction : null;
-        $rest = isset($oldPayment->rest) ? $oldPayment->rest : null;
-        $total = isset($oldPayment->total) ? $oldPayment->total : null;
-        $amount_paid = isset($oldPayment->amount_paid) ? $oldPayment->amount_paid : null;
-        $type = isset($oldPayment->type) ? $oldPayment->type : null;
-        $bank = isset($oldPayment->bank) ? $oldPayment->bank : null;
-        $bank_receipt = isset($oldPayment->bank_receipt) ? $oldPayment->bank_receipt : null;
-        $receipt = isset($oldPayment->receipt) ? $oldPayment->receipt : null;
+        // $monthName = $months[$currentMonth];
+        // $currentYear;
+        // $oldPayment = Payment::where('group_id',$data->group_id)->where('registrant_id', $data->id)->where('month', $monthName)->where('year', $currentYear)->first();
+        // $newPayment = Payment::where('group_id',$group->id)->where('registrant_id', $data->id)->where('month', $monthName)->where('year', $currentYear)->first();
+        // Log::alert('monthsToDelete'.$monthName);
+        // Log::alert('monthsToDelete'.$currentYear);
+        // Log::alert($oldPayment);
+        // Log::alert($newPayment);
+        // $reduction = isset($oldPayment->reduction) ? $oldPayment->reduction : null;
+        // $rest = isset($oldPayment->rest) ? $oldPayment->rest : null;
+        // $total = isset($oldPayment->total) ? $oldPayment->total : null;
+        // $amount_paid = isset($oldPayment->amount_paid) ? $oldPayment->amount_paid : null;
+        // $type = isset($oldPayment->type) ? $oldPayment->type : null;
+        // $bank = isset($oldPayment->bank) ? $oldPayment->bank : null;
+        // $bank_receipt = isset($oldPayment->bank_receipt) ? $oldPayment->bank_receipt : null;
+        // $receipt = isset($oldPayment->receipt) ? $oldPayment->receipt : null;
 
-        $newPayment = $newPayment->update([
-            'reduction' => $reduction,
-            'rest' => $rest,
-            'total' => $total,
-            'amount_paid' => $amount_paid,
-            'type' => $type,
-            'bank' => $bank,
-            'bank_receipt' => $bank_receipt,
-            'receipt' => $receipt,
-        ]);
-        $newPayment = $newPayment->update([
-            'reduction' => $oldPayment->reduction,
-            'rest' => $oldPayment->rest,
-            'total' => $oldPayment->total,
-            'amount_paid' => $oldPayment->amount_paid,
-            'type' => $oldPayment->type,
-            'bank' => $oldPayment->bank,
-            'bank_receipt' => $oldPayment->bank_receipt,
-            'receipt' => $oldPayment->receipt,
-        ]);
+        // $newPayment = $newPayment->update([
+        //     'reduction' => $reduction,
+        //     'rest' => $rest,
+        //     'total' => $total,
+        //     'amount_paid' => $amount_paid,
+        //     'type' => $type,
+        //     'bank' => $bank,
+        //     'bank_receipt' => $bank_receipt,
+        //     'receipt' => $receipt,
+        // ]);
         // if ($currentMonth == count($months)) {
         //     return;
         // }
         $monthsToDelete = array_slice($months, $currentMonth); // Get the months to delete
         Log::alert($monthsToDelete);
 
-        Payment::where('registrant_id', $id)
-        ->where('group_id', $data->group_id)
-        ->where('registrant_id', $data->id)
+        Payment::where('registrant_id', $data->id)
+        ->where('group_id', $oldGroup->id)
         ->whereIn('month', $monthsToDelete)
         ->where('year', '>=', $currentYear)
-        ->delete();
+        ->update(['group_id'=> $group['id'],'group'=>$group['intitule']]);
         // ->orWhere('year', '>=', $currentYear +1)
         $data->update($userData);
 
@@ -289,7 +303,6 @@ class RegistrantController extends Controller
 
             Payment::where('registrant_id', $id)
                 ->where('group_id', $registrant->group_id)
-                ->where('registrant_id', $registrant->id)
                 ->whereIn('month', $monthsToDelete)
                 ->where('year', '>=', $currentYear)
                 ->delete();

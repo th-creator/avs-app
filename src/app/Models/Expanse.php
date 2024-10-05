@@ -17,6 +17,7 @@ class Expanse extends Model
         'bank',
         'bank_receipt',
         'file',
+        'paid_by',
         'user_id',
     ];
 

@@ -86,7 +86,10 @@
                                 <input v-model="data.receipt" type="text" placeholder="Receipt" class="form-input" />
                                 <span v-if="errors.receipt" class="text-red-600 text-sm">{{ errors.receipt[0] }}</span>
                             </div>
-                            <button type="button" class="btn btn-primary w-full" @click="Create()">Submit</button>
+                            <button type="button" class="btn btn-primary w-full h-10" @click="Create()">
+                                <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
+                                <span v-else>Soumettre</span>
+                            </button>
                         </form>
                     </div>
                     </DialogPanel>
@@ -112,6 +115,9 @@ import { useAlert } from '@/composables/useAlert';
 import {useAuthStore} from '@/stores/auth.js';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+import IconComponent from '@/components/icons/IconComponent.vue'
+
+const isLoading = ref(false)
 
 const registrantsStore = useRegistrantsStore();
 const authStore = useAuthStore();
@@ -148,7 +154,7 @@ const data = ref({
     amount: 0,
     reduction: 0,
     rest: 0,
-    type: '',
+    type: 'espèces',
     total: '',
     bank: '',
     bank_receipt: '',
@@ -160,14 +166,17 @@ const data = ref({
 const errors = ref({})
 
 const Create = () => {
+    isLoading.value = true
     errors.value = []
     data.value.user_id = authStore?.user?.id
     data.value.group_id = data.value.group.split(':')[0].trim()
     data.value.student_id = data.value.student.split(':')[0].trim()
     registrantsStore.store(data.value).then(res => {
+        isLoading.value = false
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {
+        isLoading.value = false
         if(err.status == 422) {
             errors.value =  err.response.data.errors;
         }

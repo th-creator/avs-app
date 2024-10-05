@@ -25,7 +25,7 @@
                     leave-from="opacity-100 scale-100"
                     leave-to="opacity-0 scale-95"
                 >
-                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg overflow-hidden w-full max-w-xl text-black dark:text-white-dark">
+                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg w-full max-w-xl text-black dark:text-white-dark">
                     <button type="button" class="absolute top-7 ltr:right-9 rtl:left-9 text-white-dark hover:text-dark outline-none" @click="close()">
                         X
                     </button>
@@ -46,7 +46,7 @@
                                 ></multiselect>
                                 <span v-if="errors.student_id" class="text-red-600 text-sm">{{ errors.student_id[0] }}</span>
                             </div>
-                            <div class="relative mb-4">
+                            <!-- <div class="relative mb-4">
                                 <label class="text-sm">Groupe:</label>
                                 <multiselect
                                     v-model="data.group"
@@ -59,7 +59,7 @@
                                     deselect-label=""
                                 ></multiselect>
                                 <span v-if="errors.group_id" class="text-red-600 text-sm">{{ errors.group_id[0] }}</span>
-                            </div>
+                            </div> -->
                             <div class="relative mb-4">
                                 <label class="text-sm">Centre:</label> 
                                 <multiselect
@@ -75,11 +75,28 @@
                                 <span v-if="errors.center" class="text-red-600 text-sm">{{ errors.center[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Date:</label>
+                                <label class="text-sm">Date d'inscription:</label>
                                 <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
-                            <button type="button" class="btn btn-primary w-full" @click="Edit()">Submit</button>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Etat:</label> 
+                                <multiselect
+                                    v-model="data.status_show"
+                                    :options="etats"
+                                    class="custom-multiselect"
+                                    :searchable="true"
+                                    placeholder="Centre"
+                                    selected-label=""
+                                    select-label=""
+                                    deselect-label=""
+                                ></multiselect>
+                                <span v-if="errors.center" class="text-red-600 text-sm">{{ errors.center[0] }}</span>
+                            </div>
+                            <button type="button" class="btn btn-primary w-full h-10" @click="Edit()">
+                                <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
+                                <span v-else>Soumettre</span>
+                            </button>
                         </form>
                     </div>
                     </DialogPanel>
@@ -98,16 +115,18 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import { useStudentsStore } from '@/stores/students.js';
-import { useGroupsStore } from '@/stores/groups.js';
 import { useRegistrantsStore } from '@/stores/registrants.js';
 import { useAlert } from '@/composables/useAlert';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+import IconComponent from '@/components/icons/IconComponent.vue'
+
+const isLoading = ref(false)
 
 const options = ref(['AVS', 'ISFPT']);
+const etats = ref(['Active', 'Remboursé']);
 const registrantsStore = useRegistrantsStore();
 const studentsStore = useStudentsStore();
-const groupsStore = useGroupsStore();
 
 const students = computed(() => {
         return studentsStore.students.length > 0 ? studentsStore.students.map(res => {
@@ -117,17 +136,8 @@ const students = computed(() => {
         } else return res.id + ' : ' + res.firstName + ' '+ res.lastName}) : [];
         });
 
-const groups = computed(() => {
-        return groupsStore.groups.length > 0 ? groupsStore.groups.map(res => {
-            if(data.value.group == res.id) {
-            data.value.group = res.id + ' : ' + res.intitule;
-            return res.id + ' : ' + res.intitule
-        } else return res.id + ' : ' + res.intitule}) : [];
-        });
-
 onMounted(() => {
     studentsStore.index()
-    groupsStore.index()
 })
 const props = defineProps({
     showEditPopup: {
@@ -151,16 +161,21 @@ const data = ref({
     group_id: props.editedData.group_id,
     student: props.editedData.student_id,
     student_id: props.editedData.student_id,
+    status_show: props.editedData.status == -1 ? 'Remboursé' : 'Active' ,
+    status: props.editedData.status,
 })
 
 const errors = ref({})
 
 const Edit = () => {
-    data.value.group_id = data.value.group.split(':')[0].trim()
+    isLoading.value = true
+    data.value.status = data.value.status_show == 'Remboursé' ? -1 : props.editedData.status
     registrantsStore.update(data.value,props.editedData.id).then(res => {
+        isLoading.value = false
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {
+        isLoading.value = false
         if(err.status == 422) {
             errors.value =  err.response.data.errors;
         }

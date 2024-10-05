@@ -92,6 +92,30 @@
                             <p class="font-semibold text-center">{{ data.value.receipt }}</p>
                         </div>
                     </template>
+                    <template #paid="data">
+                        <div class="flex justify-center w-full">
+                            <div v-if="data.value.paid == 1 && data.value.total == data.value.amount_paid">
+                                <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
+                                    Payé
+                                </div>
+                            </div>
+                            <div v-else-if="data.value.paid == 1">
+                                <div class="px-4 py-2 rounded-full bg-orange-100 text-orange-600 w-[120px] text-center text-sm">
+                                    En cours
+                                </div>
+                            </div>
+                            <div v-else-if="data.value.paid == -1">
+                                <div class="px-4 py-2 rounded-full bg-blue-100 text-blue-600 w-[120px] text-center text-sm">
+                                    Remboursé
+                                </div>
+                            </div>
+                            <div v-else>
+                                <div class="px-4 py-2 rounded-full bg-rose-100 text-rose-600 w-[120px] text-center text-sm">
+                                    Non payé
+                                </div>
+                            </div>
+                        </div>
+                    </template>
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
@@ -223,6 +247,7 @@
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'group', title: 'Groupe', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'month', title: 'Mois', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },

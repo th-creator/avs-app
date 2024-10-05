@@ -1,19 +1,22 @@
 <template>
     <div>
         <div class="panel pb-0 mt-6">
-            <div class="flex justify-between mb-4">    
-                <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
+            <div class="flex justify-between items-end mb-4">    
+                <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." />
                 <!-- <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> -->
-                <multiselect
-                    v-model="choosenMonth"
-                    :options="options"
-                    class="custom-multiselect  max-w-xs"
-                    :searchable="true"
-                    placeholder="Le mois"
-                    selected-label=""
-                    select-label=""
-                    deselect-label=""
-                ></multiselect>
+                 <div class="flex flex-col gap-4">
+                    <button type="button" class="btn btn-info" @click="exportToExcel">Exporter</button>
+                    <multiselect
+                        v-model="choosenMonth"
+                        :options="options"
+                        class="custom-multiselect  max-w-xs"
+                        :searchable="true"
+                        placeholder="Le mois"
+                        selected-label=""
+                        select-label=""
+                        deselect-label=""
+                    ></multiselect>
+                 </div>
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -53,6 +56,16 @@
                             <p class="font-semibold text-center">{{ data.value.reduction }}%</p>
                         </div>
                     </template>
+                    <template #total="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.total }}MAD</p>
+                        </div>
+                    </template>
+                    <template #amount_paid="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.amount_paid }}MAD</p>
+                        </div>
+                    </template>
                     <template #date="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.date }}</p>
@@ -66,6 +79,30 @@
                     <template #receipt="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.receipt }}</p>
+                        </div>
+                    </template>
+                    <template #paid="data">
+                        <div class="flex justify-center w-full">
+                            <div v-if="data.value.paid == 1 && data.value.total == data.value.amount_paid">
+                                <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
+                                    Payé
+                                </div>
+                            </div>
+                            <div v-else-if="data.value.paid == 1">
+                                <div class="px-4 py-2 rounded-full bg-orange-100 text-orange-600 w-[120px] text-center text-sm">
+                                    En cours
+                                </div>
+                            </div>
+                            <div v-else-if="data.value.paid == -1">
+                                <div class="px-4 py-2 rounded-full bg-blue-100 text-blue-600 w-[120px] text-center text-sm">
+                                    Remboursé
+                                </div>
+                            </div>
+                            <div v-else>
+                                <div class="px-4 py-2 rounded-full bg-rose-100 text-rose-600 w-[120px] text-center text-sm">
+                                    Non payé
+                                </div>
+                            </div>
                         </div>
                     </template>
                     <template #actions="data">
@@ -92,6 +129,10 @@
     import Swal from 'sweetalert2';
     import Multiselect from '@suadelabs/vue3-multiselect';
     import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+    import * as XLSX from 'xlsx';
+    import { useGroupsStore } from '@/stores/groups.js';
+
+    const groupsStore = useGroupsStore();
     
     const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
     const choosenMonth = ref('Septembre');
@@ -103,9 +144,10 @@
         sort_column: 'id',
         sort_direction: 'asc',
     });
-    watch(choosenMonth, (newVal, oldVal) => {
+    watch(choosenMonth, async (newVal, oldVal) => {
         console.log(`Month changed from ${oldVal} to ${newVal}`);
-        choosenData.value = paymentsStore.groupPayments.filter(payment => payment.month.toLowerCase() === newVal.toLowerCase());
+        choosenData.value = await paymentsStore.groupPayments.filter(payment => payment.month.toLowerCase() === newVal.toLowerCase());
+        total.value = choosenData.value.reduce((total, payment) => total + Number(payment.amount)*((100-Number(payment.reduction))/100), 0)
     });
 
     const paymentsStore = usePaymentsStore();
@@ -121,7 +163,10 @@
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'month', title: 'Mois', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'reduction', title: "Reduction", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -150,6 +195,28 @@
         console.log(choosenData.value);
     })
 
+    const exportToExcel = () => {
+        // Get the attendance data from Vuex
+        const attendanceData = choosenData.value.map(res => ({nom: res.fullName, mois: res.month, 'Reste à payer': res.rest ? res.rest : Number(res.amount)*((100-Number(res.reduction))/100), 'montant à payer': res.total ? res.total : Number(res.amount)*((100-Number(res.reduction))/100)}))
+
+        // Calculate the total of all 'montant à payer'
+        const totalMontant = attendanceData.reduce((total, row) => total + row['montant à payer'], 0);
+
+        // Add the total to the attendance data
+        attendanceData.push({nom: '', mois: '', 'Reste à payer': '', 'montant à payer': total.value});
+
+        console.log(attendanceData);
+
+        // Create a worksheet from the attendance data
+        const worksheet = XLSX.utils.json_to_sheet(attendanceData);
+
+        // Create a new workbook and append the worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'paiements');
+
+        // Export the workbook to an Excel file
+        XLSX.writeFile(workbook, 'paiements_'+groupsStore.group.intitule+'.xlsx');
+    };
     const toggleEdit = (data) => {
         editedData.value = data
         console.log(editedData.value);
