@@ -29,7 +29,8 @@ export const useRegistrantsStore = defineStore("registrants", () => {
                 phone: res.student.phone,
                 parent_phone: res.student.parent_phone,
                 field: res.student.field,
-                level: res.student.level
+                level: res.student.level,
+                user: res.user
             }));  // Update the registrants state with the fetched data
             return response
         } catch (error) {

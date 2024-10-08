@@ -87,6 +87,7 @@
             { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'name', title: 'Name', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'email', title: 'Email', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'center', title: 'Centre', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'status', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];

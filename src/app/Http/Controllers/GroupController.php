@@ -50,6 +50,7 @@ class GroupController extends Controller
             'timing' => 'nullable',
             'salle' => 'nullable',
             'teacher_id' => 'required',
+            'section_id' => 'required',
         ]);
         
         $newData['timing'] = json_encode($request['timing']);

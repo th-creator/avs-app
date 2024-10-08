@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 class RegistrantController extends Controller
 {
     public function index() {
-        $data = Registrant::with('student')->with('group')->orderBy('student_id', 'desc')->get();
+        $data = Registrant::with('student')->with('group')->with('user')->orderBy('student_id', 'desc')->get();
         return response()->json(['data' => $data], 200);
     }
 
@@ -75,6 +75,8 @@ class RegistrantController extends Controller
             $group->availability = $group->availability - 1;
             $group->save();
             $data->group = $data->group;
+            $data->user = $data->user;
+            $data->student = $data->student;
             array_push($newRegistrants, $data);
             if (!$data) {
                 return response()->json(['message' => 'Failed to create Registrant'], 500);
@@ -169,6 +171,7 @@ class RegistrantController extends Controller
 
         $data->student = $data->student;
         $data->group = $data->group;
+        $data->user = $data->user;
         
         return response()->json(['message' => 'Registrant updated successfully', 'data' => $data], 200);
     }

@@ -94,7 +94,7 @@
                     </template>
                     <template #paid="data">
                         <div class="flex justify-center w-full">
-                            <div v-if="data.value.paid == 1 && data.value.total == data.value.amount_paid">
+                            <div v-if="(data.value.paid == 1 && data.value.total == data.value.amount_paid)|| data.value.reduction == 100">
                                 <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
                                     Payé
                                 </div>
@@ -114,6 +114,11 @@
                                     Non payé
                                 </div>
                             </div>
+                        </div>
+                    </template>
+                    <template #user_id="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value?.user?.firstName + ' ' + data.value?.user?.lastName }}</p>
                         </div>
                     </template>
                     <template #actions="data">
@@ -258,7 +263,7 @@
             { field: 'bank_receipt', title: "Chèque", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'receipt', title: "Recu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'date', title: "Date", headerClass: '!text-center flex justify-center', width: 'full' },
-            // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
     const rows = computed(async() => {

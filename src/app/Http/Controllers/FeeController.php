@@ -13,7 +13,7 @@ class FeeController extends Controller
     }
 
     public function show($id) {
-        $data = Fee::where('student_id',$id)->with('student')->get();
+        $data = Fee::where('student_id',$id)->with('user')->get();
         return response()->json(['data' => $data], 200);
     }
 
@@ -47,6 +47,7 @@ class FeeController extends Controller
         $data = Fee::create($newData);
         
         $data->student = $data->student;
+        $data->user = $data->user;
 
         if ($data) {
             return response()->json(['message' => 'Fee created successfully', 'data' => $data], 200);
@@ -75,6 +76,7 @@ class FeeController extends Controller
         $data->update($userData);
 
         $data->student = $data->student;
+        $data->user = $data->user;
         
         return response()->json(['message' => 'Fee updated successfully', 'data' => $data], 200);
     }

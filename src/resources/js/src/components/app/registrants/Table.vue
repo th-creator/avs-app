@@ -84,11 +84,11 @@
                             </div>    
                         </div>
                     </template>
-                    <!-- <template #user_id="data">
+                    <template #user_id="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.user.firstName + ' ' + data.value.user.lastName }}</p>
                         </div>
-                    </template> -->
+                    </template>
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
@@ -149,7 +149,7 @@ const authStore = useAuthStore();
             { field: 'date', title: "Date d'incription", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'center', title: "Centre", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'status', title: "Etat", headerClass: '!text-center flex justify-center', width: 'full' },
-            // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
 

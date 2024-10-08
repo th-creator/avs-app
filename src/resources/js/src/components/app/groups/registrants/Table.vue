@@ -120,7 +120,7 @@
     })
     const exportToExcel = () => {
         // Get the attendance data from Vuex
-        const attendanceData = registrantsStore.groupRegistrants.map(res => ({no: res.student.id, nom: res.lastName, prenom: res.firstName,...studyDates.value}))
+        const attendanceData = registrantsStore.groupRegistrants.map(res => ({no: res.student.id, nom: res.lastName, prenom: res.firstName, Mobile: res.phone,...studyDates.value}))
         console.log(attendanceData);
         // Create a worksheet from the attendance data
         const worksheet = XLSX.utils.json_to_sheet(attendanceData);

@@ -124,7 +124,7 @@ import IconComponent from '@/components/icons/IconComponent.vue'
 
 const isLoading = ref(false)
 
-const options = ref(['espèces', 'chèque']);
+const options = ref(['espèces', 'chèque', 'virement']);
 
 const studentsStore = useStudentsStore();
 

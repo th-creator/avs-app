@@ -34,7 +34,7 @@ class PaymentController extends Controller
     }
 
     public function show($id) {
-        $data = Payment::where('student_id',$id)->with('student')->get();
+        $data = Payment::where('student_id',$id)->with('user')->get();
         return response()->json(['data' => $data], 200);
     }
 
@@ -67,7 +67,7 @@ class PaymentController extends Controller
 
         $data = Payment::create($newData);
         
-        $data->student = $data->student;
+        $data->user = $data->user;
 
         if ($data) {
             return response()->json(['message' => 'Payment created successfully', 'data' => $data], 200);
@@ -94,6 +94,7 @@ class PaymentController extends Controller
         ]);
         $userData['paid'] = 1;
         $data->update($userData);
+        $data->user = $data->user;
         
         return response()->json(['message' => 'Payment updated successfully', 'data' => $data], 200);
     }
