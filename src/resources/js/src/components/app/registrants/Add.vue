@@ -180,8 +180,10 @@ const Create = () => {
         isLoading.value = false
         if(err.status == 422) {
             errors.value =  err.response.data.errors;
-        }
-        useAlert('warning', "quelque chose s'est mal passé!");
+            useAlert('warning', "quelque chose s'est mal passé!");
+        } else if(err.status == 400) {
+            useAlert('warning', "L'elève existe déjà!");
+        } else useAlert('warning', "quelque chose s'est mal passé!");
     });
 }
 </script>
