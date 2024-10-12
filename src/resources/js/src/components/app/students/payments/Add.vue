@@ -128,7 +128,6 @@
                                 <input v-model="data.receipt" type="text" placeholder="Receipt" class="form-input" />
                                 <span v-if="errors.receipt" class="text-red-600 text-sm">{{ errors.receipt[0] }}</span>
                             </div>
-                            {{ groups }}
                             <button type="button" class="btn btn-primary w-full h-10" @click="Create()">
                                 <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
                                 <span v-else>Soumettre</span>

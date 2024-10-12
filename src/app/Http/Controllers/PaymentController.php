@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Group;
 use App\Models\Payment;
 use App\Models\Registrant;
 use Illuminate\Http\Request;
@@ -19,13 +20,38 @@ class PaymentController extends Controller
         } else {
             $currentMonth += 4; // For Jan to July, add 4 to get index 5-11
         }
-        $monthsToGet = array_slice($months, 0, $currentMonth + 1);
+        $monthsToGet = array_slice($months, $currentMonth -1, $currentMonth);
         Log::alert($monthsToGet);
         $data = Payment::whereNot('paid',-1)->where(function ($query) {
             $query->where('rest', '!=', 0)
                   ->orWhereNull('rest');
         })->whereIn('month', $monthsToGet)
         ->get();
+        $registrants = Registrant::with('student')->get();
+        $missingPayments = [];
+
+        foreach ($registrants as $registrant) {
+            $payments = Payment::where('registrant_id', $registrant->id)->whereIn('month', $monthsToGet)->get();
+            $id = $registrant->id;
+            // $group = Group::whereHas('registrants', function ($query) use ($id) {
+            //     $query->where('id', $id);
+            // })->with('section')->first();
+            $paidMonths = $payments->pluck('month')->toArray();
+
+            $missingMonths = array_diff($monthsToGet, $paidMonths);
+
+            if (!empty($missingMonths)) {
+                $missingPayments[] = [
+                    'fullName' => $registrant->student['firstName'] . ' ' . $registrant->student['lastName'], 
+                    'registrant_id' => $registrant->id,
+                    // 'group' => $group->intitule,
+                    // 'group_id' => $registrant->group_id,
+                    'paid' => 0,
+                    'missing_months' => $missingMonths
+                ];
+            }
+        }
+        Log::alert($missingPayments);
         return response()->json(['data' => $data], 200);
     }
     public function fetchFinance() {

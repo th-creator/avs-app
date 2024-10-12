@@ -60,7 +60,7 @@
                                     Payé
                                 </div>
                             </div>
-                            <div v-if="data.value.total > 0">
+                            <div v-else-if="data.value.total > 0">
                                 <div class="px-4 py-2 rounded-full bg-orange-100 text-orange-600 w-[120px] text-center text-sm">
                                     En cours
                                 </div>
