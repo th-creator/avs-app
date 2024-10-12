@@ -73,9 +73,9 @@
     import Add from './Add.vue'
     import Edit from './Edit.vue'
     import Swal from 'sweetalert2';
-import {useAuthStore} from '@/stores/auth.js';
+    import {useAuthStore} from '@/stores/auth.js';
 
-const authStore = useAuthStore();
+    const authStore = useAuthStore();
     
     const params = reactive({
         current_page: 1,

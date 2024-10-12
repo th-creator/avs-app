@@ -71,7 +71,7 @@
                     </template>
                     <template #paid="data">
                         <div class="flex justify-center w-full">
-                            <div v-if="data.value.paid == 1 && data.value.total == data.value.amount_paid">
+                            <div v-if="(data.value.paid == 1 && data.value.total == data.value.amount_paid)|| data.value.reduction == 100">
                                 <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
                                     Payé
                                 </div>

@@ -11,6 +11,7 @@ export const usePaymentsStore = defineStore("payments", () => {
     const payments = ref([]);  // This will hold the payments globally
     const allPayments = ref([]);  // This will hold the payments globally
     const groupPayments = ref([]);  // This will hold the payments globally
+    const financePayments = ref([]);  // This will hold the payments globally
 
     // Fetch all payments and update the state
     const index = async () => {
@@ -27,6 +28,16 @@ export const usePaymentsStore = defineStore("payments", () => {
         try {
             const response = await api.get('api/all/paymens');
             allPayments.value = response.data.data;   // Update the payments state with the fetched data
+            return response
+        } catch (error) {
+            console.error("Failed to fetch payments:", error);
+            return error
+        }
+    };
+    const fetchFinance = async () => {
+        try {
+            const response = await api.get('api/finance/payments');
+            financePayments.value = response.data.data;   // Update the payments state with the fetched data
             return response
         } catch (error) {
             console.error("Failed to fetch payments:", error);
@@ -93,5 +104,5 @@ export const usePaymentsStore = defineStore("payments", () => {
     };
 
     // Expose the payments state and actions
-    return { payments, index, store, update, destroy, studentPayments, show, fetchGroupPayments, groupPayments, allPayments, all };
+    return { payments, index, store, update, destroy, studentPayments, show, fetchGroupPayments, groupPayments, allPayments, all, financePayments, fetchFinance };
 });

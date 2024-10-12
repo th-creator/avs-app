@@ -11,6 +11,17 @@ class GroupController extends Controller
         $data = Group::with('teacher')->get();
         return response()->json(['data' => $data], 200);
     }
+
+    public function allPayments() {
+        $data = Group::with('teacher')->with('payments')->get();
+        return response()->json(['data' => $data], 200);
+    }
+    public function studentGroups($id) {
+        $data = Group::whereHas('registrants', function ($query) use ($id) {
+            $query->where('student_id', $id);
+        })->with('section')->get();
+        return response()->json(['data' => $data], 200);
+    }
     
     public function store(Request $request)
     {

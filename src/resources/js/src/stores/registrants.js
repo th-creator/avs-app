@@ -67,7 +67,8 @@ export const useRegistrantsStore = defineStore("registrants", () => {
             phone: response.data.data.student.phone,
             parent_phone: response.data.data.student.parent_phone,
             field: response.data.data.student.field,
-            level: response.data.data.student.level
+            level: response.data.data.student.level,
+            user: response.data.data.user
         });  // Add the new user to the registrants array
         registrants.value = [...registrants.value]; // Reassign to force reactivity
         return response
@@ -93,7 +94,8 @@ export const useRegistrantsStore = defineStore("registrants", () => {
                 group: response.data.data.group.intitule,
                 parent_phone: response.data.data.student.parent_phone,
                 field: response.data.data.student.field,
-                level: response.data.data.student.level
+                level: response.data.data.student.level,
+                user: response.data.data.user
             };
             registrants.value = [...registrants.value]; // Reassign to force reactivity
         }
@@ -120,7 +122,8 @@ export const useRegistrantsStore = defineStore("registrants", () => {
                 group: response.data.data.group.intitule,
                 parent_phone: response.data.data.student.parent_phone,
                 field: response.data.data.student.field,
-                level: response.data.data.student.level
+                level: response.data.data.student.level,
+                user: response.data.data.user
             };
             registrants.value = [...registrants.value]; // Reassign to force reactivity
         }
@@ -168,7 +171,8 @@ export const useRegistrantsStore = defineStore("registrants", () => {
                 group: response.data.data.group.intitule,
                 parent_phone: response.data.data.student.parent_phone,
                 field: response.data.data.student.field,
-                level: response.data.data.student.level
+                level: response.data.data.student.level,
+                user: response.data.data.user
             };
             registrants.value = [...registrants.value]; // Reassign to force reactivity
         }

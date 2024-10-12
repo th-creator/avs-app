@@ -2,9 +2,13 @@
     <div>
         <div class="panel pb-0 mt-6">
             <div class="flex justify-between items-end mb-4"> 
-                <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." />
-                <div class="flex flex-col gap-4">  
-                    <button type="button" class="btn btn-info" @click="printPayment()">Exporter</button> 
+                <div class="flex flex-col gap-4">
+                    <button type="button" class="btn btn-warning" @click="printPayment()">Exporter</button> 
+                    <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." />
+
+                </div>
+                <div class="flex flex-col gap-4"> 
+                    <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> 
                     <multiselect
                         v-model="choosenMonth"
                         :options="options"
@@ -16,7 +20,6 @@
                         deselect-label=""
                     ></multiselect> 
                 </div>
-                <!-- <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> -->
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -267,7 +270,6 @@
             { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
     const rows = computed(async() => {
-        console.log('paymentsStore.studentPayments', paymentsStore.studentPayments);
         let data = await paymentsStore.studentPayments.length > 0 ? paymentsStore.studentPayments : []
         
         return data;
