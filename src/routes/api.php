@@ -14,6 +14,7 @@ use App\Http\Controllers\SectionController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\FeeController;
 use App\Http\Controllers\ExpanseController;
+use App\Http\Controllers\TeacherExpanseController;
 
 Route::get('user', [AuthController::class, "getUser"]);
 Route::post('register',[AuthController::class,'register']);
@@ -22,6 +23,7 @@ Route::post('refresh', [AuthController::class,'refresh']);
 Route::post('logout', [AuthController::class,'logout']);
 
 
+Route::apiResource('teacherExpanses', TeacherExpanseController::class);
 Route::apiResource('users', UserController::class);
 Route::put('users/{id}/toggle', [UserController::class, 'toggle']);
 Route::post('user/{id}/update', [ProfileController::class, 'editInfos']);
@@ -36,12 +38,14 @@ Route::get('group/{id}/registrants', [RegistrantController::class, 'groupRegistr
 Route::get('group/{id}/payments', [PaymentController::class, 'groupPayments']);
 Route::apiResource('teachers', TeacherController::class);
 Route::apiResource('groups', GroupController::class);
-Route::get('group/Payments', [GroupController::class,'allPayments']);
+Route::get('group/Payments/{month}', [GroupController::class,'allPayments']);
 Route::get('student/{id}/groups', [GroupController::class,'studentGroups']);
 Route::apiResource('sections', SectionController::class);
 Route::apiResource('payments', PaymentController::class);
 Route::get('all/paymens', [PaymentController::class, 'all']);
 Route::apiResource('fees', FeeController::class);
 Route::get('undandledFees', [FeeController::class, 'undandledFees']);
-Route::get('finance/payments', [PaymentController::class, 'fetchFinance']);
-Route::get('finance/fees', [FeeController::class, 'fetchFinance']);
+Route::post('finance/payments', [PaymentController::class, 'fetchFinance']);
+Route::post('finance/fees', [FeeController::class, 'fetchFinance']);
+Route::post('finance/expanses', [ExpanseController::class, 'fetchFinance']);
+Route::post('finance/teacherExpanses', [TeacherExpanseController::class, 'fetchFinance']);

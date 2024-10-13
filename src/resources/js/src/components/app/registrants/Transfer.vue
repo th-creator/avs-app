@@ -46,7 +46,10 @@
                                 ></multiselect>
                                 <span v-if="errors.group_id" class="text-red-600 text-sm">{{ errors.group_id[0] }}</span>
                             </div>
-                            <button type="button" class="btn btn-primary w-full" @click="Edit()">Submit</button>
+                            <button type="button" class="btn btn-primary w-full h-10" @click="Edit()">
+                                <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
+                                <span v-else>Soumettre</span>
+                            </button>
                         </form>
                     </div>
                     </DialogPanel>
@@ -70,8 +73,10 @@ import { useAlert } from '@/composables/useAlert';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 import {useAuthStore} from '@/stores/auth.js';
+import IconComponent from '@/components/icons/IconComponent.vue'
 
 const authStore = useAuthStore();
+const isLoading = ref(false)
 
 const registrantsStore = useRegistrantsStore();
 const groupsStore = useGroupsStore();
@@ -110,16 +115,21 @@ const data = ref({
 const errors = ref({})
 
 const Edit = () => {
+    isLoading.value = true
     data.value.group_id = data.value.group.split(':')[0].trim()
     data.value.user_id = authStore?.user?.id
     registrantsStore.transfer(data.value,props.editedData.id).then(res => {
+        isLoading.value = false
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {
+        isLoading.value = false
         if(err.status == 422) {
             errors.value =  err.response.data.errors;
-        }
-        useAlert('warning', "quelque chose s'est mal passé!");
+            useAlert('warning', "quelque chose s'est mal passé!");
+        } else if(err.status == 400) {
+            useAlert('warning', "L'elève existe déjà dans ce groupe!");
+        } else useAlert('warning', "quelque chose s'est mal passé!");
     });
 }
 </script>

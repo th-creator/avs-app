@@ -35,14 +35,17 @@ export const useGroupsStore = defineStore("groups", () => {
         }
     };
 
-    const fetchPayments = async () => {
+    const fetchPayments = async (month) => {
         try {
-            const response = await api.get('api/group/Payments');
+            const response = await api.get(`api/group/Payments/${month}`);
             allPayments.value = response.data.data.map(res => ({
                 id: res.id,
                 intitule: res.intitule,
                 teacher: res.teacher.firstName + ' ' + res.teacher.lastName,
-                total: res.payments.reduce((total, payment) => total + Number(payment.total), 0),
+                total: res.payments.reduce((total, payment) => {
+                    let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+                    return total + Number(amount)
+                }, 0),
                 payments: res.payments,
             }));;  // Update the groups state with the fetched data
             return response

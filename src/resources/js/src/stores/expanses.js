@@ -8,6 +8,7 @@ let api = server(BACKEND_URL)
 export const useExpansesStore = defineStore("expanses", () => {
     // Define the global state for expanses
     const expanses = ref([]);  // This will hold the expanses globally
+    const financeExpanses = ref([]);  // This will hold the expanses globally
 
     // Fetch all expanses and update the state
     const index = async () => {
@@ -21,6 +22,16 @@ export const useExpansesStore = defineStore("expanses", () => {
         }
     };
 
+    const fetchFinance = async (payload) => {
+        try {
+            const response = await api.post('api/finance/expanses',payload);
+            financeExpanses.value = response.data.data;   // Update the payments state with the fetched data
+            return response
+        } catch (error) {
+            console.error("Failed to fetch payments:", error);
+            return error
+        }
+    };
     // Store a new user and update the state
     const store = async (payload) => {
         const response = await api.post('api/expanses', payload);
@@ -49,5 +60,5 @@ export const useExpansesStore = defineStore("expanses", () => {
     };
 
     // Expose the expanses state and actions
-    return { expanses, index, store, update, destroy };
+    return { expanses, index, store, update, destroy, financeExpanses, fetchFinance };
 });

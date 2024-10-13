@@ -191,7 +191,15 @@ class RegistrantController extends Controller
             'group_id' => 'required',
             'user_id' => 'required',
         ]);
-        
+        $existingRegistrant = Registrant::where('group_id', $userData['group_id'])
+                                            ->where('student_id', $data['student_id'])
+                                            ->first();
+
+        if ($existingRegistrant) {
+            return response()->json(['message' => 'Registrant already exists'], 400);
+        } else {
+            $data = Registrant::create($newData);
+        }
 
         $oldGroup = Group::where('id',$data['group_id'])->with('section')->get()->first();
         $group = Group::where('id',$userData['group_id'])->with('section')->get()->first();
@@ -266,31 +274,31 @@ class RegistrantController extends Controller
                 ->where('year', '>=', $currentYear)
                 ->delete();
         } else {
-            $group = Group::where('id',$registrant['group_id'])->with('section')->get()->first();
-            $currentYear = date('Y');
-            $months = ['Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'];
-            $currentMonth = date('n'); // Get current month as a number (1-12)
-            // Adjust the index for the academic year starting in September
-            $flag = false;
-            if ($currentMonth >= 9) {
-                $flag = true;
+            // $group = Group::where('id',$registrant['group_id'])->with('section')->get()->first();
+            // $currentYear = date('Y');
+            // $months = ['Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'];
+            // $currentMonth = date('n'); // Get current month as a number (1-12)
+            // // Adjust the index for the academic year starting in September
+            // $flag = false;
+            // if ($currentMonth >= 9) {
+            //     $flag = true;
                 
-                $currentMonth -= 9; // For Sept to Dec, subtract 9 to get index 0-3
-            } else {
-                $currentMonth += 3; // For Jan to June, add 3 to get index 4-9
-            }
-            $monthName = $months[$currentMonth];
-            Payment::create([
-                'group' => $group['intitule'],
-                'month' => $monthName,
-                'year' => $currentYear,
-                'amount' => $group['section']['price'],
-                'fullName' => $registrant['student']['firstName']. ' ' . $registrant['student']['lastName'],
-                'user_id' => $registrantData['user_id'],
-                'student_id' => $registrant['student_id'],
-                'group_id' => $group['id'],
-                'registrant_id' => $registrant['id']
-            ]);
+            //     $currentMonth -= 9; // For Sept to Dec, subtract 9 to get index 0-3
+            // } else {
+            //     $currentMonth += 3; // For Jan to June, add 3 to get index 4-9
+            // }
+            // $monthName = $months[$currentMonth];
+            // Payment::create([
+            //     'group' => $group['intitule'],
+            //     'month' => $monthName,
+            //     'year' => $currentYear,
+            //     'amount' => $group['section']['price'],
+            //     'fullName' => $registrant['student']['firstName']. ' ' . $registrant['student']['lastName'],
+            //     'user_id' => $registrantData['user_id'],
+            //     'student_id' => $registrant['student_id'],
+            //     'group_id' => $group['id'],
+            //     'registrant_id' => $registrant['id']
+            // ]);
     }
         $registrant->user = $registrant->user;
 

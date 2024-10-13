@@ -91,6 +91,30 @@
                             <p class="font-semibold text-center">{{ data.value.receipt }}</p>
                         </div>
                     </template>
+                    <template #paid="data">
+                        <div class="flex justify-center w-full">
+                            <div v-if="(data.value.paid == 1 && data.value.total == data.value.amount_paid)|| data.value.reduction == 100">
+                                <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
+                                    Payé
+                                </div>
+                            </div>
+                            <div v-else-if="data.value.paid == 1">
+                                <div class="px-4 py-2 rounded-full bg-orange-100 text-orange-600 w-[120px] text-center text-sm">
+                                    En cours
+                                </div>
+                            </div>
+                            <div v-else-if="data.value.paid == -1">
+                                <div class="px-4 py-2 rounded-full bg-blue-100 text-blue-600 w-[120px] text-center text-sm">
+                                    Remboursé
+                                </div>
+                            </div>
+                            <div v-else>
+                                <div class="px-4 py-2 rounded-full bg-rose-100 text-rose-600 w-[120px] text-center text-sm">
+                                    Non payé
+                                </div>
+                            </div>
+                        </div>
+                    </template>
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
@@ -108,7 +132,6 @@
     import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import { usePaymentsStore } from '@/stores/payments.js';
-    import { useRoute } from 'vue-router';
     import IconComponent from '@/components/icons/IconComponent.vue'
     import Add from './Add.vue'
     import Edit from './Edit.vue'
@@ -142,7 +165,6 @@
     });
 
     const paymentsStore = usePaymentsStore();
-    const route = useRoute();
 
     const showPopup = ref(false);
     const showEditPopup = ref(false);
@@ -151,7 +173,7 @@
         ref([
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'group', title: 'Groupe', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'month', title: 'Mois', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'total', title: "montant à payer", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },

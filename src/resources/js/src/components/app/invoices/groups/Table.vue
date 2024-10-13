@@ -3,8 +3,18 @@
         <div class="panel pb-0 mt-6">
             <!-- <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Payements et Inscriptions</h5> -->
             <div class="flex justify-between my-4">    
-                <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
-                <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
+                <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." /><div class="flex flex-col gap-4">  
+                    <multiselect
+                        v-model="choosenMonth"
+                        :options="options"
+                        class="custom-multiselect  max-w-xs"
+                        :searchable="true"
+                        placeholder="Le mois"
+                        selected-label=""
+                        select-label=""
+                        deselect-label=""
+                    ></multiselect> 
+                </div>
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -16,6 +26,7 @@
                     :loading="isloading"
                     :sortColumn="params.sort_column"
                     :sortDirection="params.sort_direction"
+                    :paginationInfo="'{0} à {1} de {2}'"
                     skin="whitespace-nowrap bh-table-hover"
                     firstArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M13 19L7 12L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M16.9998 19L10.9998 12L16.9998 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                     lastArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M11 19L17 12L11 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M6.99976 19L12.9998 12L6.99976 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg> '
@@ -55,17 +66,19 @@
     </div>
 </template>
 <script setup>
-    import { ref, reactive, computed, onMounted, nextTick } from 'vue';
+    import { ref, reactive, computed, onMounted, watch } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import IconComponent from '@/components/icons/IconComponent.vue'
-    import Swal from 'sweetalert2';
-    import {useAuthStore} from '@/stores/auth.js';
-    import html2pdf from "html2pdf.js";
     import { useGroupsStore } from '@/stores/groups.js';
+    import Multiselect from '@suadelabs/vue3-multiselect';
+    import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 
-    const authStore = useAuthStore();
     const isloading = ref(true);
     const groupsStore = useGroupsStore();
+
+const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
+const choosenMonth = ref('Septembre');
+const choosenData = ref([]);
     
     const params = reactive({
         current_page: 1,
@@ -74,21 +87,18 @@
         sort_column: 'id',
         sort_direction: 'desc',
     });
-    const selectedPayment = ref({
-        month:'',
-        name:'',
-        firstName:'',
-        date:'',
-        receipt:'',
-        total:'',
-        rest:'',
-        amount:'',
-        amount_paid:'',
-    });
-
-    const showPopup = ref(false);
-    const showEditPopup = ref(false);
     
+    watch(choosenMonth, async (newVal, oldVal) => { 
+        isloading.value = true
+        await groupsStore.fetchPayments(choosenMonth.value)
+        isloading.value = false
+    });
+    onMounted(async () => {
+        const currentMonth = new Date().getMonth();
+        choosenMonth.value = options.value[currentMonth];
+        await groupsStore.fetchPayments(choosenMonth.value)
+        isloading.value = false
+    })
     const cols =
         ref([
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
@@ -103,79 +113,9 @@
         return data;
         });
 
-
-    const editedData = ref({})
     onMounted(async () => {
-        await groupsStore.fetchPayments()
-        isloading.value = false
     })
 
-    function openPdf(pdf) {
-      window.open(pdf, '_blank');
-    }
-    const toggleEdit = (data) => {
-        editedData.value = data
-        console.log(editedData.value);
-        showEditPopup.value = true
-    }
-
-    const deleteData = (data) => {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                popup: 'sweet-alerts',
-                confirmButton: 'btn btn-secondary',
-                cancelButton: 'btn btn-dark ltr:mr-3 rtl:ml-3',
-            },
-            buttonsStyling: false,
-        });
-        swalWithBootstrapButtons
-        .fire({
-            title: 'Es-tu sûr?',
-            text: "Vous ne pourrez pas revenir en arrière!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Oui, supprimer!',
-            cancelButtonText: 'Non, Annuler!',
-            reverseButtons: true,
-            padding: '2em',
-        })
-        .then((result) => {
-            if (result.value) {
-                groupsStore.destroy(data.id).then(res => {
-                    swalWithBootstrapButtons.fire('supprimé!', 'il a été supprimé.', 'success');
-                    rows.value = res.data.data
-                }).catch(err => {
-                    swalWithBootstrapButtons.fire('supprimé!', "il a été supprimé.", 'success');
-                });
-            } else if (result.dismiss === Swal.DismissReason.cancel) {
-                swalWithBootstrapButtons.fire('Annulé', "aucune mesure n'a été prise:)", 'error');
-            }
-        });
-    }
-// Print function using html2pdf.js
-const printPayment = (payment) => {
-  selectedPayment.value = payment;
-
-  // Temporarily remove the hidden class to display the receipt
-  const element = document.getElementById('receipt');
-  element.classList.remove('hidden');
-
-  // Wait for the DOM to update
-  nextTick(() => {
-    const options = {
-      margin: 1,
-      filename: `receipt-${payment.id}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    };
-
-    html2pdf().from(element).set(options).save().then(() => {
-      // Add the hidden class again after printing
-      element.classList.add('hidden');
-    });
-  });
-};
 </script>
 
 <style scoped>

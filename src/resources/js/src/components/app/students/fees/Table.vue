@@ -13,6 +13,7 @@
                     :totalRows="rows?.length"
                     :sortable="true"
                     :search="params.search"
+                    :paginationInfo="'{0} à {1} de {2}'"
                     skin="whitespace-nowrap bh-table-hover"
                     firstArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M13 19L7 12L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M16.9998 19L10.9998 12L16.9998 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                     lastArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M11 19L17 12L11 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M6.99976 19L12.9998 12L6.99976 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg> '
@@ -220,7 +221,7 @@
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'reduction', title: "Reduction", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'total', title: "montant à payer", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },

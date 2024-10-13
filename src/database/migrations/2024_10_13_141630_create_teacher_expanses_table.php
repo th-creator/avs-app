@@ -11,18 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('expanses', function (Blueprint $table) {
+        Schema::create('teacher_expanses', function (Blueprint $table) {
             $table->id();
-            $table->string('title')->nullable();
-            $table->decimal('amount', total: 8, places: 2)->nullable();
+            $table->string('teacher')->nullable();
             $table->date('date')->nullable();
-            $table->string('type')->nullable();
-            $table->string('bank')->nullable();
-            $table->string('bank_receipt')->nullable();
-            $table->longText('file')->nullable();
-            $table->string('paid_by')->nullable();
+            $table->string('group')->nullable();
+            $table->integer('total')->nullable();
+            $table->integer('percentage')->nullable();
+            $table->integer('amount')->nullable();
+            $table->integer('rest')->nullable();
+            $table->string('month')->nullable();
+            $table->string('year')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->unsignedBigInteger('teacher_id')->nullable();
+            $table->foreign('teacher_id')->references('id')->on('teachers')->onDelete('set null');
             $table->timestamps();
         });
     }

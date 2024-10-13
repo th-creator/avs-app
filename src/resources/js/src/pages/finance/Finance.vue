@@ -1,5 +1,5 @@
 <template>
-    <div class="pt-5">
+    <div class="panel pt-5">
         <Table />
     </div>
 </template>

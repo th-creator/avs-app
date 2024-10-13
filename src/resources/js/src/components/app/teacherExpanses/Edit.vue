@@ -32,58 +32,53 @@
                     <div class="text-lg text-center font-semibold ltr:pl-5 rtl:pr-5 py-5 ltr:pr-[50px] rtl:pl-[50px]">Modifier</div>
                     <div class="p-5">
                         <form>
-                            <div class="relative mb-4">
-                                <label class="text-sm">Titre:</label>
-                                <input v-model="data.title" type="text" placeholder="Titre" class="form-input" />
-                                <span v-if="errors.title" class="text-red-600 text-sm">{{ errors.title[0] }}</span>
+                            <div class="relative mb-4 flex gap-4">
+                                <div class="w-[70%]">
+                                    <label class="text-sm">Montant total:</label>
+                                    <input v-model="data.total" type="number" placeholder="Montant total" class="form-input" />
+                                    <span v-if="errors.total" class="text-red-600 text-sm">{{ errors.total[0] }}</span>
+                                </div>
+                                <div class="w-[30%]">
+                                    <label class="text-sm">Pourcentage:</label>
+                                    <input v-model="data.percentage" type="number" placeholder="Pourcentage" class="form-input" />
+                                    <span v-if="errors.percentage" class="text-red-600 text-sm">{{ errors.percentage[0] }}</span>
+                                </div>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Montant:</label>
-                                <input v-model="data.amount" type="number" placeholder="Montant" class="form-input" />
+                                <label class="text-sm">Montant à payer:</label>
+                                <input v-model="data.amount" type="number" placeholder="Montant à payer" class="form-input" />
                                 <span v-if="errors.amount" class="text-red-600 text-sm">{{ errors.amount[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Reste:</label>
+                                <input v-model="data.rest" type="number" placeholder="Reste" class="form-input" />
+                                <span v-if="errors.rest" class="text-red-600 text-sm">{{ errors.rest[0] }}</span>
+                            </div>
+                            <div class="relative mb-4 flex gap-4">
+                                <div class="w-[50%]">
+                                    <label class="text-sm">Mois:</label>
+                                    <multiselect
+                                        v-model="data.month"
+                                        :options="months"
+                                        class="custom-multiselect"
+                                        :searchable="true"
+                                        placeholder="Mois"
+                                        selected-label=""
+                                        select-label=""
+                                        deselect-label=""
+                                    ></multiselect>
+                                    <span v-if="errors.month" class="text-red-600 text-sm">{{ errors.month[0] }}</span>    
+                                </div>
+                                <div class="w-[50%]">
+                                    <label class="text-sm">Année:</label>
+                                    <input v-model="data.year" type="number" placeholder="Année" class="form-input" />
+                                    <span v-if="errors.year" class="text-red-600 text-sm">{{ errors.year[0] }}</span>
+                                </div>
                             </div>
                             <div class="relative mb-4">
                                 <label class="text-sm">Date:</label>
                                 <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <label class="text-sm">Payé par:</label>
-                                <multiselect
-                                    v-model="data.paid_by"
-                                    :options="paid_bys"
-                                    class="custom-multiselect"
-                                    :searchable="true"
-                                    placeholder="Payé par"
-                                    selected-label=""
-                                    select-label=""
-                                    deselect-label=""
-                                ></multiselect>
-                                <span v-if="errors.student_id" class="text-red-600 text-sm">{{ errors.student_id[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <label class="text-sm">Type de paiement:</label>
-                                <multiselect
-                                    v-model="data.type"
-                                    :options="options"
-                                    class="custom-multiselect"
-                                    :searchable="true"
-                                    placeholder="Type de paiement"
-                                    selected-label=""
-                                    select-label=""
-                                    deselect-label=""
-                                ></multiselect>
-                                <span v-if="errors.student_id" class="text-red-600 text-sm">{{ errors.student_id[0] }}</span>
-                            </div>
-                            <div v-if="data.type == 'chèque'" class="relative mb-4">
-                                <label class="text-sm">Bank:</label>
-                                <input v-model="data.bank" type="text" placeholder="Bank" class="form-input" />
-                                <span v-if="errors.bank" class="text-red-600 text-sm">{{ errors.bank[0] }}</span>
-                            </div>
-                            <div v-if="data.type == 'chèque'" class="relative mb-4">
-                                <label class="text-sm">Chèque:</label>
-                                <input v-model="data.bank_receipt" type="text" placeholder="Chèque" class="form-input" />
-                                <span v-if="errors.bank_receipt" class="text-red-600 text-sm">{{ errors.bank_receipt[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full h-10" @click="Edit()">
                                 <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
@@ -106,7 +101,7 @@ import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogOverlay } f
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { useExpansesStore } from '@/stores/expanses.js';
+import { useTeacherExpansesStore } from '@/stores/teacherExpanse.js';
 import { useAlert } from '@/composables/useAlert';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
@@ -114,11 +109,11 @@ import IconComponent from '@/components/icons/IconComponent.vue'
 
 const isLoading = ref(false)
 
-const options = ref(['espèces', 'chèque', 'virement']);
-const paid_bys = ref(['Centre', 'Mr Rochd']);
+const months = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
 
 
-const expansesStore = useExpansesStore();
+
+const teacherExpansesStore = useTeacherExpansesStore();
 
 const props = defineProps({
     showEditPopup: {
@@ -138,18 +133,18 @@ const props = defineProps({
 const data = ref({
     date: props.editedData.date,
     amount: props.editedData.amount,
-    title: props.editedData.title,
-    type: props.editedData.type,
-    bank: props.editedData.bank,
-    bank_receipt: props.editedData.bank_receipt,
-    paid_by: props.editedData.paid_by,
+    percentage: props.editedData.percentage,
+    rest: props.editedData.rest,
+    total: props.editedData.total,
+    month: props.editedData.month,
+    year: props.editedData.year,
 })
 
 const errors = ref({})
 
 const Edit = () => {
     isLoading.value = true
-    expansesStore.update(data.value,props.editedData.id).then(res => {
+    teacherExpansesStore.update(data.value,props.editedData.id).then(res => {
         isLoading.value = false
         useAlert('success', 'Créé avec succès!');
         props.close()

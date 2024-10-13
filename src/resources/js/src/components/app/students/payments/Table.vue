@@ -155,9 +155,9 @@
                 <thead>
                     <tr>
                         <th>Groupe</th>
-                        <th>Montant a payer</th>
+                        <th>Montant à payer</th>
                         <th>Montant reçu</th>
-                        <th>Reste a payer</th>
+                        <th>Reste à payer</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -257,7 +257,7 @@
             { field: 'month', title: 'Mois', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'total', title: "montant à payer", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'reduction', title: "Réduction", headerClass: '!text-center flex justify-center', width: 'full' },

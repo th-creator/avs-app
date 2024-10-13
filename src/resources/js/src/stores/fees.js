@@ -9,6 +9,7 @@ export const useFeesStore = defineStore("fees", () => {
     // Define the global state for payments
     const studentfees = ref([]);  // This will hold the payments globally
     const fees = ref([]);  // This will hold the fees globally
+    const financeFees = ref([]);  // This will hold the fees globally
 
     // Fetch all fees and update the state
     const index = async () => {
@@ -18,6 +19,16 @@ export const useFeesStore = defineStore("fees", () => {
             return response
         } catch (error) {
             console.error("Failed to fetch fees:", error);
+            return error
+        }
+    };
+    const fetchFinance = async (payload) => {
+        try {
+            const response = await api.post('api/finance/fees',payload);
+            financeFees.value = response.data.data;   // Update the payments state with the fetched data
+            return response
+        } catch (error) {
+            console.error("Failed to fetch payments:", error);
             return error
         }
     };
@@ -55,6 +66,7 @@ export const useFeesStore = defineStore("fees", () => {
     // Update an existing user and update the state
     const update = async (payload, id) => {
         const response = await api.put(`api/fees/${id}`, payload);
+        console.log(response);
         const index = fees.value.findIndex(user => user.id === id);
         const secondIndex = studentfees.value.findIndex(user => user.id === id);
         
@@ -80,5 +92,5 @@ export const useFeesStore = defineStore("fees", () => {
     };
 
     // Expose the fees state and actions
-    return { fees, index, store, update, destroy, studentfees, show, undandledFess };
+    return { fees, index, store, update, destroy, studentfees, show, undandledFess, fetchFinance, financeFees };
 });

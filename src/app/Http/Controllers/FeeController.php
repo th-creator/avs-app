@@ -17,10 +17,18 @@ class FeeController extends Controller
         return response()->json(['data' => $data], 200);
     }
 
+    public function fetchFinance(Request $request) {
+        $fromDate = $request->input('from');
+        $toDate = $request->input('to');
+        $data = Fee::whereBetween('date', [$fromDate, $toDate])->get();
+        return response()->json(['data' => $data], 200);
+    }
+
     public function undandledFees() {
         $data = Fee::where(function ($query) {
             $query->where('rest', '!=', 0)
-                  ->orWhereNull('rest');
+                  ->orWhereNull('rest')
+                  ->whereColumn('total', '!=', 'amount_paid');
         })->get();
         return response()->json(['data' => $data], 200);
     }
@@ -32,11 +40,11 @@ class FeeController extends Controller
             'fullName' => 'required',
             'amount' => 'required',
             'reduction' => 'required',
-            'rest' => 'nullable',
+            'rest' => 'required',
             'type' => 'nullable',
             'bank' => 'nullable',
-            'total' => 'nullable',
-            'amount_paid' => 'nullable',
+            'total' => 'required',
+            'amount_paid' => 'required',
             'bank_receipt' => 'nullable',
             'receipt' => 'nullable',
             'group' => 'nullable',

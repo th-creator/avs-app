@@ -25,6 +25,8 @@
                     :totalRows="rows?.length"
                     :sortable="true"
                     :search="params.search"
+                    :loading="isloading"
+                    :paginationInfo="'{0} à {1} de {2}'"
                     skin="whitespace-nowrap bh-table-hover"
                     firstArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M13 19L7 12L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M16.9998 19L10.9998 12L16.9998 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                     lastArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M11 19L17 12L11 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M6.99976 19L12.9998 12L6.99976 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg> '
@@ -137,6 +139,7 @@
     const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
     const choosenMonth = ref('Septembre');
     const choosenData = ref([]);
+    const isloading = ref(true);
     const params = reactive({
         current_page: 1,
         search: '',
@@ -147,7 +150,10 @@
     watch(choosenMonth, async (newVal, oldVal) => {
         console.log(`Month changed from ${oldVal} to ${newVal}`);
         choosenData.value = await paymentsStore.groupPayments.filter(payment => payment.month.toLowerCase() === newVal.toLowerCase());
-        total.value = choosenData.value.reduce((total, payment) => total + Number(payment.amount)*((100-Number(payment.reduction))/100), 0)
+        total.value = choosenData.value.reduce((total, payment) => {
+            let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+            return total + Number(amount)
+        }, 0)
     });
 
     const paymentsStore = usePaymentsStore();
@@ -188,11 +194,13 @@
         const currentMonth = new Date().getMonth();
         choosenMonth.value = options.value[currentMonth];
         await paymentsStore.fetchGroupPayments(route.params.id)
+        isloading.value =false
         console.log(paymentsStore.groupPayments);
         choosenData.value = paymentsStore.groupPayments.filter(payment => payment.month.toLowerCase() === choosenMonth.value.toLowerCase());
-        total.value = choosenData.value.reduce((total, payment) => total + Number(payment.amount)*((100-Number(payment.reduction))/100), 0)
-        // revenu.value = choosenData.value.reduce((total, payment) => total + Number(payment.amount)*((100-Number(payment.reduction))/100), 0)
-        console.log(choosenData.value);
+        total.value = choosenData.value.reduce((total, payment) => {
+            let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+            return total + Number(amount)
+        }, 0)
     })
 
     const exportToExcel = () => {

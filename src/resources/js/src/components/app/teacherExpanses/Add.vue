@@ -44,39 +44,29 @@
                                     select-label=""
                                     deselect-label=""
                                 ></multiselect>
-                                <span v-if="errors.group_id" class="text-red-600 text-sm">{{ errors.group_id[0] }}</span>
+                                <span v-if="errors.group" class="text-red-600 text-sm">{{ errors.group[0] }}</span>
                             </div>
                             <div class="relative mb-4 flex gap-4">
                                 <div class="w-[70%]">
-                                    <label class="text-sm">Montant:</label>
-                                    <input @keyup="calculateRest()" v-model="data.amount" type="number" placeholder="Montant" class="form-input" />
-                                    <span v-if="errors.amount" class="text-red-600 text-sm">{{ errors.amount[0] }}</span>
+                                    <label class="text-sm">Montant total:</label>
+                                    <input @keyup="calculateRest()" v-model="data.total" type="number" placeholder="Montant total" class="form-input" />
+                                    <span v-if="errors.total" class="text-red-600 text-sm">{{ errors.total[0] }}</span>
                                 </div>
                                 <div class="w-[30%]">
-                                    <label class="text-sm">Réduction:</label>
-                                    <input @keyup="calculateRest()" v-model="data.reduction" type="number" placeholder="Reduction" class="form-input" />
-                                    <span v-if="errors.reduction" class="text-red-600 text-sm">{{ errors.reduction[0] }}</span>
+                                    <label class="text-sm">Pourcentage:</label>
+                                    <input @keyup="calculateRest()" v-model="data.percentage" type="number" placeholder="Pourcentage" class="form-input" />
+                                    <span v-if="errors.percentage" class="text-red-600 text-sm">{{ errors.percentage[0] }}</span>
                                 </div>
                             </div>
                             <div class="relative mb-4">
                                 <label class="text-sm">Montant à payer:</label>
-                                <input v-model="data.total" type="number" placeholder="Montant a payer" class="form-input" />
-                                <span v-if="errors.total" class="text-red-600 text-sm">{{ errors.total[0] }}</span>
+                                <input v-model="data.amount" type="number" placeholder="Montant à payer" class="form-input" />
+                                <span v-if="errors.amount" class="text-red-600 text-sm">{{ errors.amount[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Montant reçu:</label>
-                                <input v-model="data.amount_paid" @keyup="calculatePayer()" type="number" placeholder="Montant reçu" class="form-input" />
-                                <span v-if="errors.amount_paid" class="text-red-600 text-sm">{{ errors.amount_paid[0] }}</span>
-                            </div>  
-                            <div class="relative mb-4">
-                                <label class="text-sm">Reste à payer:</label>
-                                <input v-model="data.rest" type="number" placeholder="Reste a payer" class="form-input" />
+                                <label class="text-sm">Reste:</label>
+                                <input v-model="data.rest" type="number" placeholder="Reste" class="form-input" />
                                 <span v-if="errors.rest" class="text-red-600 text-sm">{{ errors.rest[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <label class="text-sm">Date de paiement:</label>
-                                <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
-                                <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
                             <div class="relative mb-4 flex gap-4">
                                 <div class="w-[50%]">
@@ -100,33 +90,9 @@
                                 </div>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Type de paiement:</label>
-                                <multiselect
-                                    v-model="data.type"
-                                    :options="options"
-                                    class="custom-multiselect"
-                                    :searchable="true"
-                                    placeholder="Type de paiement"
-                                    selected-label=""
-                                    select-label=""
-                                    deselect-label=""
-                                ></multiselect>
-                                <span v-if="errors.student_id" class="text-red-600 text-sm">{{ errors.student_id[0] }}</span>
-                            </div>
-                            <div v-if="data.type == 'chèque'" class="relative mb-4">
-                                <label class="text-sm">Bank:</label>
-                                <input v-model="data.bank" type="text" placeholder="Bank" class="form-input" />
-                                <span v-if="errors.bank" class="text-red-600 text-sm">{{ errors.bank[0] }}</span>
-                            </div>
-                            <div v-if="data.type == 'chèque'" class="relative mb-4">
-                                <label class="text-sm">Chèque:</label>
-                                <input v-model="data.bank_receipt" type="text" placeholder="Chèque" class="form-input" />
-                                <span v-if="errors.bank_receipt" class="text-red-600 text-sm">{{ errors.bank_receipt[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <label class="text-sm">Reçu:</label>
-                                <input v-model="data.receipt" type="text" placeholder="Receipt" class="form-input" />
-                                <span v-if="errors.receipt" class="text-red-600 text-sm">{{ errors.receipt[0] }}</span>
+                                <label class="text-sm">Date:</label>
+                                <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
+                                <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full h-10" @click="Create()">
                                 <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
@@ -149,63 +115,43 @@ import { TransitionRoot, TransitionChild, Dialog, DialogPanel, DialogOverlay } f
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import { usePaymentsStore } from '@/stores/payments.js';
+import { useTeacherExpansesStore } from '@/stores/teacherExpanse.js';
 import { useAlert } from '@/composables/useAlert';
 import {useAuthStore} from '@/stores/auth.js';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
-import { useRoute } from 'vue-router';
-import { useStudentsStore } from '@/stores/students.js';
 import IconComponent from '@/components/icons/IconComponent.vue'
 import { useGroupsStore } from '@/stores/groups.js';
 
 const isLoading = ref(false)
 
-const options = ref(['espèces', 'chèque', 'virement']);
 const months = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
 
-const studentsStore = useStudentsStore();
 const groupsStore = useGroupsStore();
 
 const data = ref({
     date: '',
-    fullName: '',
+    teacher: '',
     group: '',
     amount: 0,
-    reduction: 0,
+    percentage: 0,
     rest: 0,
-    amount_paid: 0,
     total: 0,
-    type: 'espèces',
-    bank: '',
-    bank_receipt: '',
-    receipt: '',
     month: '',
     year: 0,
     groupHolder: '',
-    group_id: '',
+    teacher_id: '',
     user_id: '',
-    student_id: '',
 })
 
 const calculateRest = () => {
-    let reduction = data.value.reduction == null ? 0 : data.value.reduction
-    data.value.total = data.value.amount*(100-reduction)/100
+    let reduction = data.value.percentage == null ? 0 : data.value.percentage
+    data.value.amount = data.value.total*(100-reduction)/100
+    data.value.rest = data.value.total*(reduction)/100
 }
-const calculatePayer = () => {
-    data.value.rest = data.value.total - data.value.amount_paid
-}
-watch(async () => data.value.groupHolder, (newVal, oldVal) => {
-    const id = Number(data.value.groupHolder.split(':')[0].trim())
-    var group = {}
-    group = groupsStore.studentGroups.find(res => res.id == id);
-    data.value.amount = group.section.price 
-    // Add your logic here
-});
 
-const paymentsStore = usePaymentsStore();
+const teacherExpansesStore = useTeacherExpansesStore();
 const authStore = useAuthStore();
-const route = useRoute();
 
 const props = defineProps({
     showPopup: {
@@ -220,10 +166,10 @@ const props = defineProps({
 
 const errors = ref({})
 const groups = computed(() => {
-        return groupsStore.studentGroups.length > 0 ? groupsStore.studentGroups.map(res => res.id + ' : ' + res.intitule) : [];
+        return groupsStore.groups.length > 0 ? groupsStore.groups.map(res => res.id + ' : ' + res.intitule) : [];
         });
 onMounted(async () => {
-    await groupsStore.fetchStudentGroups(studentsStore.student.id)
+    await groupsStore.index()
     const currentMonth = new Date().getMonth();
     data.value.month = months.value[currentMonth];
     data.value.year = new Date().getFullYear();
@@ -233,13 +179,12 @@ const Create = () => {
     isLoading.value = true
     errors.value = []
     data.value.user_id = authStore?.user?.id
-    data.value.student_id = route.params.id
-    data.value.group_id = Number(data.value.groupHolder.split(':')[0].trim())
-    data.value.group = data.value.groupHolder.split(':')[1].trim()
-    console.log(data.value.group_id);
-    console.log(data.value.group);
-    data.value.fullName = studentsStore.student.firstName + ' ' +  studentsStore.student.lastName
-    paymentsStore.store(data.value).then(res => {
+    let group_id = Number(data.value.groupHolder.split(':')[0].trim())
+    let group = groupsStore.groups.find(res => res.id == group_id);
+    data.value.group = group.intitule
+    data.value.teacher = group.teacher.firstName + ' ' +  group.teacher.lastName
+    data.value.teacher_id = group.teacher.id
+    teacherExpansesStore.store(data.value).then(res => {
         isLoading.value = false
         useAlert('success', 'Créé avec succès!');
         props.close()

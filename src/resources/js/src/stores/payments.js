@@ -34,9 +34,9 @@ export const usePaymentsStore = defineStore("payments", () => {
             return error
         }
     };
-    const fetchFinance = async () => {
+    const fetchFinance = async (payload) => {
         try {
-            const response = await api.get('api/finance/payments');
+            const response = await api.post('api/finance/payments',payload);
             financePayments.value = response.data.data;   // Update the payments state with the fetched data
             return response
         } catch (error) {
@@ -84,8 +84,8 @@ export const usePaymentsStore = defineStore("payments", () => {
         const secondIndex = studentPayments.value.findIndex(user => user.id === id);
         
         if (index !== -1) {
-            students.value[index] = response.data.data;
-            students.value = [...students.value]; // Reassign to force reactivity
+            payments.value[index] = response.data.data;
+            payments.value = [...payments.value]; // Reassign to force reactivity
         }
         if (secondIndex !== -1) {
             studentPayments.value[secondIndex] = response.data.data;

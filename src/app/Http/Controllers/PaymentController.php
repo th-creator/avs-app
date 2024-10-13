@@ -54,28 +54,6 @@ class PaymentController extends Controller
         Log::alert($missingPayments);
         return response()->json(['data' => $data], 200);
     }
-    public function fetchFinance() {
-        $currentMonth = date('n'); // Get the current month as a number (1-12)
-        $currentYear = date('Y'); // Get the current year
-        $yearsToGet = [];
-        $months = ['Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet'];
-        // Adjust the index for the academic year starting in August
-        if ($currentMonth >= 8) {
-            $currentMonth -= 8; // For Aug to Dec, subtract 8 to get index 0-4
-            $yearsToGet = [$currentYear,$currentYear+1]; // For Jan to July, add 4 to get index 5-11
-        } else {
-            $currentMonth += 4; // For Jan to July, add 4 to get index 5-11
-            $yearsToGet = [$currentYear-1,$currentYear]; // For Jan to July, add 4 to get index 5-11
-        }
-        $monthsToGet = array_slice($months, 0, $currentMonth);
-        Log::alert($monthsToGet);
-        $data = Payment::whereNotIn('paid',[-1,0])
-        ->whereYear('date', $yearsToGet)
-        ->selectRaw('MONTH(date) as monthDate, sum(amount_paid) as total')
-        ->groupBy('monthDate')
-        ->get();
-        return response()->json(['data' => $data], 200);
-    }
 
     public function all() {
         $data = Payment::get();
@@ -89,6 +67,13 @@ class PaymentController extends Controller
 
     public function groupPayments($id) {
         $data = Payment::whereNot('paid',-1)->where('group_id',$id)->get();
+        return response()->json(['data' => $data], 200);
+    }
+
+    public function fetchFinance(Request $request) {
+        $fromDate = $request->input('from');
+        $toDate = $request->input('to');
+        $data = Payment::whereBetween('date', [$fromDate, $toDate])->get();
         return response()->json(['data' => $data], 200);
     }
     

@@ -27,7 +27,15 @@ class StudentController extends Controller
             'user_id' => 'required',
         ]);
 
-        $data = Student::create($newData);
+        $existingRecord = Student::where('firstName', $newData['firstName'])
+                                  ->where('lastName', $newData['lastName'])
+                                  ->first();
+
+        if ($existingRecord) {
+            return response()->json(['message' => 'Student already exists'], 400);
+        } else {
+            $data = Student::create($newData);
+        }
 
         $data->user = $data->user;
         
