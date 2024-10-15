@@ -14,6 +14,15 @@ class RegistrantController extends Controller
         $data = Registrant::with('student')->with('group')->with('user')->orderBy('student_id', 'desc')->get();
         return response()->json(['data' => $data], 200);
     }
+    public function doubled() {
+        $data = Registrant::with('student')->with('group')->with('user')
+            ->select('student_id', 'group_id')
+            ->groupBy('student_id', 'group_id')
+            ->havingRaw('COUNT(*) > 1')
+            ->orderBy('student_id', 'desc')
+            ->get();
+        return response()->json(['data' => $data], 200);
+    }
 
     public function show($id) {
         $data = Group::whereHas('registrants', function ($query) use ($id) {

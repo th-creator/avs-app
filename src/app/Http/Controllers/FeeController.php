@@ -52,8 +52,14 @@ class FeeController extends Controller
             'student_id' => 'required',
         ]);
 
-        $data = Fee::create($newData);
-        
+        $existingPayment = Fee::where('student_id', $newData['student_id'])
+                                  ->first();
+
+        if ($existingPayment) {
+            return response()->json(['message' => 'Payment already exists'], 400);
+        } else {
+            $data = Fee::create($newData);
+        }
         $data->student = $data->student;
         $data->user = $data->user;
 

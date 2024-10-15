@@ -234,7 +234,7 @@ const Create = () => {
     errors.value = []
     data.value.user_id = authStore?.user?.id
     data.value.student_id = route.params.id
-    data.value.group_id = Number(data.value.groupHolder.split(':')[0].trim())
+    data.value.group_id = data.value.groupHolder.split(':')[0].trim()
     data.value.group = data.value.groupHolder.split(':')[1].trim()
     console.log(data.value.group_id);
     console.log(data.value.group);
