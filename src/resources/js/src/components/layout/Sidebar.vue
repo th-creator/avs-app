@@ -124,7 +124,7 @@
                                 </li>
                             </ul>
                         </li>
-                        <li class="nav-item">
+                        <!-- <li class="nav-item">
                             <ul>
                                 <li class="nav-item">
                                     <router-link to="/teacherExpanses" class="group" @click="toggleMobileMenu">
@@ -135,7 +135,7 @@
                                     </router-link>
                                 </li>
                             </ul>
-                        </li>
+                        </li> -->
                         <li class="nav-item" v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'">
                             <ul>
                                 <li class="nav-item">

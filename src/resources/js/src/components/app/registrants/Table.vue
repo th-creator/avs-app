@@ -9,10 +9,10 @@
             <div class="datatable">
                 <vue3-datatable
                     :rows="registrantsStore.registrants"
+                    :search="params.search" 
                     :columns="cols"
                     :totalRows="rows?.length"
                     :sortable="true"
-                    :search="params.search" 
                     :sortColumn="params.sort_column"
                     :sortDirection="params.sort_direction"
                     :paginationInfo="'{0} à {1} de {2}'"
@@ -94,9 +94,9 @@
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
                             <IconComponent name="transfer" @click="() => transfer(data.value)" />
-                            <!-- <router-link :to="`/students/${data.value.student_id}/payments`" class="main-logo flex items-center shrink-0">
+                            <router-link v-if="data.value.student_id" :to="`/students/${data.value.student_id}/payments`" class="main-logo flex items-center shrink-0">
                                 <IconComponent name="view" />
-                            </router-link> -->
+                            </router-link>
                             <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
                         </div>
                     </template>
@@ -109,7 +109,7 @@
     <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
 </template>
 <script setup>
-    import { ref, reactive, computed, onMounted } from 'vue';
+    import { ref, reactive, computed, onMounted, watch } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import { useRegistrantsStore } from '@/stores/registrants.js';
     import IconComponent from '@/components/icons/IconComponent.vue'
@@ -138,7 +138,7 @@ const authStore = useAuthStore();
     const cols =
         ref([
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'student_id', title: "N°", isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'student_id', title: "N°", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'firstName', title: 'Prenom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'group', title: "Groupe", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -156,14 +156,13 @@ const authStore = useAuthStore();
 
     const rows = computed(async() => {
         let data = await registrantsStore.registrants.length > 0 ? registrantsStore.registrants : []
-        console.log(data);
+        
         return data;
         });
 
-
     const editedData = ref({})
-    onMounted(() => {
-        registrantsStore.index()
+    onMounted(async () => {
+        await registrantsStore.index()
     })
 
     const toggleEdit = (data) => {

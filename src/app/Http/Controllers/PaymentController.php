@@ -99,8 +99,9 @@ class PaymentController extends Controller
             'group_id' => 'required',
         ]);
         $registrant = Registrant::where('group_id',$newData['group_id'])->where('student_id',$newData['student_id'])->first();
-        Log::alert($newData['group_id']);
+        $group = group::where('id',$newData['group_id'])->first();
 
+        $newData['group'] = $group['intitule'];
         $newData['paid'] = 1;
         $newData['registrant_id'] = $registrant['id'];
 

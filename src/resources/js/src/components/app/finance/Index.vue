@@ -8,7 +8,7 @@
         </div>
         <button type="button" class="btn btn-info w-36" @click="searchPayments">
             <IconComponent v-if="isloading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
-            <span v-else>Chercher</span>
+            <span v-else>Rechercher</span>
         </button>
     </div>
     <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">

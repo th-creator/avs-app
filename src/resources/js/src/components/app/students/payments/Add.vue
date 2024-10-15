@@ -235,9 +235,6 @@ const Create = () => {
     data.value.user_id = authStore?.user?.id
     data.value.student_id = route.params.id
     data.value.group_id = data.value.groupHolder.split(':')[0].trim()
-    data.value.group = data.value.groupHolder.split(':')[1].trim()
-    console.log(data.value.group_id);
-    console.log(data.value.group);
     data.value.fullName = studentsStore.student.firstName + ' ' +  studentsStore.student.lastName
     paymentsStore.store(data.value).then(res => {
         isLoading.value = false
