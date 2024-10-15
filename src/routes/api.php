@@ -49,4 +49,4 @@ Route::post('finance/payments', [PaymentController::class, 'fetchFinance']);
 Route::post('finance/fees', [FeeController::class, 'fetchFinance']);
 Route::post('finance/expanses', [ExpanseController::class, 'fetchFinance']);
 Route::post('finance/teacherExpanses', [TeacherExpanseController::class, 'fetchFinance']);
-Route::post('doubled/registrants', [TeacherExpanseController::class, 'doubled']);
+Route::get('doubled/registrants', [RegistrantController::class, 'doubled']);
