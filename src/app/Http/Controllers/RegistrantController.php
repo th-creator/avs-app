@@ -206,8 +206,6 @@ class RegistrantController extends Controller
 
         if ($existingRegistrant) {
             return response()->json(['message' => 'Registrant already exists'], 400);
-        } else {
-            $data = Registrant::create($newData);
         }
 
         $oldGroup = Group::where('id',$data['group_id'])->with('section')->get()->first();
