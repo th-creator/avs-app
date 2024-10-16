@@ -126,8 +126,8 @@ import IconComponent from '@/components/icons/IconComponent.vue'
 
 const isLoading = ref(false)
 
-const levels = ref(['6em primaire', '1 AC', '2 AC', '3 AC', 'Tronc commun', '1 Bac', '2 Bac']);
-const options = ref(['SP', 'SVT', 'SMA', 'SMB', 'S. ECO', 'S. EXP', 'Science']);
+const levels = ref(['6em primaire', '1 AC', '2 AC', '3 AC', 'Tronc commun', '1 Bac', '2 Bac', 'autre']);
+const options = ref(['SP', 'SVT', 'SMA', 'SMB', 'SM', 'S. ECO', 'S. EXP', 'Science', 'autre']);
 
 const studentsStore = useStudentsStore();
 const authStore = useAuthStore();

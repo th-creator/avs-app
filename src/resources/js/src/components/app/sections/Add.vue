@@ -97,7 +97,7 @@ import IconComponent from '@/components/icons/IconComponent.vue'
 const isLoading = ref(false)
 
 const options = ref(['PC', 'Maths', 'SVT', 'Comptabilité', 'Economie générale', 'Gestion d\'entreprise', 'Philosophie', 'Anglais', 'Francais', 'Arabe', 'Education islamique', 'Sciences de l\'ingénieurie', 'Allemend', 'Histoire géographie', 'Anglais communication', 'Français comminication']);
-const levels = ref(['6em primaire', '1 AC', '2 AC', '3 AC', 'TC', '1 Bac SC ECO', '1 Bac SM1', '1 Bac SC EXP', '1Bac SM2', '2 Bac SP', '2 Bac SP', '2 Bac SM', '2 Bac SC ECO']);
+const levels = ref(['6em primaire', '1 AC', '2 AC', '3 AC', 'TC', '1 Bac SC ECO', '1 Bac SM1', '1 Bac SC EXP', '1Bac SM2', '2 Bac SP', '2 Bac SP', '2 Bac SM', '2 Bac SC ECO', 'autre']);
 
 const sectionsStore = useSectionsStore();
 const authStore = useAuthStore();
