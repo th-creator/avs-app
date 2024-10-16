@@ -20,38 +20,44 @@ class PaymentController extends Controller
         } else {
             $currentMonth += 4; // For Jan to July, add 4 to get index 5-11
         }
-        $monthsToGet = array_slice($months, $currentMonth -1, $currentMonth);
-        Log::alert($monthsToGet);
+        $currentMonthName = $months[$currentMonth];
         $data = Payment::whereNot('paid',-1)->where(function ($query) {
             $query->where('rest', '!=', 0)
                   ->orWhereNull('rest');
-        })->whereIn('month', $monthsToGet)
+        })->where('month', $currentMonthName)
         ->get();
-        $registrants = Registrant::with('student')->get();
+        $registrants = Registrant::where('status', 1)->get();
         $missingPayments = [];
 
         foreach ($registrants as $registrant) {
-            $payments = Payment::where('registrant_id', $registrant->id)->whereIn('month', $monthsToGet)->get();
-            $id = $registrant->id;
-            // $group = Group::whereHas('registrants', function ($query) use ($id) {
-            //     $query->where('id', $id);
-            // })->with('section')->first();
-            $paidMonths = $payments->pluck('month')->toArray();
+            $missingMonths = [];
+            $payment = Payment::where('registrant_id', $registrant->id)
+                                ->where('group_id', $registrant->group->id)
+                                ->where('month', $currentMonthName)
+                                ->where('year', $currentYear)
+                                ->first();
 
-            $missingMonths = array_diff($monthsToGet, $paidMonths);
-
-            if (!empty($missingMonths)) {
+            if (!$payment) {
                 $missingPayments[] = [
                     'fullName' => $registrant->student['firstName'] . ' ' . $registrant->student['lastName'], 
                     'registrant_id' => $registrant->id,
-                    // 'group' => $group->intitule,
-                    // 'group_id' => $registrant->group_id,
+                    'group' => $registrant->group->intitule,
+                    'amount' => 0,
+                    'reduction' => '0',
+                    'rest' => '0',
+                    'total' => '0',
+                    'amount_paid' => '0',
                     'paid' => 0,
-                    'missing_months' => $missingMonths
+                    'type' => null,
+                    'receipt' => null,
+                    'user_id' => null,
+                    'student_id' =>  $registrant->student['id'],
+                    'paid' => 0,
+                    'month' => $currentMonthName,
+                    'year' => $currentYear
                 ];
             }
         }
-        Log::alert($missingPayments);
         return response()->json(['data' => $data], 200);
     }
 

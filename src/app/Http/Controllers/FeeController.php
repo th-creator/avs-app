@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Fee;
+use App\Models\Student;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class FeeController extends Controller
 {
@@ -25,11 +27,27 @@ class FeeController extends Controller
     }
 
     public function undandledFees() {
+        $studentsWithoutFees = Student::whereDoesntHave('fees')->get();
+
         $data = Fee::where(function ($query) {
             $query->where('rest', '!=', 0)
                   ->orWhereNull('rest')
                   ->whereColumn('total', '!=', 'amount_paid');
         })->get();
+        foreach($studentsWithoutFees as $student) {
+            $data[] = [
+                'fullName' => $student['firstName'] . ' ' . $student['lastName'],
+                'amount' => 0,
+                'reduction' => '0',
+                'rest' => '0',
+                'total' => '0',
+                'amount_paid' => '0',
+                'type' => null,
+                'receipt' => null,
+                'user_id' => null,
+                'student_id' => $student['id'],
+            ];
+        }
         return response()->json(['data' => $data], 200);
     }
 

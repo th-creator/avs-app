@@ -11,6 +11,7 @@ export const useGroupsStore = defineStore("groups", () => {
     const group = ref([]);  // This will hold the groups globally
     const allPayments = ref([]);  // This will hold the groups globally
     const studentGroups = ref([]);  // This will hold the groups globally
+    const totalPayments = ref(0);  // This will hold the groups globally
 
     // Fetch all groups and update the state
     const index = async () => {
@@ -48,6 +49,20 @@ export const useGroupsStore = defineStore("groups", () => {
                 }, 0),
                 payments: res.payments,
             }));;  // Update the groups state with the fetched data
+            return response
+        } catch (error) {
+            console.error("Failed to fetch groups:", error);
+            return error
+        }
+    };
+
+    const fetchgroupPayments = async (month,id) => {
+        try {
+            const response = await api.get(`api/group/Payments/${month}/single/${id}`);
+            totalPayments.value = response.data.data.payments ? response.data.data.payments.reduce((total, payment) => {
+                    let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+                    return total + Number(amount)
+                }, 0) : 0
             return response
         } catch (error) {
             console.error("Failed to fetch groups:", error);
@@ -94,5 +109,5 @@ export const useGroupsStore = defineStore("groups", () => {
     };
 
     // Expose the groups state and actions
-    return { groups, index, store, update, destroy, show, group, allPayments, fetchPayments, fetchStudentGroups, studentGroups };
+    return { groups, index, store, update, destroy, show, group, allPayments, fetchPayments, fetchStudentGroups, studentGroups, totalPayments,fetchgroupPayments };
 });

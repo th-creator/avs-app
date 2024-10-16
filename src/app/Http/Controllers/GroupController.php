@@ -12,6 +12,12 @@ class GroupController extends Controller
         return response()->json(['data' => $data], 200);
     }
 
+    public function groupPayments($month,$id) {
+        $data = Group::where('id',$id)->with(['payments' => function ($query) use ($month) {
+            $query->where('month', $month);
+        }])->first();
+        return response()->json(['data' => $data], 200);
+    }
     public function allPayments($month) {
         $data = Group::with(['teacher', 'payments' => function ($query) use ($month) {
             $query->where('month', $month);

@@ -38,6 +38,7 @@ Route::get('group/{id}/registrants', [RegistrantController::class, 'groupRegistr
 Route::get('group/{id}/payments', [PaymentController::class, 'groupPayments']);
 Route::apiResource('teachers', TeacherController::class);
 Route::apiResource('groups', GroupController::class);
+Route::get('group/Payments/{month}/single/{id}', [GroupController::class,'groupPayments']);
 Route::get('group/Payments/{month}', [GroupController::class,'allPayments']);
 Route::get('student/{id}/groups', [GroupController::class,'studentGroups']);
 Route::apiResource('sections', SectionController::class);

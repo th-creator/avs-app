@@ -24,6 +24,11 @@
                             <h5 class="text-primary hover:underline">{{ data.value.id }}</h5>
                         </div>
                     </template>
+                    <template #fullName="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.fullName }}</p>
+                        </div>
+                    </template>
                     <template #firstName="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.firstName }}</p>
@@ -154,8 +159,9 @@
     const cols =
         ref([
             { field: 'id', title: 'N°', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'firstName', title: 'Prenom', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
+            // { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
+            // { field: 'firstName', title: 'Prenom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'email', title: 'Email', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'field', title: "Option", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'level', title: "Niveau", headerClass: '!text-center flex justify-center', width: 'full' },

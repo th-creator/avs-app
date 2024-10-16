@@ -25,7 +25,7 @@
                     leave-from="opacity-100 scale-100"
                     leave-to="opacity-0 scale-95"
                 >
-                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg overflow-hidden w-full max-w-lg text-black dark:text-white-dark">
+                    <DialogPanel class="panel border-0 px-4 py-1 rounded-lg w-full max-w-lg text-black dark:text-white-dark">
                     <button type="button" class="absolute top-7 ltr:right-9 rtl:left-9 text-white-dark hover:text-dark outline-none" @click="close()">
                         X
                     </button>
@@ -143,11 +143,23 @@ const data = ref({
     teacher_id: '',
     user_id: '',
 })
+watch(() => data.value.groupHolder, async (newVal, oldVal) => {
+    let group_id = Number(newVal.split(':')[0].trim())
+    await groupsStore.fetchgroupPayments(data.value.month,group_id)
+    data.value.total = groupsStore.totalPayments ? groupsStore.totalPayments : 0
+});
+watch(() => data.value.month, async (newVal, oldVal) => {
+    if(data.value.groupHolder) {
+        let group_id = Number(data.value.groupHolder.split(':')[0].trim())
+        await groupsStore.fetchgroupPayments(data.value.month,group_id)
+        data.value.total = groupsStore.totalPayments ? groupsStore.totalPayments : 0    
+    }
+});
 
 const calculateRest = () => {
     let reduction = data.value.percentage == null ? 0 : data.value.percentage
-    data.value.amount = data.value.total*(100-reduction)/100
-    data.value.rest = data.value.total*(reduction)/100
+    data.value.rest = data.value.total*(100-reduction)/100
+    data.value.amount = data.value.total*(reduction)/100
 }
 
 const teacherExpansesStore = useTeacherExpansesStore();

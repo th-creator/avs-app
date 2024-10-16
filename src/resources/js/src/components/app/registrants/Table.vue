@@ -22,6 +22,11 @@
                     previousArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M15 5L9 12L15 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                     nextArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
                 >
+                    <template #fullName="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.fullName }}</p>
+                        </div>
+                    </template>
                     <template #firstName="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.firstName }}</p>
@@ -139,8 +144,7 @@ const authStore = useAuthStore();
         ref([
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'student_id', title: "N°", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'firstName', title: 'Prenom', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'group', title: "Groupe", headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'email', title: 'Email', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'field', title: "spécialité", headerClass: '!text-center flex justify-center', width: 'full' },

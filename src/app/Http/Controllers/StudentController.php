@@ -8,7 +8,10 @@ use Illuminate\Http\Request;
 class StudentController extends Controller
 {
     public function index() {
-        $data = Student::with('user')->get();
+        $data = Student::with('user')->get()->map(function ($student) {
+            $student->fullName = $student->firstName . ' ' . $student->lastName;
+            return $student;
+        });
         return response()->json(['data' => $data], 200);
     }
     

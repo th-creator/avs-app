@@ -96,8 +96,9 @@
                     </template>
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
-                            <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
-                            <IconComponent name="delete" @click="deleteData(data.value)" />
+                            <router-link :to="`/students/${data.value.student_id}/payments`" class="main-logo flex items-center shrink-0">
+                                <IconComponent name="view" />
+                            </router-link>
                         </div>
                     </template>
                 </vue3-datatable>
@@ -144,7 +145,7 @@
             { field: 'receipt', title: "Recu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'date', title: "Date", headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
-            // { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
     const rows = computed(async() => {
         console.log('paymentsStore.payments', paymentsStore.payments);
