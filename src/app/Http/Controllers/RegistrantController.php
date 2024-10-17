@@ -243,7 +243,7 @@ class RegistrantController extends Controller
     }
 
     public function groupRegistrants($id) {
-        $data = Registrant::where('group_id',$id)->with('student')->with('payments')->get();
+        $data = Registrant::where('status',1)->where('group_id',$id)->with('student')->with('payments')->get();
         return response()->json(['data' => $data], 200);
     }
 
@@ -260,26 +260,26 @@ class RegistrantController extends Controller
         $registrant->student = $registrant->student;
         $registrant->group = $registrant->group;
         if($request->status == 0) {
-            $currentMonth = date('n'); // Get the current month as a number (1-12)
-            $currentYear = date('Y'); // Get the current year
-            $months = ['Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'];
+            // $currentMonth = date('n'); // Get the current month as a number (1-12)
+            // $currentYear = date('Y'); // Get the current year
+            // $months = ['Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'];
 
-            // Adjust the index for the academic year starting in September
-            if ($currentMonth >= 9) {
-                $currentMonth -= 9; // For Sept to Dec, subtract 9 to get index 0-3
-            } else {
-                $currentMonth += 3; // For Jan to June, add 3 to get index 4-9
-            }
-            if ($currentMonth == count($months) - 1) {
-                return;
-            }
-            $monthsToDelete = array_slice($months, $currentMonth + 1); // Get the months to delete
+            // // Adjust the index for the academic year starting in September
+            // if ($currentMonth >= 9) {
+            //     $currentMonth -= 9; // For Sept to Dec, subtract 9 to get index 0-3
+            // } else {
+            //     $currentMonth += 3; // For Jan to June, add 3 to get index 4-9
+            // }
+            // if ($currentMonth == count($months) - 1) {
+            //     return;
+            // }
+            // $monthsToDelete = array_slice($months, $currentMonth + 1); // Get the months to delete
 
-            Payment::where('registrant_id', $id)
-                ->where('group_id', $registrant->group_id)
-                ->whereIn('month', $monthsToDelete)
-                ->where('year', '>=', $currentYear)
-                ->delete();
+            // Payment::where('registrant_id', $id)
+            //     ->where('group_id', $registrant->group_id)
+            //     ->whereIn('month', $monthsToDelete)
+            //     ->where('year', '>=', $currentYear)
+            //     ->delete();
         } else {
             // $group = Group::where('id',$registrant['group_id'])->with('section')->get()->first();
             // $currentYear = date('Y');
