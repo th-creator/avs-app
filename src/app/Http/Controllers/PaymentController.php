@@ -72,7 +72,9 @@ class PaymentController extends Controller
     }
 
     public function groupPayments($id) {
-        $data = Payment::whereNot('paid',-1)->where('group_id',$id)->get();
+        $data = Payment::whereHas('registrant', function ($query) use ($id) {
+            $query->where('status', 1);
+        })->whereNot('paid',-1)->where('group_id',$id)->get();
         return response()->json(['data' => $data], 200);
     }
 

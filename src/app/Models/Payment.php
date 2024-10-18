@@ -45,4 +45,9 @@ class Payment extends Model
     {
         return $this->BelongsTo(Group::class);
     }
+
+    public function registrant()
+    {
+        return $this->BelongsTo(Registrant::class);
+    }
 }

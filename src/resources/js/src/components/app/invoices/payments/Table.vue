@@ -1,8 +1,21 @@
 <template>
     <div>
+    <div class="flex justify-end my-4 itens-end">   
+        <button type="button" class="btn btn-info w-36 h-9" @click="searchPayments">
+            <IconComponent v-if="isloading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
+            <span v-else>Rechercher</span>
+        </button>
+    </div>
         <div class="panel pb-0 mt-6">
-            <div class="flex justify-between items-end mb-4"> 
-                <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." />
+            
+            <div class="flex justify-between items-end mb-4">  
+        <div class="flex gap-10 items-end">
+            <label for="">Du:</label>
+            <input v-model="search.from" type="date" class="form-input max-w-xs" placeholder="Du..." />
+            <label for="">A:</label>
+            <input v-model="search.to" type="date" class="form-input max-w-xs" placeholder="A..." />
+        </div>
+                <!-- <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." /> -->
                 <div class="flex flex-col gap-4">  
                     <multiselect
                         v-model="choosenMonth"
@@ -44,6 +57,11 @@
                     <template #amount="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.amount }}MAD</p>
+                        </div>
+                    </template>
+                    <template #fullName="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.fullName }}</p>
                         </div>
                     </template>
                     <template #group="data">
@@ -125,16 +143,12 @@
             </div>
         </div>
     </div>
-    <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
-    <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
 </template>
 <script setup>
     import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import { usePaymentsStore } from '@/stores/payments.js';
     import IconComponent from '@/components/icons/IconComponent.vue'
-    import Add from './Add.vue'
-    import Edit from './Edit.vue'
     import Swal from 'sweetalert2';
     import html2pdf from "html2pdf.js";
     import {useAuthStore} from '@/stores/auth.js';
@@ -144,10 +158,10 @@
     const authStore = useAuthStore();
     
 
-    const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
-    const choosenMonth = ref('Septembre');
+    const options = ref(['espèces', 'chèque', 'virement']);
+    const choosenMonth = ref('espèces');
     const choosenData = ref([]);
-    const isloading = ref(true);
+    const isloading = ref(false);
 
     const datatable = ref([]);
 
@@ -160,8 +174,8 @@
     });
 
     watch(choosenMonth, (newVal, oldVal) => {
-        console.log(`Month changed from ${oldVal} to ${newVal}`);
-        choosenData.value = paymentsStore.allPayments.filter(payment => payment.month.toLowerCase() === newVal.toLowerCase());
+        console.log(oldVal,newVal);
+        choosenData.value = paymentsStore.financePayments.filter(payment => payment.type == newVal);
     });
 
     const paymentsStore = usePaymentsStore();
@@ -169,10 +183,15 @@
     const showPopup = ref(false);
     const showEditPopup = ref(false);
     
+    const search = ref({
+        from: '',
+        to: ''
+    })
+
     const cols =
         ref([
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'group', title: 'Groupe', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'total', title: "montant à payer", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -188,25 +207,26 @@
             // { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
     const rows = computed(async() => {
-        let data = await paymentsStore.allPayments.length > 0 ? paymentsStore.allPayments : []
+        let data = await paymentsStore.financePayments.length > 0 ? paymentsStore.financePayments : []
         
         return data;
         });
 
-    watch(rows, (newVal, oldVal) => {
-        console.log(`Month changed from ${oldVal} to ${newVal}`);
-        choosenData.value = paymentsStore.allPayments.filter(payment => payment.month.toLowerCase() === choosenMonth.value.toLowerCase());
-    });
+    // watch(rows, (newVal, oldVal) => {
+    //     console.log(`Month changed from ${oldVal} to ${newVal}`);
+    //     choosenData.value = paymentsStore.allPayments.filter(payment => payment.type == newVal);
+    // });
 
     const editedData = ref({})
     onMounted(async () => {
-        const currentMonth = new Date().getMonth();
-        choosenMonth.value = options.value[currentMonth];
-        await paymentsStore.all()
-        isloading.value =false
-        choosenData.value = paymentsStore.allPayments.filter(payment => payment.month.toLowerCase() === choosenMonth.value.toLowerCase());
     })
+    const searchPayments = async () => {
+        isloading.value =true
+        await paymentsStore.fetchFinance(search.value)
+        isloading.value =false
+        choosenData.value = paymentsStore.financePayments.filter(payment => payment.type == choosenMonth.value);
 
+    }
     const toggleEdit = (data) => {
         editedData.value = data
         console.log(editedData.value);
