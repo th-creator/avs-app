@@ -1,9 +1,14 @@
 <template>
     <div>
         <div class="panel pb-0 mt-6">
+            <div class="flex flex-col gap-4">
+                <button type="button" class="btn btn-warning w-40" @click="exportToExcel()">Exporter</button> 
+
+            </div>
             <!-- <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Payements et Inscriptions</h5> -->
             <div class="flex justify-between my-4">    
-                <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." /><div class="flex flex-col gap-4">  
+                <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
+                <div class="flex flex-col gap-4">  
                     <multiselect
                         v-model="choosenMonth"
                         :options="options"
@@ -72,13 +77,13 @@
     import { useGroupsStore } from '@/stores/groups.js';
     import Multiselect from '@suadelabs/vue3-multiselect';
     import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+    import * as XLSX from 'xlsx';
 
     const isloading = ref(true);
     const groupsStore = useGroupsStore();
 
-const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
-const choosenMonth = ref('Septembre');
-const choosenData = ref([]);
+    const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
+    const choosenMonth = ref('Septembre');
     
     const params = reactive({
         current_page: 1,
@@ -112,10 +117,20 @@ const choosenData = ref([]);
         let data = await groupsStore.allPayments.length > 0 ? groupsStore.allPayments : []
         return data;
         });
+        
+    const exportToExcel = () => {
+        // Get the attendance data from Vuex
+        const attendanceData = groupsStore.allPayments.map(res => ({Enseignant: res.teacher, Groupe: res.intitule, Montant: res.total}))
+        // Create a worksheet from the attendance data
+        const worksheet = XLSX.utils.json_to_sheet(attendanceData);
 
-    onMounted(async () => {
-    })
+        // Create a new workbook and append the worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'groupes');
 
+        // Export the workbook to an Excel file
+        XLSX.writeFile(workbook, 'paiements_groupes_'+choosenMonth.value+'.xlsx');
+    };
 </script>
 
 <style scoped>

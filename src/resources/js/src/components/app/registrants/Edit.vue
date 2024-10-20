@@ -80,6 +80,11 @@
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
                             </div>
                             <div class="relative mb-4">
+                                <label class="text-sm">Date d'entrée:</label>
+                                <input v-model="data.enter_date" type="date" placeholder="Date d'entrée" class="form-input" />
+                                <span v-if="errors.enter_date" class="text-red-600 text-sm">{{ errors.enter_date[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
                                 <label class="text-sm">Etat:</label> 
                                 <multiselect
                                     v-model="data.status_show"
@@ -157,6 +162,7 @@ const props = defineProps({
 const data = ref({
     center: props.editedData.center,
     date: props.editedData.date,
+    enter_date: props.editedData.enter_date,
     group: props.editedData.group_id,
     group_id: props.editedData.group_id,
     student: props.editedData.student_id,

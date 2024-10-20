@@ -13,6 +13,7 @@ class Registrant extends Model
         'date',
         'center',
         'status',
+        'enter_date',
         'user_id',
         'student_id',
         'group_id',

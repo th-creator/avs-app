@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('registrants', function (Blueprint $table) {
             $table->id();
             $table->date('date')->nullable();
+            $table->date('enter_date')->nullable();
             $table->string('center')->nullable();
             $table->integer('status')->default(1);
             $table->unsignedBigInteger('student_id')->nullable();

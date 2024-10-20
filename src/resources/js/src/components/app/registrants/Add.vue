@@ -87,9 +87,14 @@
                                 <span v-if="errors.center" class="text-red-600 text-sm">{{ errors.center[0] }}</span>
                             </div>
                             <div class="relative mb-4">
-                                <label class="text-sm">Date:</label>
+                                <label class="text-sm">Date d'inscription:</label>
                                 <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
+                            </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Date d'entrée:</label>
+                                <input v-model="data.enter_date" type="date" placeholder="Date d'entrée" class="form-input" />
+                                <span v-if="errors.enter_date" class="text-red-600 text-sm">{{ errors.enter_date[0] }}</span>
                             </div>
                             <button type="button" class="btn btn-primary w-full h-10" @click="Create()">
                                 <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
@@ -157,6 +162,7 @@ const props = defineProps({
 const data = ref({
     center: 'AVS',
     date: '',
+    enter_date: '',
     group: '',
     group_id: '',
     student: '',

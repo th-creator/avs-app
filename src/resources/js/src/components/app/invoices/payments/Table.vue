@@ -1,6 +1,7 @@
 <template>
     <div>
-    <div class="flex justify-end my-4 itens-end">   
+    <div class="flex justify-between my-4 items-center"> 
+        <button type="button" class="btn btn-warning w-40 h-9" @click="exportToExcel()">Exporter</button>   
         <button type="button" class="btn btn-info w-36 h-9" @click="searchPayments">
             <IconComponent v-if="isloading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
             <span v-else>Rechercher</span>
@@ -135,7 +136,6 @@
                     </template>
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
-                            <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
                             <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
                         </div>
                     </template>
@@ -145,15 +145,15 @@
     </div>
 </template>
 <script setup>
-    import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue';
+    import { ref, reactive, computed, watch } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import { usePaymentsStore } from '@/stores/payments.js';
     import IconComponent from '@/components/icons/IconComponent.vue'
     import Swal from 'sweetalert2';
-    import html2pdf from "html2pdf.js";
     import {useAuthStore} from '@/stores/auth.js';
     import Multiselect from '@suadelabs/vue3-multiselect';
     import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+    import * as XLSX from 'xlsx';
 
     const authStore = useAuthStore();
     
@@ -180,8 +180,6 @@
 
     const paymentsStore = usePaymentsStore();
 
-    const showPopup = ref(false);
-    const showEditPopup = ref(false);
     
     const search = ref({
         from: '',
@@ -194,8 +192,8 @@
             { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'total', title: "montant à payer", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'total', title: "Montant à payer", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'amount_paid', title: "Montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'reduction', title: "Réduction", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -212,25 +210,12 @@
         return data;
         });
 
-    // watch(rows, (newVal, oldVal) => {
-    //     console.log(`Month changed from ${oldVal} to ${newVal}`);
-    //     choosenData.value = paymentsStore.allPayments.filter(payment => payment.type == newVal);
-    // });
-
-    const editedData = ref({})
-    onMounted(async () => {
-    })
     const searchPayments = async () => {
         isloading.value =true
         await paymentsStore.fetchFinance(search.value)
         isloading.value =false
         choosenData.value = paymentsStore.financePayments.filter(payment => payment.type == choosenMonth.value);
 
-    }
-    const toggleEdit = (data) => {
-        editedData.value = data
-        console.log(editedData.value);
-        showEditPopup.value = true
     }
 
     const deleteData = (data) => {
@@ -266,52 +251,20 @@
             }
         });
     }
-    const selectedPayment = ref({
-        month:'',
-        name:'',
-        firstName:'',
-        date:'',
-        receipt:'',
-        total:'',
-        rest:'',
-        amount:'',
-        payments:[],
-    });
-// Print function using html2pdf.js
-const printPayment = async (payment) => {
-    const selected = datatable.value.getSelectedRows();
-    if(selected.length == 0) {
-        return
-    }
-    selectedPayment.value = selected[0];
-    selectedPayment.value.payments = await selected.map((item) => ({
-        group:item.group,
-        total:item.total,
-        amount_paid:item.amount_paid,
-        rest:item.rest,
-    }));
-    console.log(selected,selectedPayment.value);
-    
-  // Temporarily remove the hidden class to display the receipt
-  const element = document.getElementById('receipt');
-  element.classList.remove('hidden');
+ 
+    const exportToExcel = () => {
+        // Get the attendance data from Vuex
+        const attendanceData = paymentsStore.financePayments.map(res => ({Nom: res.fullName, 'Montant à payer': res.total, 'Montant reçu': res.amount_paid, 'Reste à payer': res.rest, 'Réduction': res.reduction, 'Recu': res.receipt}))
+        // Create a worksheet from the attendance data
+        const worksheet = XLSX.utils.json_to_sheet(attendanceData);
 
-  // Wait for the DOM to update
-  nextTick(() => {
-    const options = {
-      margin: 1,
-      filename: `receipt-${selectedPayment.value.id}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        // Create a new workbook and append the worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'groupes');
+
+        // Export the workbook to an Excel file
+        XLSX.writeFile(workbook, 'paiements.xlsx');
     };
-
-    html2pdf().from(element).set(options).save().then(() => {
-      // Add the hidden class again after printing
-      element.classList.add('hidden');
-    });
-  });
-};
 </script>
 
 

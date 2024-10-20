@@ -34,7 +34,8 @@ class RegistrantController extends Controller
     public function store(Request $request)
     {
         $newData = $request->validate([
-            'date' => 'nullable',
+            'date' => 'required',
+            'enter_date' => 'nullable',
             'center' => 'required',
             'user_id' => 'required',
             'student_id' => 'required',
@@ -153,6 +154,7 @@ class RegistrantController extends Controller
 
         $userData = $request->validate([
             'date' => 'nullable',
+            'enter_date' => 'nullable',
             'center' => 'required',
             'status' => 'required',
         ]);
@@ -243,7 +245,13 @@ class RegistrantController extends Controller
     }
 
     public function groupRegistrants($id) {
-        $data = Registrant::where('status',1)->where('group_id',$id)->with('student')->with('payments')->get();
+        $currentDate = date('Y-m-d');
+        $data = Registrant::where('status',1)
+                          ->where('group_id',$id)
+                          ->whereDate('enter_date', '<=', $currentDate)
+                          ->with('student')
+                          ->with('payments')
+                          ->get();
         return response()->json(['data' => $data], 200);
     }
 
