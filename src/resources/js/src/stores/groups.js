@@ -36,9 +36,9 @@ export const useGroupsStore = defineStore("groups", () => {
         }
     };
 
-    const fetchPayments = async (month) => {
+    const fetchPayments = async (month,year) => {
         try {
-            const response = await api.get(`api/group/Payments/${month}`);
+            const response = await api.get(`api/group/Payments/${month}/${year}`);
             allPayments.value = response.data.data.map(res => ({
                 id: res.id,
                 intitule: res.intitule,
@@ -56,9 +56,9 @@ export const useGroupsStore = defineStore("groups", () => {
         }
     };
 
-    const fetchgroupPayments = async (month,id) => {
+    const fetchgroupPayments = async (month,id,year) => {
         try {
-            const response = await api.get(`api/group/Payments/${month}/single/${id}`);
+            const response = await api.get(`api/group/Payments/${month}/single/${id}/${year}`);
             totalPayments.value = response.data.data.payments ? response.data.data.payments.reduce((total, payment) => {
                     let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
                     return total + Number(amount)

@@ -154,7 +154,7 @@ class RegistrantController extends Controller
 
         $userData = $request->validate([
             'date' => 'nullable',
-            'enter_date' => 'nullable',
+            'enter_date' => 'required',
             'center' => 'required',
             'status' => 'required',
         ]);

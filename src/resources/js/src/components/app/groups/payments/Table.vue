@@ -5,17 +5,30 @@
                 <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." />
                 <!-- <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> -->
                  <div class="flex flex-col gap-4">
-                    <button type="button" class="btn btn-info" @click="exportToExcel">Exporter</button>
-                    <multiselect
-                        v-model="choosenMonth"
-                        :options="options"
-                        class="custom-multiselect  max-w-xs"
-                        :searchable="true"
-                        placeholder="Le mois"
-                        selected-label=""
-                        select-label=""
-                        deselect-label=""
-                    ></multiselect>
+                    <button type="button" class="btn btn-warning" @click="exportToExcel">Exporter</button>
+                    <div class="flex gap-2">
+                        <multiselect
+                            v-model="choosenMonth"
+                            :options="options"
+                            class="custom-multiselect  max-w-xs"
+                            :searchable="true"
+                            placeholder="Le mois"
+                            selected-label=""
+                            select-label=""
+                            deselect-label=""
+                        ></multiselect>    
+                        <multiselect
+                            v-model="choosenYear"
+                            :options="years"
+                            class="custom-multiselect  max-w-xs"
+                            :searchable="true"
+                            placeholder="L'année"
+                            selected-label=""
+                            select-label=""
+                            deselect-label=""
+                        ></multiselect>    
+                    </div>
+                    
                  </div>
             </div>
             <div class="datatable">
@@ -109,8 +122,9 @@
                     </template>
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
-                            <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
-                            <IconComponent name="delete" @click="deleteData(data.value)" />
+                            <router-link v-if="data.value.student_id" :to="`/students/${data.value.student_id}/payments`" class="main-logo flex items-center shrink-0">
+                                <IconComponent name="view" />
+                            </router-link>
                         </div>
                     </template>
                 </vue3-datatable>
@@ -138,6 +152,8 @@
     
     const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
     const choosenMonth = ref('Septembre');
+    const years = ref([2024,2025,2026,2027,2028,2029,2030]);
+    const choosenYear = ref(2024);
     const choosenData = ref([]);
     const isloading = ref(true);
     const params = reactive({
@@ -168,7 +184,6 @@
         ref([
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'month', title: 'Mois', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -181,7 +196,7 @@
             { field: 'receipt', title: "Recu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'date', title: "Date", headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
-            // { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
     const rows = computed(async() => {
         let data = await paymentsStore.groupPayments.length > 0 ? paymentsStore.groupPayments : []
@@ -192,8 +207,9 @@
     const editedData = ref({})
     onMounted(async () => {
         const currentMonth = new Date().getMonth();
+        choosenYear.value = new Date().getFullYear();
         choosenMonth.value = options.value[currentMonth];
-        await paymentsStore.fetchGroupPayments(route.params.id)
+        await paymentsStore.fetchGroupPayments(route.params.id,choosenMonth.value,choosenYear.value)
         isloading.value =false
         console.log(paymentsStore.groupPayments);
         choosenData.value = paymentsStore.groupPayments.filter(payment => payment.month.toLowerCase() === choosenMonth.value.toLowerCase());

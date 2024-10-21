@@ -56,9 +56,9 @@ export const usePaymentsStore = defineStore("payments", () => {
         }
     };
     // Fetch all payments and update the state
-    const fetchGroupPayments = async (id) => {
+    const fetchGroupPayments = async (id,month,year) => {
         try {
-            const response = await api.get(`api/group/${id}/payments`);
+            const response = await api.get(`api/group/${id}/payments/${month}/${year}`);
             groupPayments.value = response.data.data;  // Update the payments state with the fetched data
             return response
         } catch (error) {

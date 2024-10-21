@@ -4,7 +4,7 @@
             <!-- <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Payements et Inscriptions</h5> -->
             <div class="flex justify-between my-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
-                <button type="button" class="btn btn-info" @click="exportToExcel">Exporter</button>
+                <button type="button" class="btn btn-warning" @click="exportToExcel">Exporter</button>
             </div>
             <div class="datatable">
                 <vue3-datatable

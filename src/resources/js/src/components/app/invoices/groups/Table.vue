@@ -8,18 +8,29 @@
             <!-- <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Payements et Inscriptions</h5> -->
             <div class="flex justify-between my-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
-                <div class="flex flex-col gap-4">  
-                    <multiselect
-                        v-model="choosenMonth"
-                        :options="options"
-                        class="custom-multiselect  max-w-xs"
-                        :searchable="true"
-                        placeholder="Le mois"
-                        selected-label=""
-                        select-label=""
-                        deselect-label=""
-                    ></multiselect> 
-                </div>
+                
+                <div class="flex gap-2">
+                        <multiselect
+                            v-model="choosenMonth"
+                            :options="options"
+                            class="custom-multiselect  max-w-xs"
+                            :searchable="true"
+                            placeholder="Le mois"
+                            selected-label=""
+                            select-label=""
+                            deselect-label=""
+                        ></multiselect>    
+                        <multiselect
+                            v-model="choosenYear"
+                            :options="years"
+                            class="custom-multiselect  max-w-xs"
+                            :searchable="true"
+                            placeholder="L'année"
+                            selected-label=""
+                            select-label=""
+                            deselect-label=""
+                        ></multiselect>    
+                    </div>
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -84,6 +95,8 @@
 
     const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
     const choosenMonth = ref('Septembre');
+    const years = ref([2024,2025,2026,2027,2028,2029,2030]);
+    const choosenYear = ref(2024);
     
     const params = reactive({
         current_page: 1,
@@ -95,14 +108,15 @@
     
     watch(choosenMonth, async (newVal, oldVal) => { 
         isloading.value = true
-        await groupsStore.fetchPayments(choosenMonth.value)
+        await groupsStore.fetchPayments(choosenMonth.value,choosenYear.value )
         isloading.value = false
     });
     onMounted(async () => {
         const currentMonth = new Date().getMonth();
         choosenMonth.value = options.value[currentMonth];
-        await groupsStore.fetchPayments(choosenMonth.value)
-        isloading.value = false
+        choosenYear.value = new Date().getFullYear();
+        // await groupsStore.fetchPayments(choosenMonth.value)
+        // isloading.value = false
     })
     const cols =
         ref([

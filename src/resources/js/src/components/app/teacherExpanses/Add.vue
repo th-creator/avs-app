@@ -145,13 +145,20 @@ const data = ref({
 })
 watch(() => data.value.groupHolder, async (newVal, oldVal) => {
     let group_id = Number(newVal.split(':')[0].trim())
-    await groupsStore.fetchgroupPayments(data.value.month,group_id)
+    await groupsStore.fetchgroupPayments(data.value.month,group_id,data.value.year)
     data.value.total = groupsStore.totalPayments ? groupsStore.totalPayments : 0
 });
 watch(() => data.value.month, async (newVal, oldVal) => {
     if(data.value.groupHolder) {
         let group_id = Number(data.value.groupHolder.split(':')[0].trim())
-        await groupsStore.fetchgroupPayments(data.value.month,group_id)
+        await groupsStore.fetchgroupPayments(data.value.month,group_id,data.value.year)
+        data.value.total = groupsStore.totalPayments ? groupsStore.totalPayments : 0    
+    }
+});
+watch(() => data.value.year, async (newVal, oldVal) => {
+    if(data.value.groupHolder) {
+        let group_id = Number(data.value.groupHolder.split(':')[0].trim())
+        await groupsStore.fetchgroupPayments(data.value.month,group_id,data.value.year)
         data.value.total = groupsStore.totalPayments ? groupsStore.totalPayments : 0    
     }
 });

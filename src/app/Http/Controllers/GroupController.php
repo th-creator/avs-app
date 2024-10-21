@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Group;
+use App\Models\Registrant;
+use App\Models\Payment;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class GroupController extends Controller
 {
@@ -12,16 +15,76 @@ class GroupController extends Controller
         return response()->json(['data' => $data], 200);
     }
 
-    public function groupPayments($month,$id) {
+    public function groupPayments($month,$id,$year) {
         $data = Group::where('id',$id)->with(['payments' => function ($query) use ($month) {
             $query->where('month', $month);
         }])->first();
+        foreach ($data->registrants as $registrant) {
+            $payment = Payment::where('registrant_id', $registrant->id)
+                                ->where('group_id', $data->id)
+                                ->where('month', $month)
+                                ->where('year', $year)
+                                ->first();
+
+            if (!$payment) {
+                $data->payments[] = [
+                    'fullName' => $registrant->student['firstName'] . ' ' . $registrant->student['lastName'], 
+                    'registrant_id' => $registrant->id,
+                    'group' => $data->intitule,
+                    'amount' => $data->section->price,
+                    'reduction' => '0',
+                    'rest' => '0',
+                    'total' => $data->section->price,
+                    'amount_paid' => '0',
+                    'paid' => 0,
+                    'type' => null,
+                    'receipt' => null,
+                    'user_id' => null,
+                    'student_id' =>  $registrant->student['id'],
+                    'paid' => 0,
+                    'month' => $month,
+                    'year' => $year
+                ];
+            }
+        }
         return response()->json(['data' => $data], 200);
     }
-    public function allPayments($month) {
-        $data = Group::with(['teacher', 'payments' => function ($query) use ($month) {
+    public function allPayments($month,$year) {
+        $data = Group::with(['teacher', 'payments' => function ($query) use ($month, $year) {
             $query->where('month', $month);
+            $query->where('year', $year);
         }])->get();
+
+        foreach ($data as $group) {
+            foreach ($group->registrants as $registrant) {
+                $payment = Payment::where('registrant_id', $registrant->id)
+                                    ->where('group_id', $group->id)
+                                    ->where('month', $month)
+                                    ->where('year', $year)
+                                    ->first();
+    
+                if (!$payment) {
+                    $group->payments[] = [
+                        'fullName' => $registrant->student['firstName'] . ' ' . $registrant->student['lastName'], 
+                        'registrant_id' => $registrant->id,
+                        'group' => $group->intitule,
+                        'amount' => $group->section->price,
+                        'reduction' => '0',
+                        'rest' => '0',
+                        'total' => $group->section->price,
+                        'amount_paid' => '0',
+                        'paid' => 0,
+                        'type' => null,
+                        'receipt' => null,
+                        'user_id' => null,
+                        'student_id' =>  $registrant->student['id'],
+                        'paid' => 0,
+                        'month' => $month,
+                        'year' => $year
+                    ];
+                }
+            }
+        }
         return response()->json(['data' => $data], 200);
     }
     public function studentGroups($id) {

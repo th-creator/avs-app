@@ -27,7 +27,6 @@ class PaymentController extends Controller
         })->where('month', $currentMonthName)
         ->get();
         $registrants = Registrant::where('status', 1)->get();
-        $missingPayments = [];
 
         foreach ($registrants as $registrant) {
             $missingMonths = [];
@@ -38,7 +37,7 @@ class PaymentController extends Controller
                                 ->first();
 
             if (!$payment) {
-                $missingPayments[] = [
+                $data[] = [
                     'fullName' => $registrant->student['firstName'] . ' ' . $registrant->student['lastName'], 
                     'registrant_id' => $registrant->id,
                     'group' => $registrant->group->intitule,
@@ -71,10 +70,40 @@ class PaymentController extends Controller
         return response()->json(['data' => $data], 200);
     }
 
-    public function groupPayments($id) {
+    public function groupPayments($id,$month,$year) {
         $data = Payment::whereHas('registrant', function ($query) use ($id) {
             $query->where('status', 1);
         })->whereNot('paid',-1)->where('group_id',$id)->get();
+        $group = Group::find($id);
+
+        foreach ($group->registrants as $registrant) {
+            $payment = Payment::where('registrant_id', $registrant->id)
+                                ->where('group_id', $id)
+                                ->where('month', $month)
+                                ->where('year', $year)
+                                ->first();
+
+            if (!$payment) {
+                $data[] = [
+                    'fullName' => $registrant->student['firstName'] . ' ' . $registrant->student['lastName'], 
+                    'registrant_id' => $registrant->id,
+                    'group' => $group->intitule,
+                    'amount' => $group->section->price,
+                    'reduction' => '0',
+                    'rest' => '0',
+                    'total' => $group->section->price,
+                    'amount_paid' => '0',
+                    'paid' => 0,
+                    'type' => null,
+                    'receipt' => null,
+                    'user_id' => null,
+                    'student_id' =>  $registrant->student['id'],
+                    'paid' => 0,
+                    'month' => $month,
+                    'year' => $year
+                ];
+            }
+        }
         return response()->json(['data' => $data], 200);
     }
 
