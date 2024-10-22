@@ -25,8 +25,8 @@ class PaymentController extends Controller
             'Novembre' => 11,
             'Décembre' => 12,
         ];
-        $month = $months[$month];
-        $currentDate = $year.'-'.$month.'-01';
+        $monthNumber = $months[$month];
+        $currentDate = $year.'-'.$$monthNumber.'-01';
         $data = Payment::whereNot('paid',-1)->where(function ($query) {
             $query->where('rest', '!=', 0)
                   ->orWhereNull('rest');
