@@ -11,7 +11,22 @@ use Illuminate\Support\Facades\Log;
 class PaymentController extends Controller
 {
     public function unhandledPayments($month,$year) {
-        $currentDate = date('Y-m-d');
+        $months = [
+            'Janvier' => 1,
+            'Février' => 2,
+            'Mars' => 3,
+            'Avril' => 4,
+            'Mai' => 5,
+            'Juin' => 6,
+            'Juillet' => 7,
+            'Août' => 8,
+            'Septembre' => 9,
+            'Octobre' => 10,
+            'Novembre' => 11,
+            'Décembre' => 12,
+        ];
+        $month = $months[$month];
+        $currentDate = $year.'-'.$month.'-01';
         $data = Payment::whereNot('paid',-1)->where(function ($query) {
             $query->where('rest', '!=', 0)
                   ->orWhereNull('rest');
@@ -21,7 +36,6 @@ class PaymentController extends Controller
         })
         ->get();
         $registrants = Registrant::where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
-
         foreach ($registrants as $registrant) {
             $missingMonths = [];
             $payment = Payment::where('registrant_id', $registrant->id)

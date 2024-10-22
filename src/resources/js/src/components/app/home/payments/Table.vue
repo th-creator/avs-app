@@ -151,7 +151,7 @@
     const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
     const choosenMonth = ref('Septembre');
     const years = ref([2024,2025,2026,2027,2028,2029,2030]);
-    const choosenYear = ref(2024);
+    const choosenYear = ref(new Date().getFullYear());
 
     const paymentsStore = usePaymentsStore();
     
@@ -182,10 +182,10 @@
     onMounted(async () => {
         const currentMonth = new Date().getMonth();
         choosenMonth.value = options.value[currentMonth];
-        choosenYear.value = new Date().getFullYear();
-        paymentsStore.payments.length == 0 && (isloading.value = true)
-        await paymentsStore.undandled(choosenMonth.value)
-        isloading.value = false
+        // choosenYear.value = ;
+        // paymentsStore.payments.length == 0 && (isloading.value = true)
+        // await paymentsStore.undandled(choosenMonth.value)
+        // isloading.value = false
     })
     
     watch(choosenMonth, async (newVal, oldVal) => {
