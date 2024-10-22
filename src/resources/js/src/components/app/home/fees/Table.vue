@@ -12,6 +12,9 @@
                     :totalRows="rows?.length"
                     :sortable="true"
                     :search="params.search"
+                    :loading="isloading"
+                    :sortColumn="params.sort_column"
+                    :sortDirection="params.sort_direction"
                     :paginationInfo="'{0} à {1} de {2}'"
                     skin="whitespace-nowrap bh-table-hover"
                     firstArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M13 19L7 12L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M16.9998 19L10.9998 12L16.9998 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
@@ -104,16 +107,12 @@
             </div>
         </div>
     </div>
-    <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
 </template>
 <script setup>
     import { ref, reactive, computed, onMounted } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import { useFeesStore } from '@/stores/fees.js';
-    import { useRoute } from 'vue-router';
     import IconComponent from '@/components/icons/IconComponent.vue'
-    import Edit from './Edit.vue'
-    import Swal from 'sweetalert2';
     
     const params = reactive({
         current_page: 1,
@@ -122,9 +121,9 @@
         sort_column: 'id',
         sort_direction: 'asc',
     });
+    const isloading = ref(false);
 
     const feesStore = useFeesStore();
-    const showEditPopup = ref(false);
     
     const cols =
         ref([
@@ -151,49 +150,9 @@
         });
 
 
-    const editedData = ref({})
-    onMounted(() => {
-        feesStore.undandledFess()
+    onMounted(async () => {
+        feesStore.fees.length == 0 && (isloading.value = true)
+        await feesStore.undandledFess()
+        isloading.value = false
     })
-
-    const toggleEdit = (data) => {
-        editedData.value = data
-        console.log(editedData.value);
-        showEditPopup.value = true
-    }
-
-    const deleteData = (data) => {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                popup: 'sweet-alerts',
-                confirmButton: 'btn btn-secondary',
-                cancelButton: 'btn btn-dark ltr:mr-3 rtl:ml-3',
-            },
-            buttonsStyling: false,
-        });
-        swalWithBootstrapButtons
-        .fire({
-            title: 'Es-tu sûr?',
-            text: "Vous ne pourrez pas revenir en arrière!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Oui, supprimer!',
-            cancelButtonText: 'Non, Annuler!',
-            reverseButtons: true,
-            padding: '2em',
-        })
-        .then((result) => {
-            if (result.value) {
-                feesStore.destroy(data.id).then(res => {
-                    swalWithBootstrapButtons.fire('supprimé!', 'il a été supprimé.', 'success');
-                    rows.value = res.data.data
-                }).catch(err => {
-                    swalWithBootstrapButtons.fire('supprimé!', "il a été supprimé.", 'success');
-                });
-            } else if (result.dismiss === Swal.DismissReason.cancel) {
-                swalWithBootstrapButtons.fire('Annulé', "aucune mesure n'a été prise:)", 'error');
-            }
-        });
-    }
-
 </script>

@@ -10,22 +10,12 @@ use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
-    public function index() {
-        $currentMonth = date('n'); // Get the current month as a number (1-12)
-        $currentYear = date('Y'); // Get the current year
+    public function unhandledPayments($month,$year) {
         $currentDate = date('Y-m-d');
-        $months = ['Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet'];
-        // Adjust the index for the academic year starting in August
-        if ($currentMonth >= 8) {
-            $currentMonth -= 8; // For Aug to Dec, subtract 8 to get index 0-4
-        } else {
-            $currentMonth += 4; // For Jan to July, add 4 to get index 5-11
-        }
-        $currentMonthName = $months[$currentMonth];
         $data = Payment::whereNot('paid',-1)->where(function ($query) {
             $query->where('rest', '!=', 0)
                   ->orWhereNull('rest');
-        })->where('month', $currentMonthName)
+        })->where('month', $month)
         ->whereHas('registrant', function ($query) use ($currentDate) {
             $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
         })
@@ -36,8 +26,8 @@ class PaymentController extends Controller
             $missingMonths = [];
             $payment = Payment::where('registrant_id', $registrant->id)
                                 ->where('group_id', $registrant->group->id)
-                                ->where('month', $currentMonthName)
-                                ->where('year', $currentYear)
+                                ->where('month', $month)
+                                ->where('year', $year)
                                 ->first();
 
             if (!$payment) {
@@ -56,8 +46,8 @@ class PaymentController extends Controller
                     'user_id' => null,
                     'student_id' =>  $registrant->student['id'],
                     'paid' => 0,
-                    'month' => $currentMonthName,
-                    'year' => $currentYear
+                    'month' => $month,
+                    'year' => $year
                 ];
             }
         }

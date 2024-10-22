@@ -10,27 +10,27 @@
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
                 
                 <div class="flex gap-2">
-                        <multiselect
-                            v-model="choosenMonth"
-                            :options="options"
-                            class="custom-multiselect  max-w-xs"
-                            :searchable="true"
-                            placeholder="Le mois"
-                            selected-label=""
-                            select-label=""
-                            deselect-label=""
-                        ></multiselect>    
-                        <multiselect
-                            v-model="choosenYear"
-                            :options="years"
-                            class="custom-multiselect  max-w-xs"
-                            :searchable="true"
-                            placeholder="L'année"
-                            selected-label=""
-                            select-label=""
-                            deselect-label=""
-                        ></multiselect>    
-                    </div>
+                    <multiselect
+                        v-model="choosenMonth"
+                        :options="options"
+                        class="custom-multiselect  max-w-xs"
+                        :searchable="true"
+                        placeholder="Le mois"
+                        selected-label=""
+                        select-label=""
+                        deselect-label=""
+                    ></multiselect>    
+                    <multiselect
+                        v-model="choosenYear"
+                        :options="years"
+                        class="custom-multiselect  max-w-xs"
+                        :searchable="true"
+                        placeholder="L'année"
+                        selected-label=""
+                        select-label=""
+                        deselect-label=""
+                    ></multiselect>    
+                </div>
             </div>
             <div class="datatable">
                 <vue3-datatable

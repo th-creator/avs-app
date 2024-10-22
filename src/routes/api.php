@@ -44,6 +44,7 @@ Route::get('student/{id}/groups', [GroupController::class,'studentGroups']);
 Route::apiResource('sections', SectionController::class);
 Route::apiResource('payments', PaymentController::class);
 Route::get('all/paymens', [PaymentController::class, 'all']);
+Route::get('unhandled/paymens/{month}/{year}', [PaymentController::class, 'unhandledPayments']);
 Route::apiResource('fees', FeeController::class);
 Route::get('undandledFees', [FeeController::class, 'undandledFees']);
 Route::post('finance/payments', [PaymentController::class, 'fetchFinance']);

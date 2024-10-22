@@ -4,7 +4,29 @@
             <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les paiements à régler</h5>
             <div class="flex justify-between mb-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
-                <!-- <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> -->
+                
+                <div class="flex gap-2">
+                    <multiselect
+                        v-model="choosenMonth"
+                        :options="options"
+                        class="custom-multiselect  max-w-xs"
+                        :searchable="true"
+                        placeholder="Le mois"
+                        selected-label=""
+                        select-label=""
+                        deselect-label=""
+                    ></multiselect>    
+                    <multiselect
+                        v-model="choosenYear"
+                        :options="years"
+                        class="custom-multiselect  max-w-xs"
+                        :searchable="true"
+                        placeholder="L'année"
+                        selected-label=""
+                        select-label=""
+                        deselect-label=""
+                    ></multiselect>    
+                </div>
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -13,6 +35,9 @@
                     :totalRows="rows?.length"
                     :sortable="true"
                     :search="params.search"
+                    :loading="isloading"
+                    :sortColumn="params.sort_column"
+                    :sortDirection="params.sort_direction"
                     :paginationInfo="'{0} à {1} de {2}'"
                     skin="whitespace-nowrap bh-table-hover"
                     firstArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M13 19L7 12L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M16.9998 19L10.9998 12L16.9998 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
@@ -105,15 +130,14 @@
             </div>
         </div>
     </div>
-    <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
 </template>
 <script setup>
-    import { ref, reactive, computed, onMounted } from 'vue';
+    import { ref, reactive, computed, onMounted, watch } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import { usePaymentsStore } from '@/stores/payments.js';
     import IconComponent from '@/components/icons/IconComponent.vue'
-    import Edit from './Edit.vue'
-    import Swal from 'sweetalert2';
+    import Multiselect from '@suadelabs/vue3-multiselect';
+    import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
     
     const params = reactive({
         current_page: 1,
@@ -122,11 +146,14 @@
         sort_column: 'id',
         sort_direction: 'asc',
     });
+    const isloading = ref(false);
+
+    const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
+    const choosenMonth = ref('Septembre');
+    const years = ref([2024,2025,2026,2027,2028,2029,2030]);
+    const choosenYear = ref(2024);
 
     const paymentsStore = usePaymentsStore();
-
-    const showPopup = ref(false);
-    const showEditPopup = ref(false);
     
     const cols =
         ref([
@@ -148,55 +175,27 @@
             { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
     const rows = computed(async() => {
-        console.log('paymentsStore.payments', paymentsStore.payments);
         let data = await paymentsStore.payments.length > 0 ? paymentsStore.payments : []
         return data;
         });
-
-
-    const editedData = ref({})
-    onMounted(() => {
-        paymentsStore.index()
+        
+    onMounted(async () => {
+        const currentMonth = new Date().getMonth();
+        choosenMonth.value = options.value[currentMonth];
+        choosenYear.value = new Date().getFullYear();
+        paymentsStore.payments.length == 0 && (isloading.value = true)
+        await paymentsStore.undandled(choosenMonth.value)
+        isloading.value = false
     })
-
-    const toggleEdit = (data) => {
-        editedData.value = data
-        console.log(editedData.value);
-        showEditPopup.value = true
-    }
-
-    const deleteData = (data) => {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                popup: 'sweet-alerts',
-                confirmButton: 'btn btn-secondary',
-                cancelButton: 'btn btn-dark ltr:mr-3 rtl:ml-3',
-            },
-            buttonsStyling: false,
-        });
-        swalWithBootstrapButtons
-        .fire({
-            title: 'Es-tu sûr?',
-            text: "Vous ne pourrez pas revenir en arrière!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Oui, supprimer!',
-            cancelButtonText: 'Non, Annuler!',
-            reverseButtons: true,
-            padding: '2em',
-        })
-        .then((result) => {
-            if (result.value) {
-                paymentsStore.destroy(data.id).then(res => {
-                    swalWithBootstrapButtons.fire('supprimé!', 'il a été supprimé.', 'success');
-                    rows.value = res.data.data
-                }).catch(err => {
-                    swalWithBootstrapButtons.fire('supprimé!', "il a été supprimé.", 'success');
-                });
-            } else if (result.dismiss === Swal.DismissReason.cancel) {
-                swalWithBootstrapButtons.fire('Annulé', "aucune mesure n'a été prise:)", 'error');
-            }
-        });
-    }
-
+    
+    watch(choosenMonth, async (newVal, oldVal) => {
+        isloading.value = true
+        await paymentsStore.undandled(choosenMonth.value, choosenYear.value)
+        isloading.value = false
+    });
+    watch(choosenYear, async (newVal, oldVal) => {
+        isloading.value = true
+        await paymentsStore.undandled(choosenMonth.value, choosenYear.value)
+        isloading.value = false
+    });
 </script>

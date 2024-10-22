@@ -13,6 +13,7 @@
                     :columns="cols"
                     :totalRows="rows?.length"
                     :sortable="true"
+                    :loading="isloading"
                     :sortColumn="params.sort_column"
                     :sortDirection="params.sort_direction"
                     :paginationInfo="'{0} à {1} de {2}'"
@@ -133,6 +134,7 @@ const authStore = useAuthStore();
         sort_column: 'id',
         sort_direction: 'desc',
     });
+    const isloading = ref(false);
 
     const registrantsStore = useRegistrantsStore();
 
@@ -165,10 +167,12 @@ const authStore = useAuthStore();
         });
 
     const editedData = ref({})
-    onMounted(async () => {
-        await registrantsStore.index()
-    })
 
+    onMounted(async () => {
+        registrantsStore.registrants.length == 0 && (isloading.value = true)
+        await registrantsStore.index()
+        isloading.value = false
+    })
     const toggleEdit = (data) => {
         editedData.value = data
         showEditPopup.value = true

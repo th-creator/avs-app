@@ -14,9 +14,9 @@ export const usePaymentsStore = defineStore("payments", () => {
     const financePayments = ref([]);  // This will hold the payments globally
 
     // Fetch all payments and update the state
-    const index = async () => {
+    const undandled = async (month, year) => {
         try {
-            const response = await api.get('api/payments');
+            const response = await api.get(`api/unhandled/paymens/${month}/${year}`);
             payments.value = response.data.data;   // Update the payments state with the fetched data
             return response
         } catch (error) {
@@ -104,5 +104,5 @@ export const usePaymentsStore = defineStore("payments", () => {
     };
 
     // Expose the payments state and actions
-    return { payments, index, store, update, destroy, studentPayments, show, fetchGroupPayments, groupPayments, allPayments, all, financePayments, fetchFinance };
+    return { payments, undandled, store, update, destroy, studentPayments, show, fetchGroupPayments, groupPayments, allPayments, all, financePayments, fetchFinance };
 });
