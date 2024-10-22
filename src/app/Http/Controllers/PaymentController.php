@@ -13,6 +13,7 @@ class PaymentController extends Controller
     public function index() {
         $currentMonth = date('n'); // Get the current month as a number (1-12)
         $currentYear = date('Y'); // Get the current year
+        $currentDate = date('Y-m-d');
         $months = ['Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet'];
         // Adjust the index for the academic year starting in August
         if ($currentMonth >= 8) {
@@ -25,8 +26,11 @@ class PaymentController extends Controller
             $query->where('rest', '!=', 0)
                   ->orWhereNull('rest');
         })->where('month', $currentMonthName)
+        ->whereHas('registrant', function ($query) use ($currentDate) {
+            $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
+        })
         ->get();
-        $registrants = Registrant::where('status', 1)->get();
+        $registrants = Registrant::where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
 
         foreach ($registrants as $registrant) {
             $missingMonths = [];
@@ -71,8 +75,9 @@ class PaymentController extends Controller
     }
 
     public function groupPayments($id,$month,$year) {
-        $data = Payment::whereHas('registrant', function ($query) use ($id) {
-            $query->where('status', 1);
+        $currentDate = date('Y-m-d');
+        $data = Payment::whereHas('registrant', function ($query) use ($id,$currentDate) {
+            $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
         })->whereNot('paid',-1)->where('group_id',$id)->get();
         $group = Group::find($id);
 

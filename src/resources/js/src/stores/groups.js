@@ -42,7 +42,7 @@ export const useGroupsStore = defineStore("groups", () => {
             allPayments.value = response.data.data.map(res => ({
                 id: res.id,
                 intitule: res.intitule,
-                teacher: res.teacher.firstName + ' ' + res.teacher.lastName,
+                teacher: res?.teacher?.firstName + ' ' + res?.teacher?.lastName,
                 total: res.payments.reduce((total, payment) => {
                     let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
                     return total + Number(amount)
