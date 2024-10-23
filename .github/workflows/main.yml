@@ -60,8 +60,8 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: 'ftp.avs-app.center'
-          username: 'th_creator@avs-app.center'
-          password: 'wn5H-20AfC-N'
+          username: 'oussama@avs-app.center'
+          password: 'UW5nRL!_s{}g'
           local-dir: src/  # Adjust this if needed
           server-dir: /  # Adjust this to the correct path on your server
 
@@ -70,7 +70,7 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server: 'ftp.avs-app.center'
-          username: 'th_creator@avs-app.center'
-          password: 'wn5H-20AfC-N'
+          username: 'oussama@avs-app.center'
+          password: 'UW5nRL!_s{}g'
           local-dir: src/public/build/  # Path to Vite build output
           server-dir: /build/  # Adjust this to the correct path for assets on your server
