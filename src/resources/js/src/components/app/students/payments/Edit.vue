@@ -32,15 +32,17 @@
                     <div class="text-lg text-center font-semibold ltr:pl-5 rtl:pr-5 py-5 ltr:pr-[50px] rtl:pl-[50px]">Modifier</div>
                     <div class="p-5">
                         <form>
-                            <div class="relative mb-4">
-                                <label class="text-sm">Montant:</label>
-                                <input @keyup="calculateRest()" v-model="data.amount" type="number" placeholder="Montant" class="form-input" />
-                                <span v-if="errors.amount" class="text-red-600 text-sm">{{ errors.amount[0] }}</span>
-                            </div>
-                            <div class="relative mb-4">
-                                <label class="text-sm">Réduction:</label>
-                                <input @keyup="calculateRest()" v-model="data.reduction" type="number" placeholder="Reduction" class="form-input" />
-                                <span v-if="errors.reduction" class="text-red-600 text-sm">{{ errors.reduction[0] }}</span>
+                            <div class="relative mb-4 flex gap-4">
+                                <div class="w-[70%]">
+                                    <label class="text-sm">Montant:</label>
+                                    <input @keyup="calculateRest()" v-model="data.amount" type="number" placeholder="Montant" class="form-input" />
+                                    <span v-if="errors.amount" class="text-red-600 text-sm">{{ errors.amount[0] }}</span>
+                                </div>
+                                <div class="w-[30%]">
+                                    <label class="text-sm">Réduction:</label>
+                                    <input @keyup="calculateRest()" v-model="data.reduction" type="number" placeholder="Reduction" class="form-input" />
+                                    <span v-if="errors.reduction" class="text-red-600 text-sm">{{ errors.reduction[0] }}</span>
+                                </div>
                             </div>
                             <div class="relative mb-4">
                                 <label class="text-sm">Montant à payer:</label>
@@ -61,6 +63,27 @@
                                 <label class="text-sm">Date de paiement:</label>
                                 <input v-model="data.date" type="date" placeholder="Date d'inscription" class="form-input" />
                                 <span v-if="errors.date" class="text-red-600 text-sm">{{ errors.date[0] }}</span>
+                            </div>
+                            <div class="relative mb-4 flex gap-4">
+                                <div class="w-[50%]">
+                                    <label class="text-sm">Mois:</label>
+                                    <multiselect
+                                        v-model="data.month"
+                                        :options="months"
+                                        class="custom-multiselect"
+                                        :searchable="true"
+                                        placeholder="Mois"
+                                        selected-label=""
+                                        select-label=""
+                                        deselect-label=""
+                                    ></multiselect>
+                                    <span v-if="errors.month" class="text-red-600 text-sm">{{ errors.month[0] }}</span>    
+                                </div>
+                                <div class="w-[50%]">
+                                    <label class="text-sm">Année:</label>
+                                    <input v-model="data.year" type="number" placeholder="Année" class="form-input" />
+                                    <span v-if="errors.year" class="text-red-600 text-sm">{{ errors.year[0] }}</span>
+                                </div>
                             </div>
                             <div class="relative mb-4">
                                 <label class="text-sm">Type de paiement:</label>
@@ -153,6 +176,8 @@ const data = ref({
     bank: props.editedData.bank,
     bank_receipt: props.editedData.bank_receipt,
     receipt: props.editedData.receipt,
+    month: props.editedData.month,
+    year: props.editedData.year,
 })
 
 const errors = ref({})
