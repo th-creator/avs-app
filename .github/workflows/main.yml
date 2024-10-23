@@ -59,9 +59,9 @@ jobs:
       - name: Deploy Laravel via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ${{ secrets.YOURSITE_FTP_SERVER }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.YOUR_PASSWORD }}
+          server: 'ftp.avs-app.center'
+          username: 'th_creator@avs-app.center'
+          password: 'wn5H-20AfC-N'
           local-dir: src/  # Adjust this if needed
           server-dir: /  # Adjust this to the correct path on your server
 
