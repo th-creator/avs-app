@@ -86,11 +86,15 @@ class PaymentController extends Controller
         $group = Group::find($id);
 
         foreach ($group->registrants as $registrant) {
-            $payment = Payment::where('registrant_id', $registrant->id)
+            $payment = null;
+            if($registrant['enter_date'] >= $currentDate) {
+                $payment = Payment::where('registrant_id', $registrant->id)
                                 ->where('group_id', $id)
                                 ->where('month', $month)
                                 ->where('year', $year)
                                 ->first();
+            }
+            
 
             if (!$payment) {
                 $data[] = [
@@ -186,8 +190,8 @@ class PaymentController extends Controller
             'bank' => 'nullable',
             'bank_receipt' => 'nullable',
             'receipt' => 'nullable',
-            'month' => 'nullable',
-            'year' => 'nullable',
+            'month' => 'required',
+            'year' => 'required',
         ]);
         $userData['paid'] = 1;
         $data->update($userData);
