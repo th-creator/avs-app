@@ -144,6 +144,7 @@ import IconComponent from '@/components/icons/IconComponent.vue'
 const isLoading = ref(false)
 
 const options = ref(['espèces', 'chèque', 'virement']);
+const months = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
 
 const paymentsStore = usePaymentsStore();
 
