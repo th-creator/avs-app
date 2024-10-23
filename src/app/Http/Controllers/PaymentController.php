@@ -79,16 +79,30 @@ class PaymentController extends Controller
     }
 
     public function groupPayments($id,$month,$year) {
-        $currentDate = date('Y-m-d');
+        $months = [
+            'Janvier' => 1,
+            'Février' => 2,
+            'Mars' => 3,
+            'Avril' => 4,
+            'Mai' => 5,
+            'Juin' => 6,
+            'Juillet' => 7,
+            'Août' => 8,
+            'Septembre' => 9,
+            'Octobre' => 10,
+            'Novembre' => 11,
+            'Décembre' => 12,
+        ];
+        $monthNumber = $months[$month];
+        $currentDate = $year.'-'.$monthNumber.'-01';
+        // $currentDate = date('Y-m-d');
         $data = Payment::whereHas('registrant', function ($query) use ($id,$currentDate) {
             $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
         })->whereNot('paid',-1)->where('group_id',$id)->get();
         $group = Group::find($id);
-
-        foreach ($group->registrants as $registrant) {
-            $payment = Payment::whereHas('registrant', function ($query) use ($id,$currentDate) {
-                $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
-            })->where('registrant_id', $registrant->id)
+        $registrants = Registrant::where('group_id',$id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
+        foreach ($registrants as $registrant) {
+            $payment = Payment::where('registrant_id', $registrant->id)
                                 ->where('group_id', $id)
                                 ->where('month', $month)
                                 ->where('year', $year)
