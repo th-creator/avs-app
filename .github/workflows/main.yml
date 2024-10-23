@@ -69,8 +69,8 @@ jobs:
       - name: Deploy Vite assets via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          server: ${{ secrets.YOURSITE_FTP_SERVER }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.YOUR_PASSWORD }}
+          server: 'ftp.avs-app.center'
+          username: 'th_creator@avs-app.center'
+          password: 'wn5H-20AfC-N'
           local-dir: src/public/build/  # Path to Vite build output
           server-dir: /build/  # Adjust this to the correct path for assets on your server
