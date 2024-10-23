@@ -186,6 +186,8 @@ class PaymentController extends Controller
             'bank' => 'nullable',
             'bank_receipt' => 'nullable',
             'receipt' => 'nullable',
+            'month' => 'nullable',
+            'year' => 'nullable',
         ]);
         $userData['paid'] = 1;
         $data->update($userData);
