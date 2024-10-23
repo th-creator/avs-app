@@ -86,15 +86,13 @@ class PaymentController extends Controller
         $group = Group::find($id);
 
         foreach ($group->registrants as $registrant) {
-            $payment = null;
-            if($registrant['enter_date'] >= $currentDate) {
-                $payment = Payment::where('registrant_id', $registrant->id)
+            $payment = Payment::whereHas('registrant', function ($query) use ($id,$currentDate) {
+                $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
+            })->where('registrant_id', $registrant->id)
                                 ->where('group_id', $id)
                                 ->where('month', $month)
                                 ->where('year', $year)
-                                ->first(); 
-            }
-            
+                                ->first();
 
             if (!$payment) {
                 $data[] = [
