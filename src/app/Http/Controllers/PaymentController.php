@@ -92,7 +92,7 @@ class PaymentController extends Controller
                                 ->where('group_id', $id)
                                 ->where('month', $month)
                                 ->where('year', $year)
-                                ->first();
+                                ->first(); 
             }
             
 
