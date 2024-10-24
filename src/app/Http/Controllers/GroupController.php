@@ -16,10 +16,27 @@ class GroupController extends Controller
     }
 
     public function groupPayments($month,$id,$year) {
+        $months = [
+            'Janvier' => 1,
+            'Février' => 2,
+            'Mars' => 3,
+            'Avril' => 4,
+            'Mai' => 5,
+            'Juin' => 6,
+            'Juillet' => 7,
+            'Août' => 8,
+            'Septembre' => 9,
+            'Octobre' => 10,
+            'Novembre' => 11,
+            'Décembre' => 12,
+        ];
+        $monthNumber = $months[$month];
+        $currentDate = $year.'-'.$monthNumber.'-01';
         $data = Group::where('id',$id)->with(['payments' => function ($query) use ($month) {
-            $query->where('month', $month);
+            $query->where('month', $month)->where('year', $year);
         }])->first();
-        foreach ($data->registrants as $registrant) {
+        $registrants = Registrant::where('group_id',$id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
+        foreach ($registrants as $registrant) {
             $payment = Payment::where('registrant_id', $registrant->id)
                                 ->where('group_id', $data->id)
                                 ->where('month', $month)
@@ -50,13 +67,30 @@ class GroupController extends Controller
         return response()->json(['data' => $data], 200);
     }
     public function allPayments($month,$year) {
+        $months = [
+            'Janvier' => 1,
+            'Février' => 2,
+            'Mars' => 3,
+            'Avril' => 4,
+            'Mai' => 5,
+            'Juin' => 6,
+            'Juillet' => 7,
+            'Août' => 8,
+            'Septembre' => 9,
+            'Octobre' => 10,
+            'Novembre' => 11,
+            'Décembre' => 12,
+        ];
+        $monthNumber = $months[$month];
+        $currentDate = $year.'-'.$monthNumber.'-01';
         $data = Group::with(['teacher', 'payments' => function ($query) use ($month, $year) {
             $query->where('month', $month);
             $query->where('year', $year);
         }])->get();
 
         foreach ($data as $group) {
-            foreach ($group->registrants as $registrant) {
+            $registrants = Registrant::where('group_id',$group->id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
+            foreach ($registrants as $registrant) {
                 $payment = Payment::where('registrant_id', $registrant->id)
                                     ->where('group_id', $group->id)
                                     ->where('month', $month)

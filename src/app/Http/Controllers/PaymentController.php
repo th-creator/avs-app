@@ -135,7 +135,7 @@ class PaymentController extends Controller
     public function fetchFinance(Request $request) {
         $fromDate = $request->input('from');
         $toDate = $request->input('to');
-        $data = Payment::whereBetween('date', [$fromDate, $toDate])->get();
+        $data = Payment::where('paid',1)->whereBetween('date', [$fromDate, $toDate])->get();
         return response()->json(['data' => $data], 200);
     }
     
