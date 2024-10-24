@@ -32,7 +32,7 @@ class GroupController extends Controller
         ];
         $monthNumber = $months[$month];
         $currentDate = $year.'-'.$monthNumber.'-01';
-        $data = Group::where('id',$id)->with(['payments' => function ($query) use ($month) {
+        $data = Group::where('id',$id)->with(['payments' => function ($query) use ($month, $year) {
             $query->where('month', $month)->where('year', $year);
         }])->first();
         $registrants = Registrant::where('group_id',$id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
@@ -84,8 +84,10 @@ class GroupController extends Controller
         $monthNumber = $months[$month];
         $currentDate = $year.'-'.$monthNumber.'-01';
         $data = Group::with(['teacher', 'payments' => function ($query) use ($month, $year) {
-            $query->where('month', $month);
-            $query->where('year', $year);
+            $query->where([
+                ['month', '=', $month],
+                ['year', '=', $year]
+            ]);
         }])->get();
 
         foreach ($data as $group) {
