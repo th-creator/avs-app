@@ -32,9 +32,13 @@ class GroupController extends Controller
         ];
         $monthNumber = $months[$month];
         $currentDate = $year.'-'.$monthNumber.'-01';
-        $data = Group::where('id',$id)->with(['payments' => function ($query) use ($month, $year) {
-            $query->where('month', $month)->where('year', $year);
-        }])->first();
+        $data = Group::where('id',$id)->first();
+        
+        $data->payments = Payment::whereHas('registrant', function ($query) use ($currentDate) {
+            $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
+        })->whereNot('paid',-1)->where('group_id',$data->id)
+        ->where('month', $month)
+        ->where('year', $year)->get();
         $registrants = Registrant::where('group_id',$id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
         foreach ($registrants as $registrant) {
             $payment = Payment::where('registrant_id', $registrant->id)
@@ -83,14 +87,13 @@ class GroupController extends Controller
         ];
         $monthNumber = $months[$month];
         $currentDate = $year.'-'.$monthNumber.'-01';
-        $data = Group::with(['teacher', 'payments' => function ($query) use ($month, $year) {
-            $query->where([
-                ['month', '=', $month],
-                ['year', '=', $year]
-            ]);
-        }])->get();
-
+        $data = Group::with('teacher')->get();
         foreach ($data as $group) {
+            $group->payments = Payment::whereHas('registrant', function ($query) use ($data,$currentDate) {
+                $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
+            })->whereNot('paid',-1)->where('group_id',$group->id)
+            ->where('month', $month)
+            ->where('year', $year)->get();
             $registrants = Registrant::where('group_id',$group->id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
             foreach ($registrants as $registrant) {
                 $payment = Payment::where('registrant_id', $registrant->id)
