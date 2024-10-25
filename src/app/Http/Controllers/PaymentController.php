@@ -94,10 +94,10 @@ class PaymentController extends Controller
             'Décembre' => 12,
         ];
         $monthNumber = $months[$month];
-        $currentDate = $year.'-'.$monthNumber.'-01';
+        $currentDate = $year.'-'.$monthNumber.'-'.date('d');
         // $currentDate = date('Y-m-d');
         $data = Payment::whereHas('registrant', function ($query) use ($id,$currentDate) {
-            $query->where('status', 1)->where('enter_date', '<=', date('Y-m-d', strtotime($currentDate)));
+            $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
         })->whereNot('paid',-1)->where('group_id',$id)->get();
         $group = Group::find($id);
         $registrants = Registrant::where('group_id',$id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
