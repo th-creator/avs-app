@@ -31,7 +31,7 @@ class GroupController extends Controller
             'Décembre' => 12,
         ];
         $monthNumber = $months[$month];
-        $currentDate = $year.'-'.$monthNumber.'-01';
+        $currentDate = $year.'-'.$monthNumber.'-'.date('d');
         $data = Group::where('id',$id)->first();
         
         $data->payments = Payment::whereHas('registrant', function ($query) use ($currentDate) {
@@ -86,7 +86,7 @@ class GroupController extends Controller
             'Décembre' => 12,
         ];
         $monthNumber = $months[$month];
-        $currentDate = $year.'-'.$monthNumber.'-01';
+        $currentDate = $year.'-'.$monthNumber.'-'.date('d');
         $data = Group::with('teacher')->get();
         foreach ($data as $group) {
             $group->payments = Payment::whereHas('registrant', function ($query) use ($data,$currentDate) {
