@@ -49,7 +49,7 @@ jobs:
 
       # Step to create storage symlink for Laravel
       - name: Create storage symlink
-        run: php artisan storage:link
+        run: php src/artisan storage:link
 
       # Step to set directory permissions (for Laravel)
       - name: Set directory permissions
