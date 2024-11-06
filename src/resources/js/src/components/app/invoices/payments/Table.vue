@@ -142,6 +142,10 @@
                 </vue3-datatable>
             </div>
         </div>
+    <div class="flex justify-end items-center my-4">
+        <p class="font-semibold text-lg">Total: {{ total }} MAD</p>
+        <!-- <p class="font-semibold text-lg">revenu: {{ choosenData.reduce((total, payment) => total + Number(payment.amount)*((100-Number(payment.reduction))/100), 0) }} MAD</p> -->
+    </div>
     </div>
 </template>
 <script setup>
@@ -164,6 +168,7 @@
     const isloading = ref(false);
 
     const datatable = ref([]);
+    const total = ref();
 
     const params = reactive({
         current_page: 1,
@@ -176,6 +181,12 @@
     watch(choosenMonth, (newVal, oldVal) => {
         console.log(oldVal,newVal);
         choosenData.value = paymentsStore.financePayments.filter(payment => payment.type == newVal);
+        total.value = choosenData.value.reduce((total, payment) => {
+            let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+            return total + Number(amount)
+        }, 0)
+        console.log('total', total.value);
+        
     });
 
     const paymentsStore = usePaymentsStore();
@@ -215,7 +226,12 @@
         await paymentsStore.fetchFinance(search.value)
         isloading.value =false
         choosenData.value = paymentsStore.financePayments.filter(payment => payment.type == choosenMonth.value);
-
+        total.value = choosenData.value.reduce((total, payment) => {
+            let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+            return total + Number(amount)
+        }, 0)
+        console.log('total', total.value);
+        
     }
 
     const deleteData = (data) => {

@@ -150,6 +150,7 @@ export const useRegistrantsStore = defineStore("registrants", () => {
                 date: res.date,
                 enter_date: res.enter_date,
                 phone: res.student.phone,
+                parent_phone: res.student.parent_phone,
                 rest: res.payments.reduce((total, payment) => total + (payment.paid == 1 ? Number(payment.rest) : Number(payment.amount)*((100-Number(payment.reduction))/100)), 0)
             }));  // Update the students state with the fetched data
             return response

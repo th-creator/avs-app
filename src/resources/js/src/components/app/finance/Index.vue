@@ -383,6 +383,9 @@
                 case 'virement':
                     payments.value.virement += Number(res.amount_paid);
                     break;
+                default:
+                    payments.value.cash += Number(res.amount_paid);
+                    break;
             }
         });
         feesStore.financeFees.forEach(res => {
