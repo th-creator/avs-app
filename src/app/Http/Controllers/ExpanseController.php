@@ -36,7 +36,7 @@ class ExpanseController extends Controller
         ]);
         if($request->hasFile('file')) {
             $file = $request->file('file');
-            $filename = $file->getClientOriginalName();
+            $filename = time() . '_' . $file->getClientOriginalName();
             $file->move(public_path('files'), $filename);
 
             $url = config('services.app.url');

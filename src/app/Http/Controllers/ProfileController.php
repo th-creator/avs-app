@@ -35,7 +35,7 @@ class ProfileController extends Controller
             
             if($request->hasFile('image')) {
                 $file = $request->file('image');
-                $filename = $file->getClientOriginalName();
+                $filename = time() . '_' . $file->getClientOriginalName();
                 $file->move(public_path('profiles'), $filename);
     
                 $url = config('services.app.url');
