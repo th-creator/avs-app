@@ -106,6 +106,11 @@ export const useRegistrantsStore = defineStore("registrants", () => {
 
         return response
     };
+    const refund = async (payload, id) => {
+        const response = await api.put(`api/refund/registrant/${id}`, payload);
+
+        return response
+    };
     // Update an existing user and update the state
     const transfer = async (payload, id) => {
         const response = await api.post(`api/registrant/${id}/transfer`, payload);
@@ -197,5 +202,5 @@ export const useRegistrantsStore = defineStore("registrants", () => {
     };
 
     // Expose the registrants state and actions
-    return { registrants, index, store, update, destroy, groupRegistrants, fetchGroupRegistrants, toggle, show, transfer };
+    return { registrants, index, store, update, destroy, groupRegistrants, fetchGroupRegistrants, toggle, show, transfer, refund };
 });

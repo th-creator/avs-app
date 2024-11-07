@@ -30,7 +30,7 @@ class PaymentController extends Controller
         $data = Payment::whereNot('paid',-1)->where(function ($query) {
             $query->where('rest', '!=', 0)
                   ->orWhereNull('rest');
-        })->where('month', $month)
+        })->where('month', $month)->where('year', $year)
         ->whereHas('registrant', function ($query) use ($currentDate) {
             $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
         })
@@ -77,6 +77,10 @@ class PaymentController extends Controller
         $data = Payment::where('student_id',$id)->with('user')->get();
         return response()->json(['data' => $data], 200);
     }
+    public function registrantPayment($id,$group_id) {
+        $data = Payment::where('student_id',$id)->where('group_id',$group_id)->first();
+        return response()->json(['data' => $data], 200);
+    }
 
     public function groupPayments($id,$month,$year) {
         $months = [
@@ -98,7 +102,7 @@ class PaymentController extends Controller
         // $currentDate = date('Y-m-d');
         $data = Payment::whereHas('registrant', function ($query) use ($id,$currentDate) {
             $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
-        })->whereNot('paid',-1)->where('group_id',$id)->get();
+        })->whereNot('paid',-1)->where('group_id',$id)->where('month', $month)->where('year', $year)->get();
         $group = Group::find($id);
         $registrants = Registrant::where('group_id',$id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
         foreach ($registrants as $registrant) {
@@ -136,6 +140,13 @@ class PaymentController extends Controller
         $fromDate = $request->input('from');
         $toDate = $request->input('to');
         $data = Payment::where('paid',1)->whereBetween('date', [$fromDate, $toDate])->get();
+        return response()->json(['data' => $data], 200);
+    }
+
+    public function fetchFacturation(Request $request) {
+        $fromDate = $request->input('from');
+        $toDate = $request->input('to');
+        $data = Payment::whereBetween('date', [$fromDate, $toDate])->get();
         return response()->json(['data' => $data], 200);
     }
     

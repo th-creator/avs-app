@@ -35,12 +35,12 @@ class ExpanseController extends Controller
             'user_id' => 'required',
         ]);
         if($request->hasFile('file')) {
-            $path = $request->file('file')->store('files', 'public');
-            
-            $url = config('services.app.url');
-            $urlFile = Storage::url($path);
+            $file = $request->file('file');
+            $filename = $file->getClientOriginalName();
+            $file->move(public_path('files'), $filename);
 
-            $newData['file'] = $url.$urlFile;
+            $url = config('services.app.url');
+            $newData['file'] = $url . '/files/' . $filename;
         }
         $data = Expanse::create($newData);
         
@@ -86,9 +86,9 @@ class ExpanseController extends Controller
         $fileUrl = $data->file;
         
         $filename = basename($fileUrl);
-        $filePath = 'files/' . $filename;
-        if (Storage::disk('public')->exists($filePath)) {
-            Storage::disk('public')->delete($filePath);
+        $filePath = public_path('files/' . $filename);
+        if (File::exists($filePath)) {
+            File::delete($filePath);
         }
         $data->delete();
 

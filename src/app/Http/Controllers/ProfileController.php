@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\File; 
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -32,23 +33,22 @@ class ProfileController extends Controller
             ]);
         try{
             
-        if($request->hasFile('image')) {
-            $path = $request->file('image')->store('profile', 'public');
-            
-            $url = config('services.app.url');
-            $urlFile = Storage::url($path);
-
-            $imageName = $url.$urlFile;
-        }            
-            $user = User::where('id',$id)->get()->first();
+            if($request->hasFile('image')) {
+                $file = $request->file('image');
+                $filename = $file->getClientOriginalName();
+                $file->move(public_path('profiles'), $filename);
+    
+                $url = config('services.app.url');
+                $imageName = $url . '/profiles/' . $filename;
+            }            
+            $user = User::where('id',$id)->first();
             $fileUrl = $user->path;
             
             $filename = basename($fileUrl);
-            $filePath = 'profile/' . $filename;
-            if (Storage::disk('public')->exists($filePath)) {
-                Storage::disk('public')->delete($filePath);
+            $filePath = public_path('profiles/' . $filename);
+            if (File::exists($filePath)) {
+                File::delete($filePath);
             }
-            
             $user->update([
                 'path'=>$imageName
             ]);

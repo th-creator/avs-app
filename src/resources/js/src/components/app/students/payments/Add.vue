@@ -200,7 +200,13 @@ watch(async () => data.value.groupHolder, (newVal, oldVal) => {
     var group = {}
     group = groupsStore.studentGroups.find(res => res.id == id);
     data.value.amount = group.section.price 
-    // Add your logic here
+    paymentsStore.registrantPayment(route.params.id,id).then(res => {       
+        if(res.data.data) {
+            data.value.reduction = res.data.data.reduction
+            let reduction = data.value.reduction == null ? 0 : data.value.reduction
+            data.value.total = data.value.amount*(100-reduction)/100
+        }       
+    })
 });
 
 const paymentsStore = usePaymentsStore();

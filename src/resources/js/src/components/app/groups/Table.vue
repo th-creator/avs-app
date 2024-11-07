@@ -13,6 +13,7 @@
                     :totalRows="rows?.length"
                     :sortable="true"
                     :search="params.search"
+                    :loading="isloading"
                     :paginationInfo="'{0} à {1} de {2}'"
                     skin="whitespace-nowrap bh-table-hover"
                     firstArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M13 19L7 12L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M16.9998 19L10.9998 12L16.9998 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
@@ -90,6 +91,7 @@
 
     const showPopup = ref(false);
     const showEditPopup = ref(false);
+    const isloading = ref(false);
     
     const cols =
         ref([
@@ -109,8 +111,10 @@
 
 
     const editedData = ref({})
-    onMounted(() => {
-        groupsStore.index()
+    onMounted(async () => {
+        groupsStore.groups.length == 0 && (isloading.value = true)
+        await groupsStore.index()
+        isloading.value = false
     })
 
     const toggleEdit = (data) => {

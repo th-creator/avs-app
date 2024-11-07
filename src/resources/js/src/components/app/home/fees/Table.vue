@@ -59,12 +59,17 @@
                     </template>
                     <template #paid="data">
                         <div class="flex justify-center w-full">
-                            <div v-if="(data.value.total > 0 && data.value.total == data.value.amount_paid) || data.value.reduction == 100">
+                            <div v-if="data.value.reduction == 100">
+                                <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
+                                    Gratuit
+                                </div>
+                            </div>
+                            <div v-else-if="(data.value.total > 0 && data.value.total == data.value.amount_paid) || data.value.reduction == 100">
                                 <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
                                     Payé
                                 </div>
                             </div>
-                            <div v-else-if="data.value.total > 0">
+                            <div v-else-if="data.value.total > 0 && data.value.amount_paid > 0">
                                 <div class="px-4 py-2 rounded-full bg-orange-100 text-orange-600 w-[120px] text-center text-sm">
                                     En cours
                                 </div>

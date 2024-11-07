@@ -10,12 +10,12 @@
         <div class="panel pb-0 mt-6">
             
             <div class="flex justify-between items-end mb-4">  
-        <div class="flex gap-10 items-end">
-            <label for="">Du:</label>
-            <input v-model="search.from" type="date" class="form-input max-w-xs" placeholder="Du..." />
-            <label for="">A:</label>
-            <input v-model="search.to" type="date" class="form-input max-w-xs" placeholder="A..." />
-        </div>
+                <div class="flex gap-10 items-end">
+                    <label for="">Du:</label>
+                    <input v-model="search.from" type="date" class="form-input max-w-xs" placeholder="Du..." />
+                    <label for="">A:</label>
+                    <input v-model="search.to" type="date" class="form-input max-w-xs" placeholder="A..." />
+                </div>
                 <!-- <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." /> -->
                 <div class="flex flex-col gap-4">  
                     <multiselect
@@ -23,7 +23,7 @@
                         :options="options"
                         class="custom-multiselect  max-w-xs"
                         :searchable="true"
-                        placeholder="Le mois"
+                        placeholder="Type"
                         selected-label=""
                         select-label=""
                         deselect-label=""
@@ -112,12 +112,17 @@
                     </template>
                     <template #paid="data">
                         <div class="flex justify-center w-full">
-                            <div v-if="(data.value.paid == 1 && data.value.total == data.value.amount_paid)|| data.value.reduction == 100">
+                            <div v-if="data.value.reduction == 100 && data.value.paid != -1">
+                                <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
+                                    Gratuit
+                                </div>
+                            </div>
+                            <div v-else-if="(data.value.paid == 1 && data.value.total == data.value.amount_paid)">
                                 <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
                                     Payé
                                 </div>
                             </div>
-                            <div v-else-if="data.value.paid == 1">
+                            <div v-else-if="data.value.paid == 1 && data.value.amount_paid > 0">
                                 <div class="px-4 py-2 rounded-full bg-orange-100 text-orange-600 w-[120px] text-center text-sm">
                                     En cours
                                 </div>
@@ -125,6 +130,11 @@
                             <div v-else-if="data.value.paid == -1">
                                 <div class="px-4 py-2 rounded-full bg-blue-100 text-blue-600 w-[120px] text-center text-sm">
                                     Remboursé
+                                </div>
+                            </div>
+                            <div v-else-if="data.value.paid == -2">
+                                <div class="px-4 py-2 rounded-full bg-blue-300 text-blue-800 w-[120px] text-center text-sm">
+                                    Stationaire
                                 </div>
                             </div>
                             <div v-else>
@@ -162,8 +172,8 @@
     const authStore = useAuthStore();
     
 
-    const options = ref(['espèces', 'chèque', 'virement']);
-    const choosenMonth = ref('espèces');
+    const options = ref(['tous', 'espèces', 'chèque', 'virement', 'remboursé']);
+    const choosenMonth = ref('tous');
     const choosenData = ref([]);
     const isloading = ref(false);
 
@@ -180,7 +190,7 @@
 
     watch(choosenMonth, (newVal, oldVal) => {
         console.log(oldVal,newVal);
-        choosenData.value = paymentsStore.financePayments.filter(payment => payment.type == newVal);
+        choosenData.value = paymentsStore.financePayments.filter(payment => {if(choosenMonth.value == 'tous' && payment.paid != -2 && payment.paid != -1) {return payment} if(choosenMonth.value == 'remboursé' && payment.paid == -1) {return payment} if (payment.type == choosenMonth.value && payment.paid != -2 && payment.paid != -1) return payment});
         total.value = choosenData.value.reduce((total, payment) => {
             let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
             return total + Number(amount)
@@ -223,15 +233,14 @@
 
     const searchPayments = async () => {
         isloading.value =true
-        await paymentsStore.fetchFinance(search.value)
+        await paymentsStore.fetchFacturation(search.value)
         isloading.value =false
-        choosenData.value = paymentsStore.financePayments.filter(payment => payment.type == choosenMonth.value);
+        choosenData.value = paymentsStore.financePayments.filter(payment => {if(choosenMonth.value == 'tous' && payment.paid != -2 && payment.paid != -1) {return payment} if(choosenMonth.value == 'remboursé' && (payment.paid == -1 || payment.paid == -2)) {return payment} if (payment.type == choosenMonth.value && payment.paid != -2 && payment.paid != -1) return payment});
         total.value = choosenData.value.reduce((total, payment) => {
             let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
             return total + Number(amount)
         }, 0)
         console.log('total', total.value);
-        
     }
 
     const deleteData = (data) => {

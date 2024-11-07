@@ -3,8 +3,11 @@
 /public/build
 /public/hot
 /public/storage
+/public/files
+/public/profiles
 /storage/*.key
 /vendor
+/.env
 .env.backup
 .env.production
 Homestead.json

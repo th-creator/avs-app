@@ -177,8 +177,6 @@
     
     const store = useAppStore();
     const authStore = useAuthStore();
-    const route = useRouter();
-    const search = ref(false);
 
     const logout = async () => {
         localStorage.setItem('isLoggedIn', 0);

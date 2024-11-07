@@ -20,12 +20,21 @@ export default (url, options = defaultOptions) => {
     })
     api.interceptors.response.use(
         res => res,
-        err => {
+        async err => {
             const authStore = useAuthStore();
             if(err?.response?.status == 500 && err?.response?.data?.message == 'Token has expired') {
-                useAlert('danger', 'Session expired!');
+                useAlert('danger', 'La session a expiré!');
                 authStore.logout();
                 useRouter().push({name: 'auth-login'})
+            }
+            if(err?.response?.status == 401 && err?.response?.data?.message == 'Token has expired') {
+                useAlert('danger', 'La session a expiré!');
+                // authStore.emptyLogout()
+                await authStore.logout()
+                localStorage.setItem('isLoggedIn', 0);
+                localStorage.setItem('token', 0);
+                localStorage.setItem('user', 0);
+                window.location.href = '/auth/login';
             }
             return Promise.reject(err);
         }

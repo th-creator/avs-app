@@ -98,12 +98,17 @@
                     </template>
                     <template #paid="data">
                         <div class="flex justify-center w-full">
-                            <div v-if="data.value.paid == 1 && data.value.total == data.value.amount_paid">
+                            <div v-if="data.value.reduction == 100">
+                                <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
+                                    Gratuit
+                                </div>
+                            </div>
+                            <div v-else-if="data.value.paid == 1 && data.value.total == data.value.amount_paid">
                                 <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
                                     Payé
                                 </div>
                             </div>
-                            <div v-else-if="data.value.paid == 1">
+                            <div v-else-if="data.value.paid == 1 && data.value.amount_paid > 0">
                                 <div class="px-4 py-2 rounded-full bg-orange-100 text-orange-600 w-[120px] text-center text-sm">
                                     En cours
                                 </div>
@@ -132,7 +137,6 @@
         </div>
     <div class="flex justify-end items-center my-4">
         <p class="font-semibold text-lg">Total: {{ total }} MAD</p>
-        <!-- <p class="font-semibold text-lg">revenu: {{ choosenData.reduce((total, payment) => total + Number(payment.amount)*((100-Number(payment.reduction))/100), 0) }} MAD</p> -->
     </div>
     </div>
 </template>
@@ -163,22 +167,40 @@
         sort_column: 'id',
         sort_direction: 'asc',
     });
+    // watch(choosenMonth, async (newVal, oldVal) => {
+    //     console.log(`Month changed from ${oldVal} to ${newVal}`);
+    //     choosenData.value = await paymentsStore.groupPayments.filter(payment => payment.month.toLowerCase() === newVal.toLowerCase());
+    //     total.value = choosenData.value.reduce((total, payment) => {
+    //         let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+    //         return total + Number(amount)
+    //     }, 0)
+    // });
+
     watch(choosenMonth, async (newVal, oldVal) => {
-        console.log(`Month changed from ${oldVal} to ${newVal}`);
-        choosenData.value = await paymentsStore.groupPayments.filter(payment => payment.month.toLowerCase() === newVal.toLowerCase());
-        total.value = choosenData.value.reduce((total, payment) => {
+        isloading.value = true
+        await paymentsStore.fetchGroupPayments(route.params.id,choosenMonth.value,choosenYear.value)
+        choosenData.value = paymentsStore.groupPayments;
+        total.value = paymentsStore.groupPayments.reduce((total, payment) => {
             let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
             return total + Number(amount)
         }, 0)
+        isloading.value = false
     });
-
+    watch(choosenYear, async (newVal, oldVal) => {
+        isloading.value = true
+        await paymentsStore.fetchGroupPayments(route.params.id,choosenMonth.value,choosenYear.value)
+        choosenData.value = paymentsStore.groupPayments;
+        total.value = paymentsStore.groupPayments.reduce((total, payment) => {
+            let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+            return total + Number(amount)
+        }, 0)
+        isloading.value = false
+    });
     const paymentsStore = usePaymentsStore();
     const route = useRoute();
 
-    const showPopup = ref(false);
     const showEditPopup = ref(false);
     const total = ref();
-    const revenu = ref();
     
     const cols =
         ref([
@@ -211,8 +233,7 @@
         choosenMonth.value = options.value[currentMonth];
         await paymentsStore.fetchGroupPayments(route.params.id,choosenMonth.value,choosenYear.value)
         isloading.value =false
-        console.log(paymentsStore.groupPayments);
-        choosenData.value = paymentsStore.groupPayments.filter(payment => payment.month.toLowerCase() === choosenMonth.value.toLowerCase());
+        choosenData.value = paymentsStore.groupPayments;
         total.value = choosenData.value.reduce((total, payment) => {
             let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
             return total + Number(amount)

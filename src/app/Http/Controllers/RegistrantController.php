@@ -158,6 +158,47 @@ class RegistrantController extends Controller
             'center' => 'required',
             'status' => 'required',
         ]);
+        // if($request->status == -1) {
+            $currentMonth = date('n'); // Get the current month as a number (1-12)
+            $currentYear = date('Y'); // Get the current year
+            $months = ['Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'];
+
+            // Adjust the index for the academic year starting in September
+            if ($currentMonth >= 9) {
+                $currentMonth -= 9; // For Sept to Dec, subtract 9 to get index 0-3
+            } else {
+                $currentMonth += 3; // For Jan to June, add 3 to get index 4-9
+            }
+            if ($currentMonth == count($months) - 1) {
+                return;
+            }
+            // $monthsToDelete = array_slice($months, $currentMonth + 1); // Get the months to delete
+
+            // Payment::where('registrant_id', $id)
+            //     ->where('group_id', $data->group_id)
+            //     ->whereIn('month', $monthsToDelete)
+            //     ->where('year', '>=', $currentYear)
+            //     ->delete();
+
+            $monthName = $months[$currentMonth];
+            $payment = Payment::where('group_id',$data->group_id)->where('registrant_id', $data->id)->where('month', $monthName)->where('year', $currentYear)->first();
+        // }
+        $data->update($userData);
+
+        $data->student = $data->student;
+        $data->group = $data->group;
+        $data->user = $data->user;
+        
+        return response()->json(['message' => 'Registrant updated successfully', 'data' => $data, 'payment'=>$payment], 200);
+    }
+    public function refund(Request $request, $id)
+    {
+        $data = Registrant::where('id',$id)->first();
+
+        $validateData = $request->validate([
+            'amount' => 'required',
+            'date_refund' => 'required',
+        ]);
         if($request->status == -1) {
             $currentMonth = date('n'); // Get the current month as a number (1-12)
             $currentYear = date('Y'); // Get the current year
@@ -172,26 +213,43 @@ class RegistrantController extends Controller
             if ($currentMonth == count($months) - 1) {
                 return;
             }
-            $monthsToDelete = array_slice($months, $currentMonth + 1); // Get the months to delete
+            // $monthsToDelete = array_slice($months, $currentMonth + 1); // Get the months to delete
 
-            Payment::where('registrant_id', $id)
-                ->where('group_id', $data->group_id)
-                ->whereIn('month', $monthsToDelete)
-                ->where('year', '>=', $currentYear)
-                ->delete();
+            // Payment::where('registrant_id', $id)
+            //     ->where('group_id', $data->group_id)
+            //     ->whereIn('month', $monthsToDelete)
+            //     ->where('year', '>=', $currentYear)
+            //     ->delete();
 
             $monthName = $months[$currentMonth];
-            $newPayment = Payment::where('group_id',$data->group_id)->where('registrant_id', $data->id)->where('month', $monthName)->where('year', $currentYear)->update([
+            $payment = Payment::where('group_id',$data->group_id)->where('registrant_id', $data->id)->where('month', $monthName)->where('year', $currentYear)->first();
+            $payment->paid = -2;
+            $payment->amount_paid = $payment->amount_paid - $request->amount;
+            $payment->save();
+            Payment::create([
+                'date' => $request->date_refund,
+                'fullName' => $payment->fullName,
+                'amount' => $payment->amount,
+                'reduction' => $payment->reduction,
+                'rest' => 0,
+                'total' => $payment->total,
+                'amount_paid' => $request->amount,
+                'month' => $payment->month,
+                'year' => $payment->year,
+                'type' => $payment->type,
+                'bank' => $payment->bank,
+                'bank_receipt' => $payment->bank_receipt,
+                'receipt' => $payment->receipt,
+                'group' => $payment->group,
+                'user_id' => $payment->user_id,
+                'student_id' => $payment->student_id,
+                'registrant_id' => $payment->registrant_id,
+                'group_id' => $payment->group_id,
                 'paid' => -1,
             ]);
         }
-        $data->update($userData);
-
-        $data->student = $data->student;
-        $data->group = $data->group;
-        $data->user = $data->user;
         
-        return response()->json(['message' => 'Registrant updated successfully', 'data' => $data], 200);
+        return response()->json(['message' => 'Registrant updated successfully'], 200);
     }
 
     public function transfer(Request $request, $id)

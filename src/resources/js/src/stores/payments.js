@@ -44,6 +44,25 @@ export const usePaymentsStore = defineStore("payments", () => {
             return error
         }
     };
+    const fetchFacturation = async (payload) => {
+        try {
+            const response = await api.post('api/facturation/payments',payload);
+            financePayments.value = response.data.data;   // Update the payments state with the fetched data
+            return response
+        } catch (error) {
+            console.error("Failed to fetch payments:", error);
+            return error
+        }
+    };
+    const registrantPayment = async (id,group_id) => {
+        try {
+            const response = await api.get(`api/payment/registrant/${id}/${group_id}`);
+            return response
+        } catch (error) {
+            console.error("Failed to fetch payments:", error);
+            return error
+        }
+    };
     // Fetch all payments and update the state
     const show = async (id) => {
         try {
@@ -104,5 +123,5 @@ export const usePaymentsStore = defineStore("payments", () => {
     };
 
     // Expose the payments state and actions
-    return { payments, undandled, store, update, destroy, studentPayments, show, fetchGroupPayments, groupPayments, allPayments, all, financePayments, fetchFinance };
+    return { payments, undandled, store, update, destroy, studentPayments, show, fetchGroupPayments, groupPayments, allPayments, all, financePayments, fetchFinance, fetchFacturation, registrantPayment };
 });

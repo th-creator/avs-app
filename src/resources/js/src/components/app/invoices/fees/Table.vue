@@ -1,25 +1,35 @@
 <template>
     <div>
+    <div class="flex justify-between my-4 items-center"> 
+        <button type="button" class="btn btn-warning w-40 h-9" @click="exportToExcel()">Exporter</button>   
+        <button type="button" class="btn btn-info w-36 h-9" @click="searchPayments">
+            <IconComponent v-if="isloading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
+            <span v-else>Rechercher</span>
+        </button>
+    </div>
         <div class="panel pb-0 mt-6">
-            <div class="flex justify-between items-end mb-4"> 
-                <div class="flex flex-col gap-4">
-                    <button type="button" class="btn btn-warning" @click="printPayment()">Exporter</button> 
-                    <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." />
-
-                </div>
-                <div class="flex flex-col gap-4"> 
-                    <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> 
+            
+            <div class="flex justify-between items-end mb-4">  
+        <div class="flex gap-10 items-end">
+            <label for="">Du:</label>
+            <input v-model="search.from" type="date" class="form-input max-w-xs" placeholder="Du..." />
+            <label for="">A:</label>
+            <input v-model="search.to" type="date" class="form-input max-w-xs" placeholder="A..." />
+        </div>
+                <!-- <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." /> -->
+                <div class="flex flex-col gap-4">  
                     <multiselect
                         v-model="choosenMonth"
                         :options="options"
                         class="custom-multiselect  max-w-xs"
                         :searchable="true"
-                        placeholder="Le mois"
+                        placeholder="Type"
                         selected-label=""
                         select-label=""
                         deselect-label=""
                     ></multiselect> 
                 </div>
+                <!-- <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> -->
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -30,7 +40,7 @@
                     :loading="isloading"
                     :sortColumn="params.sort_column"
                     :sortDirection="params.sort_direction"
-                    :hasCheckbox="true"
+                    :hasCheckbox="false"
                     :search="params.search"
                      ref="datatable"
                     :paginationInfo="'{0} à {1} de {2}'"
@@ -48,6 +58,11 @@
                     <template #amount="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.amount }}MAD</p>
+                        </div>
+                    </template>
+                    <template #fullName="data">
+                        <div class="flex justify-around w-full items-center gap-2">
+                            <p class="font-semibold text-center">{{ data.value.fullName }}</p>
                         </div>
                     </template>
                     <template #group="data">
@@ -97,17 +112,17 @@
                     </template>
                     <template #paid="data">
                         <div class="flex justify-center w-full">
-                            <div v-if="data.value.reduction == 100 && data.value.paid != -1">
+                            <div v-if="data.value.reduction == 100">
                                 <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
                                     Gratuit
                                 </div>
                             </div>
-                            <div v-else-if="(data.value.paid == 1 && data.value.total == data.value.amount_paid)">
+                            <div v-else-if="(data.value.total > 0 && data.value.total == data.value.amount_paid) || data.value.reduction == 100">
                                 <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
                                     Payé
                                 </div>
                             </div>
-                            <div v-else-if="data.value.paid == 1 && data.value.amount_paid > 0">
+                            <div v-else-if="data.value.total > 0 && data.value.amount_paid > 0">
                                 <div class="px-4 py-2 rounded-full bg-orange-100 text-orange-600 w-[120px] text-center text-sm">
                                     En cours
                                 </div>
@@ -117,11 +132,6 @@
                                     Remboursé
                                 </div>
                             </div>
-                            <div v-else-if="data.value.paid == -2">
-                                <div class="px-4 py-2 rounded-full bg-blue-300 text-blue-800 w-[120px] text-center text-sm">
-                                    Stationaire
-                                </div>
-                            </div>
                             <div v-else>
                                 <div class="px-4 py-2 rounded-full bg-rose-100 text-rose-600 w-[120px] text-center text-sm">
                                     Non payé
@@ -129,117 +139,41 @@
                             </div>
                         </div>
                     </template>
-                    <template #user_id="data">
-                        <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value?.user?.firstName + ' ' + data.value?.user?.lastName }}</p>
-                        </div>
-                    </template>
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
-                            <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
-                            <IconComponent name="print" @click="printPayment(data.value)" />
                             <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
                         </div>
                     </template>
                 </vue3-datatable>
             </div>
         </div>
+    <div class="flex justify-end items-center my-4">
+        <p class="font-semibold text-lg">Total: {{ total }} MAD</p>
+        <!-- <p class="font-semibold text-lg">revenu: {{ choosenData.reduce((total, payment) => total + Number(payment.amount)*((100-Number(payment.reduction))/100), 0) }} MAD</p> -->
     </div>
-    <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
-    <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
-    <!-- Hidden element to use for printing -->
-    <div id="receipt" class="receipt-container hidden">
-        <div class="reciept-wrapper">
-            <div class="flex justify-start p-">
-                <img src="/assets/images/avs-logo.png" alt="Image description" class="w-1/4">
-            </div>
-            <p class="text-center">------------------------------------------------------------------------------------------------------------------------</p>
-            <br>
-            <div>
-                <p><strong>Date :</strong> {{ new Date().toLocaleDateString() }}</p>
-                <h3><strong>Facture Mois :</strong> {{ selectedPayment?.month }}</h3>
-                <p><strong>Nom :</strong> {{ selectedPayment?.fullName }}</p>
-                <p><strong>Reçu :</strong> {{ selectedPayment?.receipt }}</p>    
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Groupe</th>
-                        <th>Montant à payer</th>
-                        <th>Montant reçu</th>
-                        <th>Reste à payer</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(payment, index) in selectedPayment.payments" :key="index">
-                        <td>{{ payment.group }}</td>
-                        <td>{{ payment.total }}</td>
-                        <td>{{ payment.amount_paid }}</td>
-                        <td>{{ payment.rest }}</td>
-                    </tr>
-                </tbody>
-            </table>    
-        </div>
-        <br>
-        <hr>
-        <br>
-        <div class="reciept-wrapper">
-            <div class="flex justify-start">
-                <img src="/assets/images/avs-logo.png" alt="Image description" class="w-1/4">
-            </div>
-            <p class="text-center">------------------------------------------------------------------------------------------------------------------------</p>
-            <br>
-            <div>
-                <p><strong>Date :</strong> {{ new Date().toLocaleDateString() }}</p>
-                <h3><strong>Facture Mois :</strong> {{ selectedPayment?.month }}</h3>
-                <p><strong>Nom :</strong> {{ selectedPayment?.fullName }}</p>
-                <p><strong>Reçu :</strong> {{ selectedPayment?.receipt }}</p>    
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Groupe</th>
-                        <th>Montant a payer</th>
-                        <th>Montant reçu</th>
-                        <th>Reste a payer</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(payment, index) in selectedPayment.payments" :key="index">
-                        <td>{{ payment.group }}</td>
-                        <td>{{ payment.total }}</td>
-                        <td>{{ payment.amount_paid }}</td>
-                        <td>{{ payment.rest }}</td>
-                    </tr>
-                </tbody>
-            </table>    
-        </div>
-        
     </div>
 </template>
 <script setup>
-    import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue';
+    import { ref, reactive, computed, watch } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
-    import { usePaymentsStore } from '@/stores/payments.js';
-    import { useRoute } from 'vue-router';
+    import { useFeesStore } from '@/stores/fees.js';
     import IconComponent from '@/components/icons/IconComponent.vue'
-    import Add from './Add.vue'
-    import Edit from './Edit.vue'
     import Swal from 'sweetalert2';
-    import html2pdf from "html2pdf.js";
     import {useAuthStore} from '@/stores/auth.js';
     import Multiselect from '@suadelabs/vue3-multiselect';
     import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+    import * as XLSX from 'xlsx';
 
     const authStore = useAuthStore();
     
 
-    const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
-    const choosenMonth = ref('Septembre');
+    const options = ref(['tous', 'espèces', 'chèque', 'virement']);
+    const choosenMonth = ref('tous');
     const choosenData = ref([]);
-    const isloading = ref(true);
+    const isloading = ref(false);
 
     const datatable = ref([]);
+    const total = ref();
 
     const params = reactive({
         current_page: 1,
@@ -250,25 +184,32 @@
     });
 
     watch(choosenMonth, (newVal, oldVal) => {
-        console.log(`Month changed from ${oldVal} to ${newVal}`);
-        choosenData.value = paymentsStore.studentPayments.filter(payment => payment.month.toLowerCase() === newVal.toLowerCase());
+        console.log(oldVal,newVal);
+        choosenData.value = feesStore.financeFees.filter(payment => {if(choosenMonth.value == 'tous') {return payment} if (payment.type == choosenMonth.value) return payment});
+        total.value = choosenData.value.reduce((total, payment) => {
+            let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+            return total + Number(amount)
+        }, 0)
+        console.log('total', total.value);
+        
     });
 
-    const paymentsStore = usePaymentsStore();
-    const route = useRoute();
+    const feesStore = useFeesStore();
 
-    const showPopup = ref(false);
-    const showEditPopup = ref(false);
     
+    const search = ref({
+        from: '',
+        to: ''
+    })
+
     const cols =
         ref([
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'group', title: 'Groupe', headerClass: '!text-center flex justify-center', width: 'full' },
-            // { field: 'month', title: 'Mois', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'total', title: "montant à payer", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'total', title: "Montant à payer", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'amount_paid', title: "Montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'reduction', title: "Réduction", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -276,33 +217,26 @@
             { field: 'bank_receipt', title: "Chèque", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'receipt', title: "Recu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'date', title: "Date", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
+            // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
+            // { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
     const rows = computed(async() => {
-        let data = await paymentsStore.studentPayments.length > 0 ? paymentsStore.studentPayments : []
+        let data = await feesStore.financeFees.length > 0 ? feesStore.financeFees : []
         
         return data;
         });
 
-    watch(rows, (newVal, oldVal) => {
-        console.log(`Month changed from ${oldVal} to ${newVal}`);
-        choosenData.value = paymentsStore.studentPayments.filter(payment => payment.month.toLowerCase() === choosenMonth.value.toLowerCase());
-    });
-
-    const editedData = ref({})
-    onMounted(async () => {
-        const currentMonth = new Date().getMonth();
-        choosenMonth.value = options.value[currentMonth];
-        await paymentsStore.show(route.params.id)
+    const searchPayments = async () => {
+        isloading.value =true
+        await feesStore.fetchFinance(search.value)
         isloading.value =false
-        choosenData.value = paymentsStore.studentPayments.filter(payment => payment.month.toLowerCase() === choosenMonth.value.toLowerCase());
-    })
-
-    const toggleEdit = (data) => {
-        editedData.value = data
-        console.log(editedData.value);
-        showEditPopup.value = true
+        choosenData.value = feesStore.financeFees.filter(payment => {if(choosenMonth.value == 'tous') {return payment} if (payment.type == choosenMonth.value) return payment});
+        total.value = choosenData.value.reduce((total, payment) => {
+            let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+            return total + Number(amount)
+        }, 0)
+        console.log('total', total.value);
+        
     }
 
     const deleteData = (data) => {
@@ -327,7 +261,7 @@
         })
         .then((result) => {
             if (result.value) {
-                paymentsStore.destroy(data.id).then(res => {
+                feesStore.destroy(data.id).then(res => {
                     swalWithBootstrapButtons.fire('supprimé!', 'il a été supprimé.', 'success');
                     rows.value = res.data.data
                 }).catch(err => {
@@ -338,52 +272,20 @@
             }
         });
     }
-    const selectedPayment = ref({
-        month:'',
-        name:'',
-        firstName:'',
-        date:'',
-        receipt:'',
-        total:'',
-        rest:'',
-        amount:'',
-        payments:[],
-    });
-// Print function using html2pdf.js
-const printPayment = async (payment) => {
-    const selected = datatable.value.getSelectedRows();
-    if(selected.length == 0) {
-        return
-    }
-    selectedPayment.value = selected[0];
-    selectedPayment.value.payments = await selected.map((item) => ({
-        group:item.group,
-        total:item.total,
-        amount_paid:item.amount_paid,
-        rest:item.rest,
-    }));
-    console.log(selected,selectedPayment.value);
-    
-  // Temporarily remove the hidden class to display the receipt
-  const element = document.getElementById('receipt');
-  element.classList.remove('hidden');
+ 
+    const exportToExcel = () => {
+        // Get the attendance data from Vuex
+        const attendanceData = feesStore.financeFees.map(res => ({Nom: res.fullName, 'Montant à payer': res.total, 'Montant reçu': res.amount_paid, 'Reste à payer': res.rest, 'Réduction': res.reduction, 'Recu': res.receipt}))
+        // Create a worksheet from the attendance data
+        const worksheet = XLSX.utils.json_to_sheet(attendanceData);
 
-  // Wait for the DOM to update
-  nextTick(() => {
-    const options = {
-      margin: 1,
-      filename: `receipt-${selectedPayment.value.id}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        // Create a new workbook and append the worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'groupes');
+
+        // Export the workbook to an Excel file
+        XLSX.writeFile(workbook, 'paiements.xlsx');
     };
-
-    html2pdf().from(element).set(options).save().then(() => {
-      // Add the hidden class again after printing
-      element.classList.add('hidden');
-    });
-  });
-};
 </script>
 
 
