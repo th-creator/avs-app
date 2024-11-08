@@ -23,7 +23,7 @@ Route::post('refresh', [AuthController::class,'refresh']);
 Route::post('logout', [AuthController::class,'logout']);
 
 
-// Route::group(['middleware' => 'jwt.auth'], function () {
+Route::group(['middleware' => 'jwt.auth'], function () {
     Route::apiResource('teacherExpanses', TeacherExpanseController::class);
     Route::apiResource('users', UserController::class);
     Route::put('users/{id}/toggle', [UserController::class, 'toggle']);
@@ -56,4 +56,4 @@ Route::post('logout', [AuthController::class,'logout']);
     Route::post('finance/expanses', [ExpanseController::class, 'fetchFinance']);
     Route::post('finance/teacherExpanses', [TeacherExpanseController::class, 'fetchFinance']);
     Route::get('doubled/registrants', [RegistrantController::class, 'doubled']);
-// });
+});
