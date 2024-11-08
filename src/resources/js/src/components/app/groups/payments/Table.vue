@@ -146,7 +146,6 @@
     import { usePaymentsStore } from '@/stores/payments.js';
     import { useRoute } from 'vue-router';
     import IconComponent from '@/components/icons/IconComponent.vue'
-    import Swal from 'sweetalert2';
     import Multiselect from '@suadelabs/vue3-multiselect';
     import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
     import * as XLSX from 'xlsx';
@@ -167,14 +166,6 @@
         sort_column: 'id',
         sort_direction: 'asc',
     });
-    // watch(choosenMonth, async (newVal, oldVal) => {
-    //     console.log(`Month changed from ${oldVal} to ${newVal}`);
-    //     choosenData.value = await paymentsStore.groupPayments.filter(payment => payment.month.toLowerCase() === newVal.toLowerCase());
-    //     total.value = choosenData.value.reduce((total, payment) => {
-    //         let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
-    //         return total + Number(amount)
-    //     }, 0)
-    // });
 
     watch(choosenMonth, async (newVal, oldVal) => {
         isloading.value = true
@@ -196,10 +187,10 @@
         }, 0)
         isloading.value = false
     });
+    
     const paymentsStore = usePaymentsStore();
     const route = useRoute();
 
-    const showEditPopup = ref(false);
     const total = ref();
     
     const cols =
@@ -226,7 +217,6 @@
         });
 
 
-    const editedData = ref({})
     onMounted(async () => {
         const currentMonth = new Date().getMonth();
         choosenYear.value = new Date().getFullYear();
@@ -245,7 +235,7 @@
         const attendanceData = choosenData.value.map(res => ({nom: res.fullName, mois: res.month, 'Reste à payer': res.rest ? res.rest : Number(res.amount)*((100-Number(res.reduction))/100), 'montant à payer': res.total ? res.total : Number(res.amount)*((100-Number(res.reduction))/100)}))
 
         // Calculate the total of all 'montant à payer'
-        const totalMontant = attendanceData.reduce((total, row) => total + row['montant à payer'], 0);
+        // const totalMontant = attendanceData.reduce((total, row) => total + row['montant à payer'], 0);
 
         // Add the total to the attendance data
         attendanceData.push({nom: '', mois: '', 'Reste à payer': '', 'montant à payer': total.value});
@@ -260,46 +250,7 @@
         XLSX.utils.book_append_sheet(workbook, worksheet, 'paiements');
 
         // Export the workbook to an Excel file
-        XLSX.writeFile(workbook, 'paiements_'+groupsStore.group.intitule+'.xlsx');
+        XLSX.writeFile(workbook, 'Paiements - '+groupsStore.group.intitule+' - '+choosenMonth.value+'.xlsx');
     };
-    const toggleEdit = (data) => {
-        editedData.value = data
-        console.log(editedData.value);
-        showEditPopup.value = true
-    }
-
-    const deleteData = (data) => {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                popup: 'sweet-alerts',
-                confirmButton: 'btn btn-secondary',
-                cancelButton: 'btn btn-dark ltr:mr-3 rtl:ml-3',
-            },
-            buttonsStyling: false,
-        });
-        swalWithBootstrapButtons
-        .fire({
-            title: 'Es-tu sûr?',
-            text: "Vous ne pourrez pas revenir en arrière!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Oui, supprimer!',
-            cancelButtonText: 'Non, Annuler!',
-            reverseButtons: true,
-            padding: '2em',
-        })
-        .then((result) => {
-            if (result.value) {
-                paymentsStore.destroy(data.id).then(res => {
-                    swalWithBootstrapButtons.fire('supprimé!', 'il a été supprimé.', 'success');
-                    rows.value = res.data.data
-                }).catch(err => {
-                    swalWithBootstrapButtons.fire('supprimé!', "il a été supprimé.", 'success');
-                });
-            } else if (result.dismiss === Swal.DismissReason.cancel) {
-                swalWithBootstrapButtons.fire('Annulé', "aucune mesure n'a été prise:)", 'error');
-            }
-        });
-    }
 
 </script>

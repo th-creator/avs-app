@@ -96,40 +96,46 @@
     <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
     <!-- Hidden element to use for printing -->
     <div id="receipt" class="receipt-container hidden m-4">
-        <div class="reciept-wrapper">
-            <div class="flex justify-start p-10">
-                <img src="/assets/images/avs-logo.png" alt="Image description" class="w-1/4">
-            </div>
-            <p class="text-center">------------------------------------------------------------------------------------------------------------------------</p>
-            <br>
-            <div>
-                <p class="text-center text-2xl font-bold underline"><strong>RENFORCEMENT ET SOUTIEN SCOLAIRE</strong></p>
+        <div class="flex flex-col justify-between h-screen">
+            <div class="reciept-wrapper h-screen">
+                <div class="flex justify-between p-10">
+                    <img src="/assets/images/avs-logo.png" alt="Image description" class="w-1/4">
+                    <img src="/assets/images/isfpt-logo.jpeg" alt="Image description" class="w-2/5">
+                </div>
+                <p class="text-center text-3xl font-semibold" style="font-family: 'Courier New', monospace;">RENFORCEMENT ET SOUTIEN SCOLAIRE</p>
                 <br>
+                <hr >
+                <br>
+                <div>
+                    <p class="text-center text-3xl font-medium" style="font-family: 'Courier New', monospace;">Emploi du temps</p>
+                    <br>
+                </div>
+                <table class="border-collapse border-2 border-gray-500 my-4">
+                    <thead>
+                        <tr>
+                            <th class="border-2 border-gray-500">Jour</th>
+                            <th class="border-2 border-gray-500">Matière</th>
+                            <th class="border-2 border-gray-500">Professeur</th>
+                            <th class="border-2 border-gray-500">Heure</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(payment, index) in selectedPayment" :key="index" class="border-2 border-gray-500">
+                            <td class="border-2 border-gray-500">{{ payment.day }}</td>
+                            <td class="border-2 border-gray-500">{{ payment.subject }}</td>
+                            <td class="border-2 border-gray-500">{{ payment.teacher }}</td>
+                            <td class="border-2 border-gray-500">{{ payment.timing }}</td>
+                        </tr>
+                    </tbody>
+                </table>    
             </div>
-            <table class="border-collapse border-2 border-gray-500 my-4">
-                <thead>
-                    <tr>
-                        <th class="border-2 border-gray-500">Jour</th>
-                        <th class="border-2 border-gray-500">Matière</th>
-                        <th class="border-2 border-gray-500">Professeur</th>
-                        <th class="border-2 border-gray-500">Heure</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(payment, index) in selectedPayment" :key="index" class="border-2 border-gray-500">
-                        <td class="border-2 border-gray-500">{{ payment.day }}</td>
-                        <td class="border-2 border-gray-500">{{ payment.subject }}</td>
-                        <td class="border-2 border-gray-500">{{ payment.teacher }}</td>
-                        <td class="border-2 border-gray-500">{{ payment.timing }}</td>
-                    </tr>
-                </tbody>
-            </table>    
+            <div class="mt-auto">
+                <p class="text-center p-2">Centre AVS MA, Avenue Allal Al Fassi - à côté de la boulangerie Alpha 2000 - Marrakech</p>
+                <p class="text-center p-2">Centre AVS2 MA, 5ème étage, siège du parti ISTIQLAL, AV AL MOZDALIFA - Marrakech</p>
+                <p class="text-center p-2">Tel: 0524311982 / 0661843332 / 0667635797</p>
+            </div>    
         </div>
-        <div>
-            <p class="text-center p-2">Centre AVS MA, Avenue Allal Al Fassi - à côté de la boulangerie Alpha 2000 - Marrakech</p>
-            <p class="text-center p-2">Centre AVS2 MA, 5ème étage, siège du parti ISTIQLAL, AV AL MOZDALIFA - Marrakech</p>
-            <p class="text-center p-2">Tel: 0524311982 / 0661843332 / 0662265561</p>
-        </div>
+        
     </div>
 </template>
 <script setup>
@@ -252,7 +258,7 @@ const printPayment = async (payment) => {
   nextTick(() => {
     const options = {
       margin: 1,
-      filename: `receipt-${payment.firstName + '_' + payment.lastName}.pdf`,
+      filename: `emploi-${payment.firstName + '_' + payment.lastName}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },

@@ -116,24 +116,25 @@
     <!-- Hidden element to use for printing -->
     <div id="receipt" class="receipt-container hidden">
         <div class="reciept-wrapper">
-            <div class="flex justify-start p-">
+            <div class="flex justify-between p-">
                 <img src="/assets/images/avs-logo.png" alt="Image description" class="w-1/4">
+                <img src="/assets/images/isfpt-logo.jpeg" alt="Image description" class="w-2/5">
             </div>
-            <p class="text-center">------------------------------------------------------------------------------------------------------------------------</p>
+            <p class="text-center text-3xl font-semibold" style="font-family: 'Courier New', monospace;">RENFORCEMENT ET SOUTIEN SCOLAIRE</p>
             <br>
-            <div>
-                <p><strong>Date :</strong> {{ new Date().toLocaleDateString() }}</p>
-                <h3><strong>Facture Mois :</strong> {{ selectedPayment?.month }}</h3>
-                <p><strong>Nom :</strong> {{ selectedPayment?.fullName }}</p>
-                <p><strong>Reçu :</strong> {{ selectedPayment?.receipt }}</p>    
+            <hr >
+            <!-- <p class="text-center">------------------------------------------------------------------------------------------------------------------------</p> -->
+            <br>
+            <div class="flex justify-between">
+                <p><strong>Nom :</strong> {{ selectedPayment?.fullName }} </p><p> <strong>Date :</strong> {{ new Date().toLocaleDateString() }}</p>
             </div>
             <table>
                 <thead>
                     <tr>
-                        <th>Montant a payer</th>
+                        <th>Montant à payer</th>
                         <th>Montant reçu</th>
-                        <th>Reste a payer</th>
-                        <th>Type de reglement</th>
+                        <th>Reste à payer</th>
+                        <th>Reçu</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -141,33 +142,39 @@
                         <td>{{ selectedPayment?.total }}</td>
                         <td>{{ selectedPayment?.amount_paid }}</td>
                         <td>{{ selectedPayment?.rest }}</td>
-                        <td>{{ selectedPayment?.type }}</td>
+                        <td>{{ selectedPayment?.receipt }}</td>
                     </tr>
                 </tbody>
-            </table>    
+            </table> 
+            <div>
+                <p class="text-center">Centre AVS MA, Avenue Allal Al Fassi - à côté de la boulangerie Alpha 2000 - Marrakech</p>
+                <p class="text-center p-">Centre AVS2 MA, 5ème étage, siège du parti ISTIQLAL, AV AL MOZDALIFA - Marrakech</p>
+                <p class="text-center p-">Tel: 0524311982 / 0661843332 / 0667635797</p>
+            </div>    
         </div>
         <br>
         <hr>
         <br>
         <div class="reciept-wrapper">
-            <div class="flex justify-start">
+            <div class="flex justify-between p-">
                 <img src="/assets/images/avs-logo.png" alt="Image description" class="w-1/4">
+                <img src="/assets/images/isfpt-logo.jpeg" alt="Image description" class="w-2/5">
             </div>
-            <p class="text-center">------------------------------------------------------------------------------------------------------------------------</p>
+            <p class="text-center text-3xl font-semibold" style="font-family: 'Courier New', monospace;">RENFORCEMENT ET SOUTIEN SCOLAIRE</p>
             <br>
-            <div>
-                <p><strong>Date :</strong> {{ new Date().toLocaleDateString() }}</p>
-                <h3><strong>Facture Mois :</strong> {{ selectedPayment?.month }}</h3>
-                <p><strong>Nom :</strong> {{ selectedPayment?.fullName }}</p>
-                <p><strong>Reçu :</strong> {{ selectedPayment?.receipt }}</p>    
+            <hr >
+            <!-- <p class="text-center">------------------------------------------------------------------------------------------------------------------------</p> -->
+            <br>
+            <div class="flex justify-between">
+                <p><strong>Nom :</strong> {{ selectedPayment?.fullName }} </p><p> <strong>Date :</strong> {{ new Date().toLocaleDateString() }}</p>
             </div>
             <table>
                 <thead>
                     <tr>
-                        <th>Montant a payer</th>
+                        <th>Montant à payer</th>
                         <th>Montant reçu</th>
-                        <th>Reste a payer</th>
-                        <th>Type de reglement</th>
+                        <th>Reste à payer</th>
+                        <th>Reçu</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -175,12 +182,16 @@
                         <td>{{ selectedPayment?.total }}</td>
                         <td>{{ selectedPayment?.amount_paid }}</td>
                         <td>{{ selectedPayment?.rest }}</td>
-                        <td>{{ selectedPayment?.type }}</td>
+                        <td>{{ selectedPayment?.receipt }}</td>
                     </tr>
                 </tbody>
-            </table>    
+            </table> 
+            <div>
+                <p class="text-center">Centre AVS MA, Avenue Allal Al Fassi - à côté de la boulangerie Alpha 2000 - Marrakech</p>
+                <p class="text-center p-">Centre AVS2 MA, 5ème étage, siège du parti ISTIQLAL, AV AL MOZDALIFA - Marrakech</p>
+                <p class="text-center p-">Tel: 0524311982 / 0661843332 / 0667635797</p>
+            </div>    
         </div>
-        
     </div>
 </template>
 <script setup>
@@ -304,7 +315,7 @@ const printPayment = (payment) => {
   nextTick(() => {
     const options = {
       margin: 1,
-      filename: `receipt-${payment.id}.pdf`,
+      filename: `Frais-${payment.fullName}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },

@@ -121,25 +121,49 @@
     const exportToExcel = () => {
         // Get the attendance data from Vuex
         const attendanceData = registrantsStore.groupRegistrants.map(res => ({no: res.student.id, nom: res.lastName, prenom: res.firstName, Mobile: res.phone,...studyDates.value}))
+        
         // Create a worksheet from the attendance data
-        const worksheet = XLSX.utils.json_to_sheet(attendanceData);
+        const worksheet = XLSX.utils.json_to_sheet(attendanceData, {cellStyles: true});
 
         // Create a new workbook and append the worksheet
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance');
 
+        // Apply some cell styling
+        const ws = workbook.Sheets['Attendance'];
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for(let R = range.s.r; R <= range.e.r; ++R) {
+            for(let C = range.s.c; C <= range.e.c; ++C) {
+                const cell_address = {c:C, r:R};
+                const cell_ref = XLSX.utils.encode_cell(cell_address);
+                if(ws[cell_ref]) {
+                    ws[cell_ref].s = {
+                        fill: {
+                            fgColor: {rgb: "FFFFAA00"}
+                        },
+                        font: {
+                            color: {rgb: "FF000000"},
+                            sz: 14,
+                            bold: true,
+                            underline: true
+                        }
+                    };
+                }
+            }
+        }
+
         // Export the workbook to an Excel file
-        XLSX.writeFile(workbook, 'présence_'+groupsStore.group.intitule+'.xlsx');
+        XLSX.writeFile(workbook, 'liste de présence - '+groupsStore.group.intitule+'.xlsx');
     };
     // Mapping from French days to JavaScript days
     const dayMap = {
-        "Lundi": 1,    // Monday
-        "Mardi": 2,    // Tuesday
-        "Mercredi": 3, // Wednesday
-        "Jeudi": 4,    // Thursday
-        "Vendredi": 5, // Friday
-        "Samedi": 6,   // Saturday
-        "Dimanche": 0  // Sunday (this will be excluded)
+        "Lundi": 2,    // Monday
+        "Mardi": 3,    // Tuesday
+        "Mercredi": 4, // Wednesday
+        "Jeudi": 5,    // Thursday
+        "Vendredi": 6, // Friday
+        "Samedi": 7,   // Saturday
+        "Dimanche": 1  // Sunday (this will be excluded)
         };
 
 // Function to get all dates for the specified days in the current month, excluding Sundays
@@ -165,13 +189,24 @@
         const allDays = getDaysInMonth(currentMonth, currentYear);
         // Loop through the studyData and find all matching dates
         JSON.parse(groupsStore.group.timing).forEach(item => {
+            console.log(allDays);
+            
             const targetDay = dayMap[item.day]; // Get the day number (0-6) from French day
 
             // Loop through all the days of the current month
             allDays.forEach(date => {
-            if (date.getDay() === (targetDay+1)) {
-                datesToReturn.push(date.toISOString().slice(5, 10)); // Format MM-DD
-            }
+                console.log(date.getDay(), (targetDay));
+                
+                if (date.getDay() === (targetDay)) {
+                    datesToReturn.push(date.toISOString().slice(5, 10)); // Format MM-DD
+                }
+                if (7 === (targetDay) && date.getDay() == 6) {
+                    date.setDate(date.getDate() + 1);
+                    console.log(date.toISOString().slice(5, 10));
+                    
+                    datesToReturn.push(date.toISOString().slice(5, 10)); // Format MM-DD
+                }
+                // console.log(datesToReturn);
             });
         });
 
@@ -181,39 +216,4 @@
         });
         console.log(studyDates.value);
     };
-
-    const deleteData = (data) => {
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                popup: 'sweet-alerts',
-                confirmButton: 'btn btn-secondary',
-                cancelButton: 'btn btn-dark ltr:mr-3 rtl:ml-3',
-            },
-            buttonsStyling: false,
-        });
-        swalWithBootstrapButtons
-        .fire({
-            title: 'Es-tu sûr?',
-            text: "Vous ne pourrez pas revenir en arrière!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Oui, supprimer!',
-            cancelButtonText: 'Non, Annuler!',
-            reverseButtons: true,
-            padding: '2em',
-        })
-        .then((result) => {
-            if (result.value) {
-                registrantsStore.destroy(data.id).then(res => {
-                    swalWithBootstrapButtons.fire('supprimé!', 'il a été supprimé.', 'success');
-                    rows.value = res.data.data
-                }).catch(err => {
-                    swalWithBootstrapButtons.fire('supprimé!', "il a été supprimé.", 'success');
-                });
-            } else if (result.dismiss === Swal.DismissReason.cancel) {
-                swalWithBootstrapButtons.fire('Annulé', "aucune mesure n'a été prise:)", 'error');
-            }
-        });
-    }
-
 </script>
