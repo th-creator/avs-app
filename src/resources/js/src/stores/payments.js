@@ -64,9 +64,9 @@ export const usePaymentsStore = defineStore("payments", () => {
         }
     };
     // Fetch all payments and update the state
-    const show = async (id) => {
+    const show = async (id,month,year) => {
         try {
-            const response = await api.get(`api/payments/${id}`);
+            const response = await api.get(`api/student/payments/${id}/${month}/${year}`);
             studentPayments.value = response.data.data;  // Update the payments state with the fetched data
             return response
         } catch (error) {
@@ -87,7 +87,10 @@ export const usePaymentsStore = defineStore("payments", () => {
     };
 
     // Store a new user and update the state
-    const store = async (payload) => {
+    const store = async (payload,group = null) => {
+        if (group) {
+            studentPayments.value = studentPayments.value.filter(user => user.group !== group);
+        }
         const response = await api.post('api/payments', payload);
         payments.value.push(response.data.data);  // Add the new user to the payments array
         payments.value = [...payments.value]; // Reassign to force reactivity

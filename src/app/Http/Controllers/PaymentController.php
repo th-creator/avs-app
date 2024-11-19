@@ -77,6 +77,64 @@ class PaymentController extends Controller
         $data = Payment::where('student_id',$id)->with('user')->get();
         return response()->json(['data' => $data], 200);
     }
+    public function studentpayments($id,$month,$year) {
+        $months = [
+            'Janvier' => 1,
+            'Février' => 2,
+            'Mars' => 3,
+            'Avril' => 4,
+            'Mai' => 5,
+            'Juin' => 6,
+            'Juillet' => 7,
+            'Août' => 8,
+            'Septembre' => 9,
+            'Octobre' => 10,
+            'Novembre' => 11,
+            'Décembre' => 12,
+        ];
+        $monthNumber = $months[$month];
+        $currentDate = $year.'-'.$monthNumber.'-'.date('d');
+
+        $data = Payment::where('student_id',$id)->where('month', $month)->where('year', $year)->with('user')->get();
+        $registrants = Registrant::where('student_id',$id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
+        foreach ($registrants as $registrant) {
+            $payment = Payment::where('registrant_id', $registrant->id)
+                                ->where('month', $month)
+                                ->where('year', $year)
+                                ->first();
+
+            if (!$payment) {
+                $group = $registrant->group;
+                $pay = Payment::where('student_id',$id)->where('group_id',$group->id)->first();
+                if($pay && $pay->reduction) {
+                    $reduction = $pay->reduction;
+                    $total = $group->section->price*(100-$pay->reduction)/100;
+                } else {
+                    $reduction = 0;
+                    $total = 0;
+                }
+                $data[] = [
+                    'fullName' => $registrant->student['firstName'] . ' ' . $registrant->student['lastName'], 
+                    'registrant_id' => $registrant->id,
+                    'group' => $group->intitule,
+                    'group_id' => $group->id,
+                    'amount' => $group->section->price,
+                    'reduction' => $reduction,
+                    'rest' => '0',
+                    'total' => $total,
+                    'amount_paid' => '0',
+                    'paid' => null,
+                    'type' => null,
+                    'receipt' => null,
+                    'user_id' => null,
+                    'student_id' =>  $id,
+                    'month' => $month,
+                    'year' => $year
+                ];
+            }
+        }
+        return response()->json(['data' => $data], 200);
+    }
     public function registrantPayment($id,$group_id) {
         $data = Payment::where('student_id',$id)->where('group_id',$group_id)->first();
         return response()->json(['data' => $data], 200);
@@ -160,9 +218,9 @@ class PaymentController extends Controller
             'rest' => 'required',
             'total' => 'required',
             'amount_paid' => 'nullable',
-            'month' => 'nullable',
-            'year' => 'nullable',
-            'type' => 'nullable',
+            'month' => 'required',
+            'year' => 'required',
+            'type' => 'required',
             'bank' => 'nullable',
             'bank_receipt' => 'nullable',
             'receipt' => 'nullable',
@@ -209,7 +267,7 @@ class PaymentController extends Controller
             'rest' => 'required',
             'total' => 'required',
             'amount_paid' => 'nullable',
-            'type' => 'nullable',
+            'type' => 'required',
             'bank' => 'nullable',
             'bank_receipt' => 'nullable',
             'receipt' => 'nullable',

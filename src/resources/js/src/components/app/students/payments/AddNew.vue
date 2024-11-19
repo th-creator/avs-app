@@ -1,6 +1,6 @@
 <template>
     <div>
-        <TransitionRoot appear :show="showEditPopup" as="template">
+        <TransitionRoot appear :show="showNewPopup" as="template">
             <Dialog as="div"  class="relative z-50">
             <TransitionChild 
                 as="template"
@@ -29,7 +29,7 @@
                     <button type="button" class="absolute top-7 ltr:right-9 rtl:left-9 text-white-dark hover:text-dark outline-none" @click="close()">
                         X
                     </button>
-                    <div class="text-lg text-center font-semibold ltr:pl-5 rtl:pr-5 py-5 ltr:pr-[50px] rtl:pl-[50px]">Modifier</div>
+                    <div class="text-lg text-center font-semibold ltr:pl-5 rtl:pr-5 py-5 ltr:pr-[50px] rtl:pl-[50px]">Ajouter</div>
                     <div class="p-5">
                         <form>
                             <div class="relative mb-4 flex gap-4">
@@ -114,7 +114,7 @@
                                 <input v-model="data.receipt" type="text" placeholder="Receipt" class="form-input" />
                                 <span v-if="errors.receipt" class="text-red-600 text-sm">{{ errors.receipt[0] }}</span>
                             </div>
-                            <button type="button" class="btn btn-primary w-full h-10" @click="Edit()">
+                            <button type="button" class="btn btn-primary w-full h-10" @click="AddNew()">
                                 <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
                                 <span v-else>Soumettre</span>
                             </button>
@@ -140,6 +140,8 @@ import { useAlert } from '@/composables/useAlert';
 import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 import IconComponent from '@/components/icons/IconComponent.vue'
+import {useAuthStore} from '@/stores/auth.js';
+import { useStudentsStore } from '@/stores/students.js';
 
 const isLoading = ref(false)
 
@@ -147,16 +149,18 @@ const options = ref(['espèces', 'chèque', 'virement']);
 const months = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
 
 const paymentsStore = usePaymentsStore();
+const authStore = useAuthStore();
+const studentsStore = useStudentsStore();
 
 const calculatePayer = () => {
     data.value.rest = data.value.total - data.value.amount_paid
 }
 const props = defineProps({
-    showEditPopup: {
+    showNewPopup: {
         type: Boolean,
         required: true,
     },
-    editedData: {
+    newData: {
         type: Object,
         required: true,
     },
@@ -167,18 +171,22 @@ const props = defineProps({
 });
 
 const data = ref({
-    date: props.editedData.date,
-    amount: props.editedData.amount,
-    reduction: props.editedData.reduction,
-    rest: props.editedData.rest,
-    amount_paid: props.editedData.amount_paid,
-    total: props.editedData.total,
-    type: props.editedData.type,
-    bank: props.editedData.bank,
-    bank_receipt: props.editedData.bank_receipt,
-    receipt: props.editedData.receipt,
-    month: props.editedData.month,
-    year: props.editedData.year,
+    date: '',
+    amount: props.newData.amount,
+    reduction: props.newData.reduction,
+    rest: props.newData.rest,
+    amount_paid: props.newData.amount_paid,
+    total: props.newData.total,
+    type: 'espèces',
+    bank: '',
+    bank_receipt: '',
+    receipt: '',
+    month: props.newData.month,
+    year: props.newData.year,
+    fullName: '',
+    group_id: props.newData.group_id,
+    user_id: '',
+    student_id: props.newData.student_id,
 })
 
 const errors = ref({})
@@ -186,20 +194,22 @@ const calculateRest = () => {
     let reduction = data.value.reduction == null ? 0 : data.value.reduction
     data.value.total = data.value.amount*(100-reduction)/100
 }
-const Edit = () => {
+const AddNew = () => {
     isLoading.value = true
-    paymentsStore.update(data.value,props.editedData.id).then(res => {
-        console.log(res);
+    data.value.user_id = authStore?.user?.id
+    data.value.fullName = studentsStore.student.firstName + ' ' +  studentsStore.student.lastName
+    paymentsStore.store(data.value,props.newData.group).then(res => {
         isLoading.value = false
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {
-        console.log(err);
         isLoading.value = false
         if(err.status == 422) {
             errors.value =  err.response.data.errors;
-        }
-        useAlert('warning', "quelque chose s'est mal passé!");
+            useAlert('warning', "quelque chose s'est mal passé!");
+        } else if(err.status == 400) {
+            useAlert('warning', "Le paiement existe déjà!");
+        } else useAlert('warning', "quelque chose s'est mal passé!");
     });
 }
 </script>

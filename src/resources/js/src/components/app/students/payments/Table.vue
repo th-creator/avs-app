@@ -9,16 +9,28 @@
                 </div>
                 <div class="flex flex-col gap-4"> 
                     <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> 
-                    <multiselect
-                        v-model="choosenMonth"
-                        :options="options"
-                        class="custom-multiselect  max-w-xs"
-                        :searchable="true"
-                        placeholder="Le mois"
-                        selected-label=""
-                        select-label=""
-                        deselect-label=""
-                    ></multiselect> 
+                    <div class="flex gap-2">
+                        <multiselect
+                            v-model="choosenMonth"
+                            :options="options"
+                            class="custom-multiselect  max-w-xs"
+                            :searchable="true"
+                            placeholder="Le mois"
+                            selected-label=""
+                            select-label=""
+                            deselect-label=""
+                        ></multiselect>    
+                        <multiselect
+                            v-model="choosenYear"
+                            :options="years"
+                            class="custom-multiselect  max-w-xs"
+                            :searchable="true"
+                            placeholder="L'année"
+                            selected-label=""
+                            select-label=""
+                            deselect-label=""
+                        ></multiselect>    
+                    </div>
                 </div>
             </div>
             <div class="datatable">
@@ -135,16 +147,18 @@
                         </div>
                     </template>
                     <template #actions="data">
-                        <div class="flex w-fit mx-auto justify-around gap-5">
+                        <div v-if="data.value.paid != null" class="flex w-fit mx-auto justify-around gap-5">
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
                             <!-- <IconComponent name="print" @click="printPayment(data.value)" /> -->
                             <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
                         </div>
+                        <p class="font-semibold text-xl text-center cursor-pointer" @click="() => toggleNew(data.value)" v-else>+</p>
                     </template>
                 </vue3-datatable>
             </div>
         </div>
     </div>
+    <AddNew :close="() => showNewPopup = false" :showNewPopup="showNewPopup" v-bind:newData="newData" v-if="showNewPopup"/>
     <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
     <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
     <!-- Hidden element to use for printing -->
@@ -240,6 +254,7 @@
     import IconComponent from '@/components/icons/IconComponent.vue'
     import Add from './Add.vue'
     import Edit from './Edit.vue'
+    import AddNew from './AddNew.vue'
     import Swal from 'sweetalert2';
     import html2pdf from "html2pdf.js";
     import {useAuthStore} from '@/stores/auth.js';
@@ -251,6 +266,8 @@
 
     const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
     const choosenMonth = ref('Septembre');
+    const years = ref([2024,2025,2026,2027,2028,2029,2030]);
+    const choosenYear = ref(2024);
     const choosenData = ref([]);
     const isloading = ref(true);
 
@@ -264,16 +281,13 @@
         sort_direction: 'desc',
     });
 
-    watch(choosenMonth, (newVal, oldVal) => {
-        console.log(`Month changed from ${oldVal} to ${newVal}`);
-        choosenData.value = paymentsStore.studentPayments.filter(payment => payment.month.toLowerCase() === newVal.toLowerCase());
-    });
-
     const paymentsStore = usePaymentsStore();
     const route = useRoute();
 
+
     const showPopup = ref(false);
     const showEditPopup = ref(false);
+    const showNewPopup = ref(false);
     
     const cols =
         ref([
@@ -302,22 +316,41 @@
 
     watch(rows, (newVal, oldVal) => {
         console.log(`Month changed from ${oldVal} to ${newVal}`);
-        choosenData.value = paymentsStore.studentPayments.filter(payment => payment.month.toLowerCase() === choosenMonth.value.toLowerCase());
+        choosenData.value = paymentsStore.studentPayments;
     });
 
     const editedData = ref({})
+    const newData = ref({})
     onMounted(async () => {
         const currentMonth = new Date().getMonth();
+        choosenYear.value = new Date().getFullYear();
         choosenMonth.value = options.value[currentMonth];
-        await paymentsStore.show(route.params.id)
+        await paymentsStore.show(route.params.id,choosenMonth.value,choosenYear.value)
+        choosenData.value = paymentsStore.studentPayments;
         isloading.value =false
-        choosenData.value = paymentsStore.studentPayments.filter(payment => payment.month.toLowerCase() === choosenMonth.value.toLowerCase());
     })
+    watch(choosenMonth, async (newVal, oldVal) => {
+        isloading.value = true
+        await paymentsStore.show(route.params.id,choosenMonth.value,choosenYear.value)
+        choosenData.value = paymentsStore.studentPayments;
+        isloading.value = false
+    });
+    watch(choosenYear, async (newVal, oldVal) => {
+        isloading.value = true
+        await paymentsStore.show(route.params.id,choosenMonth.value,choosenYear.value)
+        choosenData.value = paymentsStore.studentPayments;
+        isloading.value = false
+    });
 
     const toggleEdit = (data) => {
         editedData.value = data
         console.log(editedData.value);
         showEditPopup.value = true
+    }
+    const toggleNew = (data) => {
+        newData.value = data
+        console.log(editedData.value);
+        showNewPopup.value = true
     }
 
     const deleteData = (data) => {
