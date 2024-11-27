@@ -162,6 +162,7 @@ class PaymentController extends Controller
             $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
         })->whereNot('paid',-1)->where('group_id',$id)->where('month', $month)->where('year', $year)->get();
         $group = Group::find($id);
+        $price = $group->section->price;
         $registrants = Registrant::where('group_id',$id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
         foreach ($registrants as $registrant) {
             $payment = Payment::where('registrant_id', $registrant->id)
@@ -171,14 +172,22 @@ class PaymentController extends Controller
                                 ->first();
 
             if (!$payment) {
+                $pay = Payment::where('student_id',$registrant->student_id)->where('group_id',$group->id)->first();
+                if($pay && $pay->reduction) {
+                    $reduction = $pay->reduction;
+                    $total = $price*(100-$pay->reduction)/100;
+                } else {
+                    $reduction = 0;
+                    $total = $price;
+                }
                 $data[] = [
                     'fullName' => $registrant->student['firstName'] . ' ' . $registrant->student['lastName'], 
                     'registrant_id' => $registrant->id,
                     'group' => $group->intitule,
-                    'amount' => $group->section->price,
-                    'reduction' => '0',
+                    'amount' => $price,
+                    'reduction' => $reduction,
                     'rest' => '0',
-                    'total' => $group->section->price,
+                    'total' => $total,
                     'amount_paid' => '0',
                     'paid' => 0,
                     'type' => null,

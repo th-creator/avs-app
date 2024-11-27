@@ -33,7 +33,7 @@ class GroupController extends Controller
         $monthNumber = $months[$month];
         $currentDate = $year.'-'.$monthNumber.'-'.date('d');
         $data = Group::where('id',$id)->first();
-        
+        $price = $data->section->price;
         $data->payments = Payment::whereHas('registrant', function ($query) use ($currentDate) {
             $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
         })->whereNot('paid',-1)->where('group_id',$data->id)
@@ -48,21 +48,19 @@ class GroupController extends Controller
                                 ->first();
 
             if (!$payment) {
+                $pay = Payment::where('student_id',$registrant->student_id)->where('group_id',$data->id)->first();
+                Log::alert($pay);
+                if($pay && $pay->reduction) {
+                    $reduction = $pay->reduction;
+                    $total = $price*(100-$pay->reduction)/100;
+                } else {
+                    $reduction = 0;
+                    $total = $price;
+                }
                 $data->payments[] = [
-                    'fullName' => $registrant->student['firstName'] . ' ' . $registrant->student['lastName'], 
-                    'registrant_id' => $registrant->id,
-                    'group' => $data->intitule,
                     'amount' => $data->section->price,
-                    'reduction' => '0',
-                    'rest' => '0',
-                    'total' => $data->section->price,
-                    'amount_paid' => '0',
-                    'paid' => 0,
-                    'type' => null,
-                    'receipt' => null,
-                    'user_id' => null,
-                    'student_id' =>  $registrant->student['id'],
-                    'paid' => 0,
+                    'reduction' => $reduction,
+                    'total' => $total,
                     'month' => $month,
                     'year' => $year
                 ];
@@ -103,14 +101,23 @@ class GroupController extends Controller
                                     ->first();
     
                 if (!$payment) {
+                    $price = $group->section->price;
+                    $pay = Payment::where('student_id',$registrant->student_id)->where('group_id',$group->id)->first();
+                    if($pay && $pay->reduction) {
+                        $reduction = $pay->reduction;
+                        $total = $price*(100-$pay->reduction)/100;
+                    } else {
+                        $reduction = 0;
+                        $total = $price;
+                    }
                     $group->payments[] = [
                         'fullName' => $registrant->student['firstName'] . ' ' . $registrant->student['lastName'], 
                         'registrant_id' => $registrant->id,
                         'group' => $group->intitule,
-                        'amount' => $group->section->price,
-                        'reduction' => '0',
+                        'amount' => $price,
+                        'reduction' => $reduction,
                         'rest' => '0',
-                        'total' => $group->section->price,
+                        'total' => $total,
                         'amount_paid' => '0',
                         'paid' => 0,
                         'type' => null,
