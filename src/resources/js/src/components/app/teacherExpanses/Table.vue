@@ -108,7 +108,7 @@
             { field: 'group', title: 'Groupe', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'total', title: "Montant total", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: "Montant payé", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'amount', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'month', title: "Mois", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'date', title: "Date", headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
