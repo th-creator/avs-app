@@ -3,8 +3,34 @@
         <div class="panel pb-0 mt-6">
             <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les dépenses des enseignants</h5>
             <div class="flex justify-between my-4">    
+                <button type="button" class="btn btn-warning w-40 h-9" @click="exportToExcel()">Exporter</button>   
+                <button type="button" class="btn btn-info w-40 h-9" @click="showPopup = true">Ajouter</button>
+            </div>
+            <div class="flex justify-between my-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
-                <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
+                
+                <div class="flex gap-2">
+                    <multiselect
+                        v-model="choosenMonth"
+                        :options="options"
+                        class="custom-multiselect  max-w-xs"
+                        :searchable="true"
+                        placeholder="Le mois"
+                        selected-label=""
+                        select-label=""
+                        deselect-label=""
+                    ></multiselect>    
+                    <multiselect
+                        v-model="choosenYear"
+                        :options="years"
+                        class="custom-multiselect  max-w-xs"
+                        :searchable="true"
+                        placeholder="L'année"
+                        selected-label=""
+                        select-label=""
+                        deselect-label=""
+                    ></multiselect>    
+                </div>
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -72,12 +98,28 @@
                 </vue3-datatable>
             </div>
         </div>
+        <div class="flex flex-col justify-end items-end my-4">
+            <table class="w-fit font-semibold text-lg">
+                <tr>
+                    <td>Montant Total: </td>
+                    <td> {{ total }} MAD</td>
+                </tr>
+                <tr>
+                    <td>Montant payé: </td>
+                    <td> {{ amount }} MAD</td>
+                </tr>
+                <tr>
+                    <td>Le Reste: </td>
+                    <td> {{ rest }} MAD</td>
+                </tr>
+            </table>
+        </div>
     </div>
     <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
     <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
 </template>
 <script setup>
-    import { ref, reactive, computed, onMounted, nextTick } from 'vue';
+    import { ref, reactive, computed, onMounted, watch } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import IconComponent from '@/components/icons/IconComponent.vue'
     import Add from './Add.vue'
@@ -85,6 +127,14 @@
     import Swal from 'sweetalert2';
     import {useAuthStore} from '@/stores/auth.js';
     import { useTeacherExpansesStore } from '@/stores/teacherExpanse.js';
+    import Multiselect from '@suadelabs/vue3-multiselect';
+    import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+    import * as XLSX from 'xlsx';
+
+    const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
+    const choosenMonth = ref('Septembre');
+    const years = ref([2024,2025,2026,2027,2028,2029,2030]);
+    const choosenYear = ref(new Date().getFullYear());
 
     const authStore = useAuthStore();
     const isloading = ref(true);
@@ -100,6 +150,9 @@
 
     const showPopup = ref(false);
     const showEditPopup = ref(false);
+    const total = ref(0)
+    const rest = ref(0)
+    const amount = ref(0)
     
     const cols =
         ref([
@@ -116,15 +169,35 @@
         ]) || [];
 
     const rows = computed(async() => {
+        total.value = 0
+        rest.value = 0
+        amount.value = 0
         let data = await teacherExpanseStore.teacherExpanses.length > 0 ? teacherExpanseStore.teacherExpanses : []
+        teacherExpanseStore.teacherExpanses.map((payment) => {
+            total.value = total.value + Number(payment.total)
+            rest.value = rest.value + Number(payment.rest)
+            amount.value = amount.value + Number(payment.amount)
+        }, 0)
         return data;
         });
 
 
+    watch(choosenMonth, async (newVal, oldVal) => { 
+        isloading.value = true
+        await teacherExpanseStore.index(choosenMonth.value,choosenYear.value)
+        isloading.value = false
+    });
+    watch(choosenYear, async (newVal, oldVal) => { 
+        isloading.value = true
+        await teacherExpanseStore.index(choosenMonth.value,choosenYear.value)
+        isloading.value = false
+    });
     const editedData = ref({})
     onMounted(async () => {
-        await teacherExpanseStore.index()
-        isloading.value = false
+        const currentMonth = new Date().getMonth();
+        choosenMonth.value = options.value[currentMonth];
+        // await teacherExpanseStore.index()
+        // isloading.value = false
     })
 
     function openPdf(pdf) {
@@ -169,6 +242,21 @@
             }
         });
     }
+ 
+    const exportToExcel = () => {
+        // Get the attendance data from Vuex
+        const attendanceData = teacherExpanseStore.teacherExpanses.map(res => ({'Enseignant': res.teacher, 'Groupe': res.group, 'Montant total': res.total, 'Montant payé': res.amount, 'Reste': res.rest, 'Date': res.date}))
+        attendanceData.push({'Enseignant': 'Total', 'Groupe': '', 'Montant total': total.value, 'Montant payé': amount.value, 'Reste': rest.value, 'Date': ''})
+        // Create a worksheet from the attendance data
+        const worksheet = XLSX.utils.json_to_sheet(attendanceData);
+
+        // Create a new workbook and append the worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'dépenses');
+
+        // Export the workbook to an Excel file
+        XLSX.writeFile(workbook, 'dépenses-'+choosenMonth.value+'-'+choosenYear.value+'.xlsx');
+    };
 </script>
 
 <style scoped>

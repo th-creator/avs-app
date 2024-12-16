@@ -85,6 +85,16 @@
                                 <input v-model="data.bank_receipt" type="text" placeholder="Chèque" class="form-input" />
                                 <span v-if="errors.bank_receipt" class="text-red-600 text-sm">{{ errors.bank_receipt[0] }}</span>
                             </div>
+                            <div class="relative mb-4">
+                                <label class="text-sm">Document:</label>
+                                <input
+                                    @change="handleFileChange"
+                                    type="file"
+                                    placeholder="Document"
+                                    class="form-input"
+                                />
+                                <span v-if="errors.file" class="text-red-600 text-sm">{{ errors.file[0] }}</span>
+                            </div>
                             <button type="button" class="btn btn-primary w-full h-10" @click="Edit()">
                                 <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
                                 <span v-else>Soumettre</span>
@@ -143,13 +153,30 @@ const data = ref({
     bank: props.editedData.bank,
     bank_receipt: props.editedData.bank_receipt,
     paid_by: props.editedData.paid_by,
+    file: '',
 })
 
 const errors = ref({})
 
+const handleFileChange = ($e) => {
+  const file = $e.target.files[0];
+
+  if (!file) return;
+
+  data.value.file = file;
+};
 const Edit = () => {
     isLoading.value = true
-    expansesStore.update(data.value,props.editedData.id).then(res => {
+    const formData = new FormData();
+    formData.append('file', data.value.file);
+    formData.append('date', data.value.date);
+    formData.append('amount', data.value.amount);
+    formData.append('title', data.value.title);
+    formData.append('bank', data.value.bank);
+    formData.append('bank_receipt', data.value.bank_receipt);
+    formData.append('type', data.value.type);
+    formData.append('paid_by', data.value.paid_by);
+    expansesStore.update(formData,props.editedData.id).then(res => {
         isLoading.value = false
         useAlert('success', 'Créé avec succès!');
         props.close()

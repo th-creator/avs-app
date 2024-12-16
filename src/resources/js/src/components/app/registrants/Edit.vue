@@ -84,7 +84,7 @@
                                 <input v-model="data.enter_date" type="date" placeholder="Date d'entrée" class="form-input" />
                                 <span v-if="errors.enter_date" class="text-red-600 text-sm">{{ errors.enter_date[0] }}</span>
                             </div>
-                            <div class="relative mb-4">
+                            <div class="relative mb-4"  v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'">
                                 <label class="text-sm">Etat:</label> 
                                 <multiselect
                                     v-model="data.status_show"
@@ -185,11 +185,14 @@ import Multiselect from '@suadelabs/vue3-multiselect';
 import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
 import IconComponent from '@/components/icons/IconComponent.vue'
 
+import {useAuthStore} from '@/stores/auth.js';
+
+const authStore = useAuthStore();
 const isLoading = ref(false)
 const showEdit = ref(false)
 
 const options = ref(['AVS', 'ISFPT']);
-const etats = ref(['Active', 'Remboursé']);
+const etats = ref(['Active', 'Remboursé', 'Désactivé']);
 const registrantsStore = useRegistrantsStore();
 const studentsStore = useStudentsStore();
 
@@ -227,7 +230,7 @@ const data = ref({
     group_id: props.editedData.group_id,
     student: props.editedData.student_id,
     student_id: props.editedData.student_id,
-    status_show: props.editedData.status == -1 ? 'Remboursé' : 'Active' ,
+    status_show: props.editedData.status == -1 ? 'Remboursé' : props.editedData.status == 0 ? 'Désactivé' : 'Actif' ,
     status: props.editedData.status,
     date_refund: '',
     amount_recieved: 0,
@@ -237,7 +240,7 @@ const errors = ref({})
 
 const Edit = () => {
     isLoading.value = true
-    data.value.status = data.value.status_show == 'Remboursé' ? -1 : 1
+    data.value.status = data.value.status_show == 'Remboursé' ? -1 : data.value.status_show == 'Désactivé' ? 0 : 1
     registrantsStore.update(data.value,props.editedData.id).then(res => {
         console.log('dataaaa',res);
         if(res.data.payment) {

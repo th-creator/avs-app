@@ -11,9 +11,9 @@ export const useTeacherExpansesStore = defineStore("teacherExpanses", () => {
     const financeteachersExpanses = ref([]);  // This will hold the teacherExpanses globally
 
     // Fetch all teacherExpanses and update the state
-    const index = async () => {
+    const index = async (month,year) => {
         try {
-            const response = await api.get('api/teacherExpanses');
+            const response = await api.get(`api/all/teacher/expanse/${month}/${year}`);
             teacherExpanses.value = response.data.data;  // Update the teacherExpanses state with the fetched data
             return response
         } catch (error) {

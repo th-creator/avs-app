@@ -24,7 +24,6 @@ Route::post('logout', [AuthController::class,'logout']);
 
 
 Route::group(['middleware' => 'jwt.auth'], function () {
-    Route::apiResource('teacherExpanses', TeacherExpanseController::class);
     Route::apiResource('users', UserController::class);
     Route::put('users/{id}/toggle', [UserController::class, 'toggle']);
     Route::post('user/{id}/update', [ProfileController::class, 'editInfos']);
@@ -33,6 +32,10 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::apiResource('students', StudentController::class);
     Route::apiResource('registrants', RegistrantController::class);
     Route::apiResource('expanses', ExpanseController::class);
+    Route::post('expanse/update/{id}', [ExpanseController::class, 'update']);
+    Route::get('all/expanse/{from}/{to}', [ExpanseController::class, 'all']);
+    Route::apiResource('teacherExpanses', TeacherExpanseController::class);
+    Route::get('all/teacher/expanse/{month}/{year}', [TeacherExpanseController::class, 'all']);
     Route::put('refund/registrant/{id}', [RegistrantController::class, 'refund']);
     Route::put('registrant/{id}/toggle', [RegistrantController::class, 'toggle']);
     Route::post('registrant/{id}/transfer', [RegistrantController::class, 'transfer']);
@@ -47,6 +50,7 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::apiResource('sections', SectionController::class);
     Route::apiResource('payments', PaymentController::class);
     Route::get('all/paymens', [PaymentController::class, 'all']);
+    Route::get('check/payment/{from}/{to}', [PaymentController::class, 'fetchCheck']);
     Route::get('student/payments/{id}/{month}/{year}', [PaymentController::class,'studentpayments']);
     Route::get('unhandled/paymens/{month}/{year}', [PaymentController::class, 'unhandledPayments']);
     Route::apiResource('fees', FeeController::class);

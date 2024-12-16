@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Fee;
 use App\Models\Group;
 use App\Models\Payment;
 use App\Models\Registrant;
@@ -207,6 +208,14 @@ class PaymentController extends Controller
         $fromDate = $request->input('from');
         $toDate = $request->input('to');
         $data = Payment::whereNotIn('paid',[-1,0])->whereBetween('date', [$fromDate, $toDate])->get();
+        return response()->json(['data' => $data], 200);
+    }
+
+    public function fetchCheck($fromDate, $toDate) {
+        $payments = Payment::where('type','chèque')->whereBetween('date', [$fromDate, $toDate])->get();
+        $fees = Fee::where('type','chèque')->whereBetween('date', [$fromDate, $toDate])->get();
+        $data = $payments->concat($fees);
+
         return response()->json(['data' => $data], 200);
     }
 

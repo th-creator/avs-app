@@ -111,6 +111,11 @@
         await groupsStore.fetchPayments(choosenMonth.value,choosenYear.value )
         isloading.value = false
     });
+    watch(choosenYear, async (newVal, oldVal) => { 
+        isloading.value = true
+        await groupsStore.fetchPayments(choosenMonth.value,choosenYear.value )
+        isloading.value = false
+    });
     onMounted(async () => {
         const currentMonth = new Date().getMonth();
         choosenMonth.value = options.value[currentMonth];

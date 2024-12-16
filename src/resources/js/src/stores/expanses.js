@@ -13,7 +13,19 @@ export const useExpansesStore = defineStore("expanses", () => {
     // Fetch all expanses and update the state
     const index = async () => {
         try {
-            const response = await api.get('api/expanses');
+            const response = await api.get(`api/expanses`);
+            expanses.value = response.data.data;  // Update the expanses state with the fetched data
+            return response
+        } catch (error) {
+            console.error("Failed to fetch expanses:", error);
+            return error
+        }
+    };
+
+    // Fetch all expanses and update the state
+    const all = async (from,to) => {
+        try {
+            const response = await api.get(`api/all/expanse/${from}/${to}`);
             expanses.value = response.data.data;  // Update the expanses state with the fetched data
             return response
         } catch (error) {
@@ -42,7 +54,7 @@ export const useExpansesStore = defineStore("expanses", () => {
 
     // Update an existing user and update the state
     const update = async (payload, id) => {
-        const response = await api.put(`api/expanses/${id}`, payload);
+        const response = await api.post(`api/expanse/update/${id}`, payload);
         const index = expanses.value.findIndex(user => user.id === id);
         if (index !== -1) {
             expanses.value[index] = response.data.data;
@@ -60,5 +72,5 @@ export const useExpansesStore = defineStore("expanses", () => {
     };
 
     // Expose the expanses state and actions
-    return { expanses, index, store, update, destroy, financeExpanses, fetchFinance };
+    return { expanses, index, store, update, destroy, financeExpanses, fetchFinance, all };
 });

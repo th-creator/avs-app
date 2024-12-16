@@ -14,6 +14,10 @@ class ExpanseController extends Controller
         $data = Expanse::with('user')->get();
         return response()->json(['data' => $data], 200);
     }
+    public function all($from,$to) {
+        $data = Expanse::whereBetween('date', [$from, $to])->with('user')->get();
+        return response()->json(['data' => $data], 200);
+    }
 
     public function fetchFinance(Request $request) {
         $fromDate = $request->input('from');
@@ -68,6 +72,27 @@ class ExpanseController extends Controller
         ]);
         
         $data->update($userData);
+
+        
+        if($request->hasFile('file')) {
+            $file = $request->file('file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('files'), $filename);
+
+            $url = config('services.app.url');
+            $filesName = $url . '/files/' . $filename;
+            $fileUrl = $data->file;
+            if(!empty($fileUrl)) {
+                $filename = basename($fileUrl);
+                $filePath = public_path('files/' . $filename);
+                if (File::exists($filePath)) {
+                    File::delete($filePath);
+                }
+            }
+            $data->update([
+                'file'=>$filesName
+            ]);
+        }            
 
         $data->user = $data->user;
         

@@ -1,10 +1,23 @@
 <template>
     <div>
+        <h5 class="font-semibold text-lg dark:text-white-light mt-5">Les dépenses générales</h5>
         <div class="panel pb-0 mt-6">
-            <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les dépenses générales</h5>
             <div class="flex justify-between my-4">    
-                <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
-                <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
+                <button type="button" class="btn btn-warning w-40 h-9" @click="exportToExcel()">Exporter</button>   
+                <!-- <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." /> -->
+                <button type="button" class="btn btn-info w-36 h-9" @click="showPopup = true">Ajouter</button>
+            </div>
+            <div class="flex justify-between my-4 items-center">  
+                    <div class="flex gap-10 items-end">
+                        <label for="">Du:</label>
+                        <input v-model="search.from" type="date" class="form-input max-w-xs" placeholder="Du..." />
+                        <label for="">A:</label>
+                        <input v-model="search.to" type="date" class="form-input max-w-xs" placeholder="A..." />
+                    </div> 
+                <button type="button" class="btn btn-success w-36 h-9" @click="searchExpanses">
+                    <IconComponent v-if="isloading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
+                    <span v-else>Rechercher</span>
+                </button>
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -75,6 +88,9 @@
                 </vue3-datatable>
             </div>
         </div>
+        <div class="flex justify-end items-center my-4">
+            <p class="font-semibold text-lg">Total: {{ total }} MAD</p>
+        </div>
     </div>
     <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
     <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
@@ -88,9 +104,10 @@
     import Swal from 'sweetalert2';
     import {useAuthStore} from '@/stores/auth.js';
     import { useExpansesStore } from '@/stores/expanses.js';
+    import * as XLSX from 'xlsx';
 
     const authStore = useAuthStore();
-    const isloading = ref(true);
+    const isloading = ref(false);
     
     const params = reactive({
         current_page: 1,
@@ -104,6 +121,17 @@
     const showPopup = ref(false);
     const showEditPopup = ref(false);
     
+    const search = ref({
+        from: '',
+        to: ''
+    })
+    const total = ref(0)
+
+    onMounted(async () => {
+        isloading.value = true
+        await expansesStore.index()
+        isloading.value = false
+    })
     const cols =
         ref([
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
@@ -121,15 +149,19 @@
     const rows = computed(async() => {
         console.log('expansesStore.expanses', expansesStore.expanses);
         let data = await expansesStore.expanses.length > 0 ? expansesStore.expanses : []
+        total.value = expansesStore.expanses.reduce((total, payment) => {
+            return total + Number(payment.amount)
+        }, 0)
         return data;
         });
 
 
     const editedData = ref({})
-    onMounted(async () => {
-        await expansesStore.index()
+    const searchExpanses = async () => {
+        isloading.value = true
+        await expansesStore.all(search.value.from,search.value.to)
         isloading.value = false
-    })
+    }
 
     function openPdf(pdf) {
       window.open(pdf, '_blank');
@@ -173,6 +205,20 @@
             }
         });
     }
+ 
+    const exportToExcel = () => {
+        // Get the attendance data from Vuex
+        const attendanceData = expansesStore.expanses.map(res => ({'Titre': res.title, 'Montant': res.amount, 'Type': res.type, 'Payé par': res.paid_by, 'Date': res.date}))
+        // Create a worksheet from the attendance data
+        const worksheet = XLSX.utils.json_to_sheet(attendanceData);
+
+        // Create a new workbook and append the worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'dépenses');
+
+        // Export the workbook to an Excel file
+        XLSX.writeFile(workbook, 'dépenses.xlsx');
+    };
 </script>
 
 <style scoped>

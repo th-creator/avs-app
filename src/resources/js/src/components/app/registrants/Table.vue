@@ -79,7 +79,25 @@
                         </div>
                     </template>
                     <template #status="data">
-                        <div class="flex justify-around w-full">
+                        <div class="flex justify-center w-full">
+                            <div v-if="data.value.status == 1">
+                                <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
+                                    Actif
+                                </div>
+                            </div>
+                            <div v-else-if="data.value.status == 0">
+                                <div class="px-4 py-2 rounded-full bg-orange-100 text-orange-600 w-[120px] text-center text-sm">
+                                    Désactivé
+                                </div>
+                            </div>
+                            <div v-else-if="data.value.status == -1">
+                                <div class="px-4 py-2 rounded-full bg-blue-100 text-blue-600 w-[120px] text-center text-sm">
+                                    Remboursé
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                        <!-- <div class="flex justify-around w-full">
                             <div class="relative !p-1">
                                 <button class="absolute left-0 top-0 z-10 h-full w-full" @click="registrantsStore.toggle({user_id:authStore?.user?.id,status: data.value.status ? 0 : 1},data.value.id)"></button>
                                 <label class="!relative !inline-flex !cursor-pointer !items-center">
@@ -90,7 +108,7 @@
                                 </label>
                             </div>    
                         </div>
-                    </template>
+                    </template> -->
                     <template #user_id="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.user.firstName + ' ' + data.value.user.lastName }}</p>

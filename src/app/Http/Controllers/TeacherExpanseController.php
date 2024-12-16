@@ -4,11 +4,19 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\TeacherExpanse;
+use Illuminate\Support\Facades\Log;
 
 class TeacherExpanseController extends Controller
 {   
     public function index() {
         $data = TeacherExpanse::with('user')->get();
+        return response()->json(['data' => $data], 200);
+    }
+    public function all($month,$year) {
+        $data = TeacherExpanse::where('month', $month)
+                                ->where('year', $year)
+                                ->with('user')->get();
+        Log::alert($data);
         return response()->json(['data' => $data], 200);
     }
 
