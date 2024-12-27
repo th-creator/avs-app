@@ -399,6 +399,9 @@
                 case 'virement':
                     payments.value.virement += Number(res.amount_paid);
                     break;
+                default:
+                    payments.value.cash += Number(amount);
+                    break;
             }
         });
         expansesStore.financeExpanses.forEach(res => {

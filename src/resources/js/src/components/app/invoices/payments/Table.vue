@@ -193,7 +193,7 @@
         choosenData.value = paymentsStore.financePayments.filter(payment => {if(choosenMonth.value == 'tous' && payment.paid != -2 && payment.paid != -1) {return payment} if(choosenMonth.value == 'remboursé' && payment.paid == -1) {return payment} if (payment.type == choosenMonth.value && payment.paid != -2 && payment.paid != -1) return payment});
         total.value = choosenData.value.reduce((total, payment) => {
             let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
-            return total + Number(amount)
+            return total + Number(payment.amount_paid)
         }, 0)
         console.log('total', total.value);
         
@@ -237,8 +237,8 @@
         isloading.value =false
         choosenData.value = paymentsStore.financePayments.filter(payment => {if(choosenMonth.value == 'tous' && payment.paid != -2 && payment.paid != -1) {return payment} if(choosenMonth.value == 'remboursé' && payment.paid == -1) {return payment} if (payment.type == choosenMonth.value && payment.paid != -2 && payment.paid != -1) return payment});
         total.value = choosenData.value.reduce((total, payment) => {
-            let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
-            return total + Number(amount)
+            // let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+            return total + Number(payment.amount_paid)
         }, 0)
         console.log('total', total.value);
     }

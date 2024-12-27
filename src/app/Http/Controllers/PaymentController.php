@@ -222,7 +222,7 @@ class PaymentController extends Controller
     public function fetchFacturation(Request $request) {
         $fromDate = $request->input('from');
         $toDate = $request->input('to');
-        $data = Payment::whereBetween('date', [$fromDate, $toDate])->get();
+        $data = Payment::whereNotIn('paid',[-1,0])->whereBetween('date', [$fromDate, $toDate])->get();
         return response()->json(['data' => $data], 200);
     }
     
