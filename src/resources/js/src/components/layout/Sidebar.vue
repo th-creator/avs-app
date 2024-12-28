@@ -163,6 +163,18 @@
                         <li class="nav-item">
                             <ul>
                                 <li class="nav-item">
+                                    <router-link to="/receipt" class="group" @click="toggleMobileMenu">
+                                        <div class="flex items-center">
+                                            <IconComponent name="receipt"/>  
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Reçu</span>
+                                        </div>
+                                    </router-link>
+                                </li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <ul>
+                                <li class="nav-item">
                                     <router-link to="/options" class="group" @click="toggleMobileMenu">
                                         <div class="flex items-center">
                                             <IconComponent name="sections"/>  

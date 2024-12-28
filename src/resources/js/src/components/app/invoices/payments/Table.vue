@@ -16,10 +16,10 @@
                     <label for="">A:</label>
                     <input v-model="search.to" type="date" class="form-input max-w-xs" placeholder="A..." />
                 </div>
-                <!-- <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." /> -->
+                <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." />
                 <div class="flex flex-col gap-4">  
                     <multiselect
-                        v-model="choosenMonth"
+                        v-model="choosenVal"
                         :options="options"
                         class="custom-multiselect  max-w-xs"
                         :searchable="true"
@@ -173,7 +173,7 @@
     
 
     const options = ref(['tous', 'espèces', 'chèque', 'virement', 'remboursé']);
-    const choosenMonth = ref('tous');
+    const choosenVal = ref('tous');
     const choosenData = ref([]);
     const isloading = ref(false);
 
@@ -188,14 +188,12 @@
         sort_direction: 'desc',
     });
 
-    watch(choosenMonth, (newVal, oldVal) => {
-        console.log(oldVal,newVal);
-        choosenData.value = paymentsStore.financePayments.filter(payment => {if(choosenMonth.value == 'tous' && payment.paid != -2 && payment.paid != -1) {return payment} if(choosenMonth.value == 'remboursé' && payment.paid == -1) {return payment} if (payment.type == choosenMonth.value && payment.paid != -2 && payment.paid != -1) return payment});
+    watch(choosenVal, (newVal, oldVal) => {
+        choosenData.value = paymentsStore.financePayments.filter(payment => {if(choosenVal.value == 'tous' && payment.paid != -2 && payment.paid != -1) {return payment} if(choosenVal.value == 'remboursé' && payment.paid == -1) {return payment} if (payment.type == choosenVal.value && payment.paid != -2 && payment.paid != -1) return payment});
         total.value = choosenData.value.reduce((total, payment) => {
-            let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+            // let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
             return total + Number(payment.amount_paid)
         }, 0)
-        console.log('total', total.value);
         
     });
 
@@ -235,12 +233,11 @@
         isloading.value =true
         await paymentsStore.fetchFacturation(search.value)
         isloading.value =false
-        choosenData.value = paymentsStore.financePayments.filter(payment => {if(choosenMonth.value == 'tous' && payment.paid != -2 && payment.paid != -1) {return payment} if(choosenMonth.value == 'remboursé' && payment.paid == -1) {return payment} if (payment.type == choosenMonth.value && payment.paid != -2 && payment.paid != -1) return payment});
+        choosenData.value = paymentsStore.financePayments.filter(payment => {if(choosenVal.value == 'tous' && payment.paid != -2 && payment.paid != -1) {return payment} if(choosenVal.value == 'remboursé' && payment.paid == -1) {return payment} if (payment.type == choosenVal.value && payment.paid != -2 && payment.paid != -1) return payment});
         total.value = choosenData.value.reduce((total, payment) => {
             // let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
             return total + Number(payment.amount_paid)
         }, 0)
-        console.log('total', total.value);
     }
 
     const deleteData = (data) => {

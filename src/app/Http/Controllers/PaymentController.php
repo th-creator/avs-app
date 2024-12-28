@@ -219,6 +219,14 @@ class PaymentController extends Controller
         return response()->json(['data' => $data], 200);
     }
 
+    public function fetchReceipt($fromDate, $toDate) {
+        $payments = Payment::whereBetween('date', [$fromDate, $toDate])->get();
+        $fees = Fee::whereBetween('date', [$fromDate, $toDate])->get();
+        $data = $payments->concat($fees);
+
+        return response()->json(['data' => $data], 200);
+    }
+
     public function fetchFacturation(Request $request) {
         $fromDate = $request->input('from');
         $toDate = $request->input('to');

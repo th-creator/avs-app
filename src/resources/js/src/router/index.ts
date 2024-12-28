@@ -49,6 +49,11 @@ const routes: RouteRecordRaw[] = [
         component: () => import('../pages/expanses/expanses.vue'), 
     },
     {
+        path: '/receipt',
+        name: 'receipt',
+        component: () => import('../pages/receipt/Receipt.vue'), 
+    },
+    {
         path: '/teacherExpanses',
         name: 'teacherExpanses', 
         component: () => import('../pages/teacherExpanses/teacherExpanses.vue'), 

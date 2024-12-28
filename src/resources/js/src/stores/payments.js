@@ -13,6 +13,7 @@ export const usePaymentsStore = defineStore("payments", () => {
     const groupPayments = ref([]);  // This will hold the payments globally
     const financePayments = ref([]);  // This will hold the payments globally
     const checkPayments = ref([]);  // This will hold the payments globally
+    const receiptPayments = ref([]);  // This will hold the payments globally
 
     // Fetch all payments and update the state
     const undandled = async (month, year) => {
@@ -99,6 +100,18 @@ export const usePaymentsStore = defineStore("payments", () => {
         }
     };
 
+    // Fetch all payments and update the state
+    const fetchReceipt = async (from,to) => {
+        try {
+            const response = await api.get(`api/receipt/payment/${from}/${to}`);
+            receiptPayments.value = response.data.data;  // Update the payments state with the fetched data
+            return response
+        } catch (error) {
+            console.error("Failed to fetch payments:", error);
+            return error
+        }
+    };
+
     // Store a new user and update the state
     const store = async (payload,group = null) => {
         if (group) {
@@ -139,5 +152,5 @@ export const usePaymentsStore = defineStore("payments", () => {
     };
 
     // Expose the payments state and actions
-    return { payments, undandled, store, update, destroy, studentPayments, show, fetchGroupPayments, groupPayments, allPayments, all, financePayments, fetchFinance, fetchFacturation, registrantPayment, checkPayments, fetchchecks };
+    return { payments, undandled, store, update, destroy, studentPayments, show, fetchGroupPayments, groupPayments, allPayments, all, financePayments, fetchFinance, fetchFacturation, registrantPayment, checkPayments, fetchchecks, fetchReceipt, receiptPayments };
 });
