@@ -41,7 +41,7 @@ class GroupController extends Controller
         ->where('year', $year)->get();
         $registrants = Registrant::where('group_id',$id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
         foreach ($registrants as $registrant) {
-            $payment = Payment::where('registrant_id', $registrant->id)
+            $payment = Payment::where('student_id', $registrant->student_id)
                                 ->where('group_id', $data->id)
                                 ->where('month', $month)
                                 ->where('year', $year)
@@ -94,7 +94,7 @@ class GroupController extends Controller
             ->where('year', $year)->get();
             $registrants = Registrant::where('group_id',$group->id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
             foreach ($registrants as $registrant) {
-                $payment = Payment::where('registrant_id', $registrant->id)
+                $payment = Payment::where('student_id', $registrant->student_id)
                                     ->where('group_id', $group->id)
                                     ->where('month', $month)
                                     ->where('year', $year)

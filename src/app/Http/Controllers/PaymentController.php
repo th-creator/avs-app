@@ -39,8 +39,8 @@ class PaymentController extends Controller
         $registrants = Registrant::where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
         foreach ($registrants as $registrant) {
             $missingMonths = [];
-            $payment = Payment::where('registrant_id', $registrant->id)
-                                ->where('group_id', $registrant->group->id)
+            $payment = Payment::where('student_id', $registrant->student_id)
+                                ->where('group_id', $registrant->group_id)
                                 ->where('month', $month)
                                 ->where('year', $year)
                                 ->first();
@@ -99,7 +99,8 @@ class PaymentController extends Controller
         $data = Payment::where('student_id',$id)->where('month', $month)->where('year', $year)->with('user')->get();
         $registrants = Registrant::where('student_id',$id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
         foreach ($registrants as $registrant) {
-            $payment = Payment::where('registrant_id', $registrant->id)
+            $payment = Payment::where('student_id', $id)
+                                ->where('group_id', $registrant->group_id)
                                 ->where('month', $month)
                                 ->where('year', $year)
                                 ->first();
@@ -166,7 +167,7 @@ class PaymentController extends Controller
         $price = $group->section->price;
         $registrants = Registrant::where('group_id',$id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
         foreach ($registrants as $registrant) {
-            $payment = Payment::where('registrant_id', $registrant->id)
+            $payment = Payment::where('student_id', $registrant->student_id)
                                 ->where('group_id', $id)
                                 ->where('month', $month)
                                 ->where('year', $year)
