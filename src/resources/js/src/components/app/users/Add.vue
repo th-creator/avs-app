@@ -120,17 +120,20 @@ const data = ref({
 const errors = ref({})
 
 const Create = () => {
-    errors.value = {}
-    usersStore.store(data.value).then(res => {
-        isLoading.value = false
-        useAlert('success', 'Créé avec succès!');
-        props.close()
-    }).catch((err) => {
-        isLoading.value = false
-        if(err.status == 422) {
-            errors.value =  err.response.data.errors;
-        }
-        useAlert('warning', "quelque chose s'est mal passé!");
-    });
+    if (isLoading.value == false) {
+        isLoading.value = true
+        errors.value = {}
+        usersStore.store(data.value).then(res => {
+            isLoading.value = false
+            useAlert('success', 'Créé avec succès!');
+            props.close()
+        }).catch((err) => {
+            isLoading.value = false
+            if(err.status == 422) {
+                errors.value =  err.response.data.errors;
+            }
+            useAlert('warning', "quelque chose s'est mal passé!");
+        });
+    }
 }
 </script>

@@ -236,24 +236,26 @@ onMounted(async () => {
     // console.log();
 }) 
 const Create = () => {
-    isLoading.value = true
-    errors.value = []
-    data.value.user_id = authStore?.user?.id
-    data.value.student_id = route.params.id
-    data.value.group_id = data.value.groupHolder.split(':')[0].trim()
-    data.value.fullName = studentsStore.student.firstName + ' ' +  studentsStore.student.lastName
-    paymentsStore.store(data.value).then(res => {
-        isLoading.value = false
-        useAlert('success', 'Créé avec succès!');
-        props.close()
-    }).catch((err) => {
-        isLoading.value = false
-        if(err.status == 422) {
-            errors.value =  err.response.data.errors;
-            useAlert('warning', "quelque chose s'est mal passé!");
-        } else if(err.status == 400) {
-            useAlert('warning', "Le paiement existe déjà!");
-        } else useAlert('warning', "quelque chose s'est mal passé!");
-    });
+    if (isLoading.value == false) {
+        isLoading.value = true
+        errors.value = []
+        data.value.user_id = authStore?.user?.id
+        data.value.student_id = route.params.id
+        data.value.group_id = data.value.groupHolder.split(':')[0].trim()
+        data.value.fullName = studentsStore.student.firstName + ' ' +  studentsStore.student.lastName
+        paymentsStore.store(data.value).then(res => {
+            isLoading.value = false
+            useAlert('success', 'Créé avec succès!');
+            props.close()
+        }).catch((err) => {
+            isLoading.value = false
+            if(err.status == 422) {
+                errors.value =  err.response.data.errors;
+                useAlert('warning', "quelque chose s'est mal passé!");
+            } else if(err.status == 400) {
+                useAlert('warning', "Le paiement existe déjà!");
+            } else useAlert('warning', "quelque chose s'est mal passé!");
+        });
+    }
 }
 </script>

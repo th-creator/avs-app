@@ -172,24 +172,26 @@ const data = ref({
 const errors = ref({})
 
 const Create = () => {
-    isLoading.value = true
-    errors.value = []
-    data.value.user_id = authStore?.user?.id
-    data.value.group_id = data.value.group.map(res => res.split(':')[0].trim())
-    data.value.student_id = data.value.student.split(':')[0].trim()
-    console.log(data.value.group_id);
-    registrantsStore.store(data.value).then(res => {
-        isLoading.value = false
-        useAlert('success', 'Créé avec succès!');
-        props.close()
-    }).catch((err) => {
-        isLoading.value = false
-        if(err.status == 422) {
-            errors.value =  err.response.data.errors;
-            useAlert('warning', "quelque chose s'est mal passé!");
-        } else if(err.status == 400) {
-            useAlert('warning', "L'elève existe déjà!");
-        } else useAlert('warning', "quelque chose s'est mal passé!");
-    });
+    if (isLoading.value == false) {
+        isLoading.value = true
+        errors.value = []
+        data.value.user_id = authStore?.user?.id
+        data.value.group_id = data.value.group.map(res => res.split(':')[0].trim())
+        data.value.student_id = data.value.student.split(':')[0].trim()
+        console.log(data.value.group_id);
+        registrantsStore.store(data.value).then(res => {
+            isLoading.value = false
+            useAlert('success', 'Créé avec succès!');
+            props.close()
+        }).catch((err) => {
+            isLoading.value = false
+            if(err.status == 422) {
+                errors.value =  err.response.data.errors;
+                useAlert('warning', "quelque chose s'est mal passé!");
+            } else if(err.status == 400) {
+                useAlert('warning', "L'elève existe déjà!");
+            } else useAlert('warning', "quelque chose s'est mal passé!");
+        });
+    }
 }
 </script>

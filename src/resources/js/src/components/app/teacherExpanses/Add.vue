@@ -195,26 +195,28 @@ onMounted(async () => {
     // console.log();
 }) 
 const Create = () => {
-    isLoading.value = true
-    errors.value = []
-    data.value.user_id = authStore?.user?.id
-    let group_id = Number(data.value.groupHolder.split(':')[0].trim())
-    let group = groupsStore.groups.find(res => res.id == group_id);
-    data.value.group = group.intitule
-    data.value.teacher = group.teacher.firstName + ' ' +  group.teacher.lastName
-    data.value.teacher_id = group.teacher.id
-    teacherExpansesStore.store(data.value).then(res => {
-        isLoading.value = false
-        useAlert('success', 'Créé avec succès!');
-        props.close()
-    }).catch((err) => {
-        isLoading.value = false
-        if(err.status == 422) {
-            errors.value =  err.response.data.errors;
-            useAlert('warning', "quelque chose s'est mal passé!");
-        } else if(err.status == 400) {
-            useAlert('warning', "Le paiement existe déjà!");
-        } else useAlert('warning', "quelque chose s'est mal passé!");
-    });
+    if (isLoading.value == false) {
+        isLoading.value = true
+        errors.value = []
+        data.value.user_id = authStore?.user?.id
+        let group_id = Number(data.value.groupHolder.split(':')[0].trim())
+        let group = groupsStore.groups.find(res => res.id == group_id);
+        data.value.group = group.intitule
+        data.value.teacher = group.teacher.firstName + ' ' +  group.teacher.lastName
+        data.value.teacher_id = group.teacher.id
+        teacherExpansesStore.store(data.value).then(res => {
+            isLoading.value = false
+            useAlert('success', 'Créé avec succès!');
+            props.close()
+        }).catch((err) => {
+            isLoading.value = false
+            if(err.status == 422) {
+                errors.value =  err.response.data.errors;
+                useAlert('warning', "quelque chose s'est mal passé!");
+            } else if(err.status == 400) {
+                useAlert('warning', "Le paiement existe déjà!");
+            } else useAlert('warning', "quelque chose s'est mal passé!");
+        });
+    }
 }
 </script>

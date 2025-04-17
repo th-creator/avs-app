@@ -125,19 +125,21 @@ const data = ref({
 const errors = ref({})
 
 const Create = () => {
-    isLoading.value = true
-    data.value.user_id = authStore?.user?.id
-    errors.value = {}
-    teachersStore.store(data.value).then(res => {
-        isLoading.value = false
-        useAlert('success', 'Créé avec succès!');
-        props.close()
-    }).catch((err) => {
-        isLoading.value = false
-        if(err.status == 422) {
-            errors.value =  err.response.data.errors;
-        }
-        useAlert('warning', "quelque chose s'est mal passé!");
-    });
+    if (isLoading.value == false) {
+        isLoading.value = true
+        data.value.user_id = authStore?.user?.id
+        errors.value = {}
+        teachersStore.store(data.value).then(res => {
+            isLoading.value = false
+            useAlert('success', 'Créé avec succès!');
+            props.close()
+        }).catch((err) => {
+            isLoading.value = false
+            if(err.status == 422) {
+                errors.value =  err.response.data.errors;
+            }
+            useAlert('warning', "quelque chose s'est mal passé!");
+        });
+    }
 }
 </script>

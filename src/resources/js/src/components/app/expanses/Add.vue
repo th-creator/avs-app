@@ -164,29 +164,31 @@ const handleFileChange = ($e) => {
   data.value.file = file;
 };
 const Create = () => {
-    isLoading.value = true
-    errors.value = []
-    const formData = new FormData();
-    formData.append('file', data.value.file);
-    formData.append('date', data.value.date);
-    formData.append('amount', data.value.amount);
-    formData.append('title', data.value.title);
-    formData.append('bank', data.value.bank);
-    formData.append('bank_receipt', data.value.bank_receipt);
-    formData.append('type', data.value.type);
-    formData.append('paid_by', data.value.paid_by);
-    formData.append('user_id', authStore?.user?.id);
-    data.value.user_id = authStore?.user?.id
-    expansesStore.store(formData).then(res => {
-        isLoading.value = false
-        useAlert('success', 'Créé avec succès!');
-        props.close()
-    }).catch((err) => {
-        isLoading.value = false
-        if(err.status == 422) {
-            errors.value =  err.response.data.errors;
-        }
-        useAlert('warning', "quelque chose s'est mal passé!");
-    });
+    if (isLoading.value == false) {
+        isLoading.value = true
+        errors.value = []
+        const formData = new FormData();
+        formData.append('file', data.value.file);
+        formData.append('date', data.value.date);
+        formData.append('amount', data.value.amount);
+        formData.append('title', data.value.title);
+        formData.append('bank', data.value.bank);
+        formData.append('bank_receipt', data.value.bank_receipt);
+        formData.append('type', data.value.type);
+        formData.append('paid_by', data.value.paid_by);
+        formData.append('user_id', authStore?.user?.id);
+        data.value.user_id = authStore?.user?.id
+        expansesStore.store(formData).then(res => {
+            isLoading.value = false
+            useAlert('success', 'Créé avec succès!');
+            props.close()
+        }).catch((err) => {
+            isLoading.value = false
+            if(err.status == 422) {
+                errors.value =  err.response.data.errors;
+            }
+            useAlert('warning', "quelque chose s'est mal passé!");
+        });
+    }
 }
 </script>

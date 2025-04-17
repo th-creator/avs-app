@@ -203,22 +203,24 @@ const detachTiming = (value) => {
 }
 
 const Create = () => {
-    isLoading.value = true
-    errors.value = []
-    data.value.user_id = authStore?.user?.id
-    data.value.teacher_id = data.value.teacher.split(':')[0].trim()
-    data.value.section_id = data.value.section.split(':')[0].trim()
-    
-    groupsStore.store(data.value).then(res => {
-        isLoading.value = false
-        useAlert('success', 'Créé avec succès!');
-        props.close()
-    }).catch((err) => {
-        isLoading.value = false
-        if(err.status == 422) {
-            errors.value =  err.response.data.errors;
-        }
-        useAlert('warning', "quelque chose s'est mal passé!");
-    });
+    if (isLoading.value == false) {
+        isLoading.value = true
+        errors.value = []
+        data.value.user_id = authStore?.user?.id
+        data.value.teacher_id = data.value.teacher.split(':')[0].trim()
+        data.value.section_id = data.value.section.split(':')[0].trim()
+        
+        groupsStore.store(data.value).then(res => {
+            isLoading.value = false
+            useAlert('success', 'Créé avec succès!');
+            props.close()
+        }).catch((err) => {
+            isLoading.value = false
+            if(err.status == 422) {
+                errors.value =  err.response.data.errors;
+            }
+            useAlert('warning', "quelque chose s'est mal passé!");
+        });
+    }
 }
 </script>
