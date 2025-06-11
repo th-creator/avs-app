@@ -400,7 +400,7 @@
                     payments.value.virement += Number(res.amount_paid);
                     break;
                 default:
-                    payments.value.cash += Number(amount);
+                    payments.value.cash += Number(res.amount_paid);
                     break;
             }
         });
@@ -414,6 +414,9 @@
                     break;
                 case 'virement':
                     expanses.value.virement += Number(res.amount);
+                    break;
+                default:
+                    expanses.value.cash += Number(res.amount);
                     break;
             }
         });
