@@ -34,4 +34,11 @@ class Fee extends Model
     {
         return $this->BelongsTo(Student::class);
     }
+    public function scopeForAY($q, string $ay) {
+        [$a,$b] = array_map('intval', explode('/', $ay));
+        return $q->where(function($w) use($a,$b){
+            $w->whereYear('date', $a)->whereMonth('date', '>=', 9)
+              ->orWhere(function($q2) use($b){ $q2->whereYear('date', $b)->whereMonth('date', '<=', 6); });
+        });
+    }
 }

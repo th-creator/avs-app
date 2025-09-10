@@ -33,9 +33,9 @@ export const useFeesStore = defineStore("fees", () => {
         }
     };
     // Fetch all fees and update the state
-    const show = async (id) => {
+    const show = async (id,ay) => {
         try {
-            const response = await api.get(`api/fees/${id}`);
+            const response = await api.get(`api/fees/${id}?ay=${ay}`);
             studentfees.value = response.data.data;  // Update the fees state with the fetched data
             return response
         } catch (error) {
@@ -44,9 +44,9 @@ export const useFeesStore = defineStore("fees", () => {
         }
     };
     // Fetch all fees and update the state
-    const undandledFess = async () => {
+    const undandledFess = async (ay) => {
         try {
-            const response = await api.get(`api/undandledFees`);
+            const response = await api.get(`api/undandledFees?ay=${ay}`);
             fees.value = response.data.data;  // Update the fees state with the fetched data
             return response
         } catch (error) {

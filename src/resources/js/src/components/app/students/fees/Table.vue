@@ -4,7 +4,21 @@
             <!-- <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Payements et Inscriptions</h5> -->
             <div class="flex justify-between my-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
-                <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
+                <div class="flex flex-row gap-2">
+                    <div class="flex gap-2">
+                        <multiselect
+                            v-model="choosenAY"
+                            :options="AYs"
+                            class="custom-multiselect  max-w-xs"
+                            :searchable="true"
+                            placeholder="Le mois"
+                            selected-label=""
+                            select-label=""
+                            deselect-label=""
+                        ></multiselect>    
+                    </div>
+                    <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
+                </div>
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -195,7 +209,7 @@
     </div>
 </template>
 <script setup>
-    import { ref, reactive, computed, onMounted, nextTick } from 'vue';
+    import { ref, reactive, computed, onMounted, nextTick, watch } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import { useFeesStore } from '@/stores/fees.js';
     import { useRoute } from 'vue-router';
@@ -205,7 +219,22 @@
     import Swal from 'sweetalert2';
     import {useAuthStore} from '@/stores/auth.js';
     import html2pdf from "html2pdf.js";
+    import Multiselect from '@suadelabs/vue3-multiselect';
 
+    const AYs = ref(['2024/2025','2025/2026','2026/2027','2027/2028','2028/2029','2029/2030','2030/2031','2031/2032','2032/2033', '2033/2034']);
+    const choosenAY = ref(getCurrentAY())
+    
+    function getCurrentAY() {
+        const now = new Date()
+        const y = now.getFullYear()
+        const m = now.getMonth() + 1 // JS months are 0-based
+
+        if (m >= 9) {
+            return `${y}/${y + 1}`   // e.g., Sept 2025 → "2025/2026"
+        } else {
+            return `${y - 1}/${y}`   // e.g., Feb 2025 → "2024/2025"
+        }
+    }
     const authStore = useAuthStore();
     
     const params = reactive({
@@ -233,6 +262,11 @@
     const showPopup = ref(false);
     const showEditPopup = ref(false);
     
+    watch(choosenAY, async () => {
+        isloading.value = true
+        await feesStore.show(route.params.id,choosenAY.value)
+        isloading.value = false
+    });
     const cols =
         ref([
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
@@ -260,7 +294,7 @@
 
     const editedData = ref({})
     onMounted(async () => {
-        await feesStore.show(route.params.id)
+        await feesStore.show(route.params.id,choosenAY.value)
         isloading.value = false
     })
 

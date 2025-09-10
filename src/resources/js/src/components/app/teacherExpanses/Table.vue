@@ -132,7 +132,7 @@
     import * as XLSX from 'xlsx';
 
     const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
-    const choosenMonth = ref('Septembre');
+    const choosenMonth = ref('');
     const years = ref([2024,2025,2026,2027,2028,2029,2030]);
     const choosenYear = ref(new Date().getFullYear());
 

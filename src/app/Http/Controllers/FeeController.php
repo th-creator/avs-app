@@ -2,20 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\Fee;
 use App\Models\Student;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class FeeController extends Controller
 {
+    protected string $ay;
+
+    public function __construct()
+    {
+        $this->ay = request('ay') 
+            ?? (now()->month >= 9 
+                ? now()->year.'/'.(now()->year+1) 
+                : (now()->year-1).'/'.now()->year);
+    }
     public function index() {
         $data = Fee::with('student')->get();
         return response()->json(['data' => $data], 200);
     }
 
     public function show($id) {
-        $data = Fee::where('student_id',$id)->with('user')->get();
+        $data = Fee::where('student_id',$id)->forAY($this->ay)->with('user')->get();
         return response()->json(['data' => $data], 200);
     }
 
@@ -27,7 +38,8 @@ class FeeController extends Controller
     }
 
     public function undandledFees() {
-        $studentsWithoutFees = Student::whereDoesntHave('fees')->get();
+        $studentsWithoutFees = Student::whereDoesntHave('fees')
+        ->forAY($this->ay)->get();
 
         $data = Fee::where(function ($query) {
             $query->where('rest', '!=', 0)
@@ -42,7 +54,7 @@ class FeeController extends Controller
                 'rest' => '0',
                 'total' => '0',
                 'amount_paid' => '0',
-                'type' => null,
+                'type' => null, 
                 'receipt' => null,
                 'user_id' => null,
                 'student_id' => $student['id'],
@@ -69,7 +81,7 @@ class FeeController extends Controller
             'student_id' => 'required',
         ]);
 
-        $existingPayment = Fee::where('student_id', $newData['student_id'])
+        $existingPayment = Fee::where('student_id', $newData['student_id'])->where('date', $newData['date'])
                                   ->first();
 
         if ($existingPayment) {

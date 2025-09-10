@@ -10,6 +10,16 @@ use Illuminate\Support\Facades\Log;
 
 class GroupController extends Controller
 {
+    protected string $ay;
+
+    public function __construct()
+    {
+        $this->ay = request('ay') 
+            ?? (now()->month >= 9 
+                ? now()->year.'/'.(now()->year+1) 
+                : (now()->year-1).'/'.now()->year);
+    }
+    
     public function index() {
         $data = Group::with('teacher')->get();
         return response()->json(['data' => $data], 200);
@@ -92,7 +102,7 @@ class GroupController extends Controller
             })->whereNot('paid',-1)->where('group_id',$group->id)
             ->where('month', $month)
             ->where('year', $year)->get();
-            $registrants = Registrant::where('group_id',$group->id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
+            $registrants = Registrant::where('group_id',$group->id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->forAY($this->ay)->get();
             foreach ($registrants as $registrant) {
                 $payment = Payment::where('student_id', $registrant->student_id)
                                     ->where('group_id', $group->id)

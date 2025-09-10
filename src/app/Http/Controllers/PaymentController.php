@@ -43,7 +43,16 @@ class PaymentController extends Controller
             'Décembre' => 12,
         ];
         $monthNumber = $months[$month];
-        $currentDate = $year.'-'.$monthNumber.'-'.date('d');
+        // $currentDate = $year.'-'.$monthNumber.'-'.date('d'); // this used to be the one
+        if ($monthNumber >= 9) {            // Sep–Dec -> Y/(Y+1)
+            $ayStart = (int) $year;
+            $ayEnd   = (int) $year + 1;
+        } else {                      // Jan–Jun -> (Y-1)/Y
+            $ayStart = (int) $year - 1;
+            $ayEnd   = (int) $year;
+        }
+        // $academicYear = "{$ayStart}/{$ayEnd}";
+        $currentDate = \Carbon\Carbon::createFromDate((int)$year, (int)$monthNumber, 1)->endOfMonth()->toDateString();
         $data = Payment::whereNot('paid',-1)->where(function ($query) {
             $query->where('rest', '!=', 0)
                   ->orWhereNull('rest');
@@ -52,7 +61,16 @@ class PaymentController extends Controller
             $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
         })
         ->get();
-        $registrants = Registrant::where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
+        $registrants = Registrant::where('status', 1)->whereDate('enter_date', '<=', $currentDate)
+            ->where(function ($q) use ($ayStart, $ayEnd) {
+                $q->where(function ($q1) use ($ayStart) {
+                    $q1->whereYear('enter_date', $ayStart)
+                    ->whereBetween(DB::raw('MONTH(enter_date)'), [9, 12]);
+                })->orWhere(function ($q2) use ($ayEnd) {
+                    $q2->whereYear('enter_date', $ayEnd)
+                    ->whereBetween(DB::raw('MONTH(enter_date)'), [1, 6]);
+                });
+            })->get();
         foreach ($registrants as $registrant) {
             $missingMonths = [];
             $payment = Payment::where('student_id', $registrant->student_id)
@@ -117,7 +135,7 @@ class PaymentController extends Controller
             $ayStart = (int) $year - 1;
             $ayEnd   = (int) $year;
         }
-        $academicYear = "{$ayStart}/{$ayEnd}";
+        // $academicYear = "{$ayStart}/{$ayEnd}";
         $currentDate = \Carbon\Carbon::createFromDate((int)$year, (int)$monthNumber, 1)->endOfMonth()->toDateString();
 
         $data = Payment::where('student_id',$id)->where('month', $month)->where('year', $year)->with('user')->get();
@@ -192,8 +210,9 @@ class PaymentController extends Controller
             'Décembre' => 12,
         ];
         $monthNumber = $months[$month];
-        $currentDate = $year.'-'.$monthNumber.'-'.date('d');
+        // $currentDate = $year.'-'.$monthNumber.'-'.date('d'); // this used to be the one
         // $currentDate = date('Y-m-d');
+        $currentDate = \Carbon\Carbon::createFromDate((int)$year, (int)$monthNumber, 1)->endOfMonth()->toDateString();
         $data = Payment::whereHas('registrant', function ($query) use ($id,$currentDate) {
             $query->where('status', 1)->whereDate('enter_date', '<=', $currentDate);
         })->whereNot('paid',-1)->where('group_id',$id)->where('month', $month)->where('year', $year)->get();
@@ -207,8 +226,7 @@ class PaymentController extends Controller
             $ayStart = (int) $year - 1;
             $ayEnd   = (int) $year;
         }
-        $academicYear = "{$ayStart}/{$ayEnd}";
-        $currentDate = \Carbon\Carbon::createFromDate((int)$year, (int)$monthNumber, 1)->endOfMonth()->toDateString();
+        // $academicYear = "{$ayStart}/{$ayEnd}";
         // $currentDate = Carbon::createFromDate((int)$year, (int)$month, 1)->endOfMonth()->toDateString();
 
         $registrants = Registrant::where('group_id',$id)->where('status', 1)

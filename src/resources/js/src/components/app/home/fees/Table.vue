@@ -4,6 +4,18 @@
             <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les frais d'inscriptions à régler</h5>
             <div class="flex justify-between my-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
+                <div class="flex gap-2">
+                        <multiselect
+                            v-model="choosenAY"
+                            :options="AYs"
+                            class="custom-multiselect  max-w-xs"
+                            :searchable="true"
+                            placeholder="Le mois"
+                            selected-label=""
+                            select-label=""
+                            deselect-label=""
+                        ></multiselect>    
+                    </div>
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -114,10 +126,31 @@
     </div>
 </template>
 <script setup>
-    import { ref, reactive, computed, onMounted } from 'vue';
+    import { ref, reactive, computed, onMounted, watch } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import { useFeesStore } from '@/stores/fees.js';
     import IconComponent from '@/components/icons/IconComponent.vue'
+    import Multiselect from '@suadelabs/vue3-multiselect';
+
+    const AYs = ref(['2024/2025','2025/2026','2026/2027','2027/2028','2028/2029','2029/2030','2030/2031','2031/2032','2032/2033', '2033/2034']);
+    const choosenAY = ref(getCurrentAY())
+    
+    function getCurrentAY() {
+        const now = new Date()
+        const y = now.getFullYear()
+        const m = now.getMonth() + 1 // JS months are 0-based
+
+        if (m >= 9) {
+            return `${y}/${y + 1}`   // e.g., Sept 2025 → "2025/2026"
+        } else {
+            return `${y - 1}/${y}`   // e.g., Feb 2025 → "2024/2025"
+        }
+    }
+    watch(choosenAY, async () => {
+        isloading.value = true
+        await feesStore.undandledFess(choosenAY.value)
+        isloading.value = false
+    });
     
     const params = reactive({
         current_page: 1,
@@ -157,7 +190,7 @@
 
     onMounted(async () => {
         feesStore.fees.length == 0 && (isloading.value = true)
-        await feesStore.undandledFess()
+        await feesStore.undandledFess(choosenAY.value)
         isloading.value = false
     })
 </script>
