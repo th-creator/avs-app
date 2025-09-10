@@ -4,7 +4,21 @@
             <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Inscrits</h5>
             <div class="flex justify-between mb-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
-                <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
+                <div class="flex flex-row gap-4">
+                    <div class="flex gap-2">
+                        <multiselect
+                            v-model="choosenAY"
+                            :options="AYs"
+                            class="custom-multiselect  max-w-xs"
+                            :searchable="true"
+                            placeholder="Le mois"
+                            selected-label=""
+                            select-label=""
+                            deselect-label=""
+                        ></multiselect>    
+                    </div>
+                    <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
+                </div>
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -97,18 +111,6 @@
                             </div>
                         </div>
                     </template>
-                        <!-- <div class="flex justify-around w-full">
-                            <div class="relative !p-1">
-                                <button class="absolute left-0 top-0 z-10 h-full w-full" @click="registrantsStore.toggle({user_id:authStore?.user?.id,status: data.value.status ? 0 : 1},data.value.id)"></button>
-                                <label class="!relative !inline-flex !cursor-pointer !items-center">
-                                    <div
-                                        :class="[data.value.status == 1 && '!bg-blue-600 after:!translate-x-full after:!border-white']"
-                                        class="!peer !h-6 !w-11 !rounded-full bg-gray-200 after:!absolute after:!left-[2px] after:!top-[2px] after:!h-5 after:!w-5 after:!rounded-full after:!border after:!border-gray-300 after:!bg-white after:!transition-all after:!content-[''] peer-focus:!outline-none peer-focus:!ring-4 peer-focus:!ring-blue-300 dark:!border-gray-600 dark:!bg-gray-700 dark:peer-focus:!ring-blue-800"
-                                    ></div>
-                                </label>
-                            </div>    
-                        </div>
-                    </template> -->
                     <template #user_id="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.user.firstName + ' ' + data.value.user.lastName }}</p>
@@ -142,6 +144,7 @@
     import Transfer from './Transfer.vue'
     import Swal from 'sweetalert2';
 import {useAuthStore} from '@/stores/auth.js';
+import Multiselect from '@suadelabs/vue3-multiselect';
 
 const authStore = useAuthStore();
     
@@ -156,9 +159,29 @@ const authStore = useAuthStore();
 
     const registrantsStore = useRegistrantsStore();
 
+    const AYs = ref(['2024/2025','2025/2026','2026/2027','2027/2028','2028/2029','2029/2030','2030/2031','2031/2032','2032/2033', '2033/2034']);
+    const choosenAY = ref(getCurrentAY())
+
     const showPopup = ref(false);
     const showEditPopup = ref(false);
     const showTransferPopup = ref(false);
+
+    function getCurrentAY() {
+        const now = new Date()
+        const y = now.getFullYear()
+        const m = now.getMonth() + 1 // JS months are 0-based
+
+        if (m >= 9) {
+            return `${y}/${y + 1}`   // e.g., Sept 2025 → "2025/2026"
+        } else {
+            return `${y - 1}/${y}`   // e.g., Feb 2025 → "2024/2025"
+        }
+    }
+    watch(choosenAY, async () => {
+        isloading.value = true
+        await registrantsStore.index(choosenAY.value)
+        isloading.value = false
+    });
     
     const cols =
         ref([
@@ -188,7 +211,7 @@ const authStore = useAuthStore();
 
     onMounted(async () => {
         registrantsStore.registrants.length == 0 && (isloading.value = true)
-        await registrantsStore.index()
+        await registrantsStore.index(choosenAY.value)
         isloading.value = false
     })
     const toggleEdit = (data) => {

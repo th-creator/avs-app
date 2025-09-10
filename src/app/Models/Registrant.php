@@ -38,4 +38,12 @@ class Registrant extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function scopeForAY($q, string $ay) {
+        [$a,$b] = array_map('intval', explode('/', $ay));
+        return $q->where(function($w) use($a,$b){
+            $w->whereYear('enter_date', $a)->whereMonth('enter_date', '>=', 9)
+              ->orWhere(function($q2) use($b){ $q2->whereYear('enter_date', $b)->whereMonth('enter_date', '<=', 6); });
+        });
+    }
 }

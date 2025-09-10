@@ -10,8 +10,19 @@ use Illuminate\Support\Facades\Log;
 
 class RegistrantController extends Controller
 {
+    protected string $ay;
+
+    public function __construct()
+    {
+        $this->ay = request('ay') 
+            ?? (now()->month >= 9 
+                ? now()->year.'/'.(now()->year+1) 
+                : (now()->year-1).'/'.now()->year);
+    }
+    
     public function index() {
-        $data = Registrant::with('student')->with('group')->with('user')->orderBy('student_id', 'desc')->get();
+        $data = Registrant::with('student')
+        ->forAY($this->ay) ->with('group','user')->orderBy('student_id', 'desc')->get();
         return response()->json(['data' => $data], 200);
     }
     public function doubled() {
@@ -56,39 +67,6 @@ class RegistrantController extends Controller
             }
             $data->student = $data->student;
             $group = Group::where('id',$newData['group_id'])->with('section')->get()->first();
-            // $currentYear = date('Y');
-            // $months = ['Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'];
-            // $currentMonth = date('n'); // Get current month as a number (1-12)
-            // // Adjust the index for the academic year starting in September
-            // $flag = false;
-            // if ($currentMonth >= 9) {
-            //     $flag = true;
-                
-            //     $currentMonth -= 9; // For Sept to Dec, subtract 9 to get index 0-3
-            // } else {
-            //     $currentMonth += 3; // For Jan to June, add 3 to get index 4-9
-            // }
-            
-            // for ($i = $currentMonth; $i < count($months); $i++) { // Loop until June
-            //     if ($i > 3 && $flag == true) {
-            //         $monthName = $months[$i];
-            //         $yearName = $currentYear+1;
-            //     } else {
-            //         $yearName = $currentYear;
-            //         $monthName = $months[$i];
-            //     }
-            //     Payment::create([
-            //         'group' => $group['intitule'],
-            //         'month' => $monthName,
-            //         'year' => $yearName,
-            //         'amount' => $group['section']['price'],
-            //         'fullName' => $data['student']['firstName']. ' ' . $data['student']['lastName'],
-            //         'user_id' => $newData['user_id'],
-            //         'student_id' => $newData['student_id'],
-            //         'group_id' => $group['id'],
-            //         'registrant_id' => $data['id']
-            //     ]);
-            // }
     
             $group->availability = $group->availability - 1;
             $group->save();
@@ -100,52 +78,6 @@ class RegistrantController extends Controller
             }
         }
         return response()->json(['message' => 'Registrant created successfully', 'data' => $data], 200);
-        // $newData['status'] = 1;
-        // $data = Registrant::create($newData);
-        // $data->student = $data->student;
-        // $group = Group::where('id',$newData['group_id'])->with('section')->get()->first();
-        // $currentYear = date('Y');
-        // $months = ['Septembre', 'Octobre', 'Novembre', 'Décembre', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin'];
-        // $currentMonth = date('n'); // Get current month as a number (1-12)
-        // // Adjust the index for the academic year starting in September
-        // $flag = false;
-        // if ($currentMonth >= 9) {
-        //     $flag = true;
-            
-        //     $currentMonth -= 9; // For Sept to Dec, subtract 9 to get index 0-3
-        // } else {
-        //     $currentMonth += 3; // For Jan to June, add 3 to get index 4-9
-        // }
-        
-        // for ($i = $currentMonth; $i < count($months); $i++) { // Loop until June
-        //     if ($i > 3 && $flag == true) {
-        //         $monthName = $months[$i];
-        //         $yearName = $currentYear+1;
-        //     } else {
-        //         $yearName = $currentYear;
-        //         $monthName = $months[$i];
-        //     }
-        //     Payment::create([
-        //         'group' => $group['intitule'],
-        //         'month' => $monthName,
-        //         'year' => $yearName,
-        //         'amount' => $group['section']['price'],
-        //         'fullName' => $data['student']['firstName']. ' ' . $data['student']['lastName'],
-        //         'user_id' => $newData['user_id'],
-        //         'student_id' => $newData['student_id'],
-        //         'group_id' => $group['id'],
-        //         'registrant_id' => $data['id']
-        //     ]);
-        // }
-
-        // $group->availability = $group->availability - 1;
-        // $group->save();
-        // $data->group = $data->group;
-        if ($data) {
-            return response()->json(['message' => 'Registrant created successfully', 'data' => $data], 200);
-        } else {
-            return response()->json(['message' => 'Failed to create Registrant'], 500);
-        }
     }
 
     public function update(Request $request, $id)
@@ -307,6 +239,7 @@ class RegistrantController extends Controller
         $data = Registrant::where('status',1)
                           ->where('group_id',$id)
                           ->whereDate('enter_date', '<=', $currentDate)
+                          ->forAY($this->ay) 
                           ->with('student')
                           ->with('payments')
                           ->get();

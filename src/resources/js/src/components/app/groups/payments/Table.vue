@@ -4,7 +4,7 @@
             <div class="flex justify-between items-end mb-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." />
                 <!-- <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> -->
-                 <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-4">
                     <button type="button" class="btn btn-warning" @click="exportToExcel">Exporter</button>
                     <div class="flex gap-2">
                         <multiselect
@@ -154,9 +154,9 @@
     const groupsStore = useGroupsStore();
     
     const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
-    const choosenMonth = ref('Septembre');
+    const choosenMonth = ref('');
     const years = ref([2024,2025,2026,2027,2028,2029,2030]);
-    const choosenYear = ref(2024);
+    const choosenYear = ref(new Date().getFullYear());
     const choosenData = ref([]);
     const isloading = ref(true);
     const params = reactive({
@@ -166,7 +166,6 @@
         sort_column: 'id',
         sort_direction: 'asc',
     });
-
     watch(choosenMonth, async (newVal, oldVal) => {
         isloading.value = true
         await paymentsStore.fetchGroupPayments(route.params.id,choosenMonth.value,choosenYear.value)
@@ -219,9 +218,9 @@
 
     onMounted(async () => {
         const currentMonth = new Date().getMonth();
-        choosenYear.value = new Date().getFullYear();
+        // choosenYear.value = new Date().getFullYear();
         choosenMonth.value = options.value[currentMonth];
-        await paymentsStore.fetchGroupPayments(route.params.id,choosenMonth.value,choosenYear.value)
+        // await paymentsStore.fetchGroupPayments(route.params.id,choosenMonth.value,choosenYear.value)
         isloading.value =false
         choosenData.value = paymentsStore.groupPayments;
         total.value = choosenData.value.reduce((total, payment) => {

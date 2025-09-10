@@ -10,10 +10,10 @@ export const useRegistrantsStore = defineStore("registrants", () => {
     const registrants = ref([]);  // This will hold the registrants globally
     const groupRegistrants = ref([]);  // This will hold the students globally
 
-    // Fetch all registrants and update the state
-    const index = async () => {
+    // Fetch all registrants and update the state 
+    const index = async (ay) => {
         try {
-            const response = await api.get('api/registrants');
+            const response = await api.get(`api/registrants?ay=${ay}`);
             registrants.value = response.data.data.map(res => ({
                 id: res.id,
                 center: res.center,
@@ -140,9 +140,9 @@ export const useRegistrantsStore = defineStore("registrants", () => {
 
         return response
     };
-    const fetchGroupRegistrants = async (id) => {
+    const fetchGroupRegistrants = async (id,ay) => {
         try {
-            const response = await api.get(`api/group/${id}/registrants`);
+            const response = await api.get(`api/group/${id}/registrants?ay=${ay}`);
             groupRegistrants.value = response.data.data.map(res => ({
                 id: res.id,
                 center: res.center,

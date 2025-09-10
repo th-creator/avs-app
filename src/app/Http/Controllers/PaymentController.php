@@ -7,10 +7,26 @@ use App\Models\Group;
 use App\Models\Payment;
 use App\Models\Registrant;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PaymentController extends Controller
 {
+    protected ?string $ay; // nullable in case month=8
+
+    public function __construct()
+    {
+        $month = (int) request('month');
+        $year  = (int) request('year');
+
+        if ($month === 8) {
+            $this->ay = null; // 👈 Exclude August
+        } elseif ($month >= 9) {
+            $this->ay = "{$year}/" . ($year + 1);
+        } else { // months 1–6
+            $this->ay = ($year - 1) . "/{$year}";
+        }
+    }
     public function unhandledPayments($month,$year) {
         $months = [
             'Janvier' => 1,
@@ -94,10 +110,28 @@ class PaymentController extends Controller
             'Décembre' => 12,
         ];
         $monthNumber = $months[$month];
-        $currentDate = $year.'-'.$monthNumber.'-'.date('d');
+        if ($monthNumber >= 9) {            // Sep–Dec -> Y/(Y+1)
+            $ayStart = (int) $year;
+            $ayEnd   = (int) $year + 1;
+        } else {                      // Jan–Jun -> (Y-1)/Y
+            $ayStart = (int) $year - 1;
+            $ayEnd   = (int) $year;
+        }
+        $academicYear = "{$ayStart}/{$ayEnd}";
+        $currentDate = \Carbon\Carbon::createFromDate((int)$year, (int)$monthNumber, 1)->endOfMonth()->toDateString();
 
         $data = Payment::where('student_id',$id)->where('month', $month)->where('year', $year)->with('user')->get();
-        $registrants = Registrant::where('student_id',$id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
+        $registrants = Registrant::where('student_id',$id)
+        ->where('status', 1)->whereDate('enter_date', '<=', $currentDate)
+        ->where(function ($q) use ($ayStart, $ayEnd) {
+            $q->where(function ($q1) use ($ayStart) {
+                $q1->whereYear('enter_date', $ayStart)
+                   ->whereBetween(DB::raw('MONTH(enter_date)'), [9, 12]);
+            })->orWhere(function ($q2) use ($ayEnd) {
+                $q2->whereYear('enter_date', $ayEnd)
+                   ->whereBetween(DB::raw('MONTH(enter_date)'), [1, 6]);
+            });
+        })->get();
         foreach ($registrants as $registrant) {
             $payment = Payment::where('student_id', $id)
                                 ->where('group_id', $registrant->group_id)
@@ -165,7 +199,29 @@ class PaymentController extends Controller
         })->whereNot('paid',-1)->where('group_id',$id)->where('month', $month)->where('year', $year)->get();
         $group = Group::find($id);
         $price = $group->section->price;
-        $registrants = Registrant::where('group_id',$id)->where('status', 1)->whereDate('enter_date', '<=', $currentDate)->get();
+        // Determine AY start/end from month/year
+        if ($monthNumber >= 9) {            // Sep–Dec -> Y/(Y+1)
+            $ayStart = (int) $year;
+            $ayEnd   = (int) $year + 1;
+        } else {                      // Jan–Jun -> (Y-1)/Y
+            $ayStart = (int) $year - 1;
+            $ayEnd   = (int) $year;
+        }
+        $academicYear = "{$ayStart}/{$ayEnd}";
+        $currentDate = \Carbon\Carbon::createFromDate((int)$year, (int)$monthNumber, 1)->endOfMonth()->toDateString();
+        // $currentDate = Carbon::createFromDate((int)$year, (int)$month, 1)->endOfMonth()->toDateString();
+
+        $registrants = Registrant::where('group_id',$id)->where('status', 1)
+        ->where(function ($q) use ($ayStart, $ayEnd) {
+            $q->where(function ($q1) use ($ayStart) {
+                $q1->whereYear('enter_date', $ayStart)
+                   ->whereBetween(DB::raw('MONTH(enter_date)'), [9, 12]);
+            })->orWhere(function ($q2) use ($ayEnd) {
+                $q2->whereYear('enter_date', $ayEnd)
+                   ->whereBetween(DB::raw('MONTH(enter_date)'), [1, 6]);
+            });
+        })->whereDate('enter_date', '<=', $currentDate)->get();
+        // return response()->json(['data' => $registrants], 200);
         foreach ($registrants as $registrant) {
             $payment = Payment::where('student_id', $registrant->student_id)
                                 ->where('group_id', $id)
@@ -204,6 +260,8 @@ class PaymentController extends Controller
         }
         return response()->json(['data' => $data], 200);
     }
+
+    
 
     public function fetchFinance(Request $request) {
         $fromDate = $request->input('from');

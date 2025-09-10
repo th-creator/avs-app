@@ -50,4 +50,12 @@ class Payment extends Model
     {
         return $this->BelongsTo(Registrant::class);
     }
+
+    public function scopeForAY($q, string $ay) {
+        [$a,$b] = array_map('intval', explode('/', $ay));
+        return $q->where(function($w) use($a,$b){
+            $w->where(function($q1) use($a){ $q1->where('year',$a)->whereBetween('month',[9,12]); })
+              ->orWhere(function($q2) use($b){ $q2->where('year',$b)->whereBetween('month',[1,6]); });
+        });
+    }
 }
