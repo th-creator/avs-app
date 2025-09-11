@@ -186,7 +186,7 @@ const authStore = useAuthStore();
     const cols =
         ref([
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'student_id', title: "N°", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'ay_no', title: "N°", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'group', title: "Groupe", headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'email', title: 'Email', headerClass: '!text-center flex justify-center', width: 'full' },

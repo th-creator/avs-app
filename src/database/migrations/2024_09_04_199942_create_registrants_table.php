@@ -17,6 +17,8 @@ return new class extends Migration
             $table->date('enter_date')->nullable();
             $table->string('center')->nullable();
             $table->integer('status')->default(1);
+            $table->unsignedInteger('ay_no')->nullable()->after('status');
+            $table->index('ay_no');
             $table->unsignedBigInteger('student_id')->nullable();
             $table->foreign('student_id')->references('id')->on('students')->onDelete('set null');
             $table->unsignedBigInteger('user_id')->nullable();

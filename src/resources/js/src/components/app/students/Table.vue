@@ -169,7 +169,7 @@
     const selectedPayment = ref([]);
     const cols =
         ref([
-            { field: 'id', title: 'N°', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
+            // { field: 'id', title: 'N°', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'firstName', title: 'Prenom', headerClass: '!text-center flex justify-center', width: 'full' },

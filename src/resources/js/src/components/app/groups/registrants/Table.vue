@@ -125,7 +125,7 @@
     }
     const cols =
         ref([
-            { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'ay_no', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'firstName', title: 'Prenom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'phone', title: "Mobile", headerClass: '!text-center flex justify-center', width: 'full' },

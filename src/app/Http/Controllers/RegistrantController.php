@@ -7,6 +7,8 @@ use App\Models\Payment;
 use App\Models\Registrant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class RegistrantController extends Controller
 {
@@ -42,43 +44,124 @@ class RegistrantController extends Controller
         return response()->json(['data' => $data], 200);
     }
     
-    public function store(Request $request)
-    {
-        $newData = $request->validate([
-            'date' => 'required',
-            'enter_date' => 'nullable',
-            'center' => 'required',
-            'user_id' => 'required',
-            'student_id' => 'required',
-            'group_id' => 'required',
-        ]);
-        $newRegistrants = [];
-        foreach($newData['group_id'] as $group_id) {
-            $newData['group_id'] = $group_id;
-            $newData['status'] = 1;
-            $existingRegistrant = Registrant::where('group_id', $newData['group_id'])
-                                            ->where('student_id', $newData['student_id'])
-                                            ->first();
+    // public function store(Request $request)
+    // {
+    //     $newData = $request->validate([
+    //         'date' => 'required',
+    //         'enter_date' => 'nullable',
+    //         'center' => 'required',
+    //         'user_id' => 'required',
+    //         'student_id' => 'required',
+    //         'group_id' => 'required',
+    //     ]);
+    //     $newRegistrants = [];
+    //     foreach($newData['group_id'] as $group_id) {
+    //         $newData['group_id'] = $group_id;
+    //         $newData['status'] = 1;
+    //         $existingRegistrant = Registrant::where('group_id', $newData['group_id'])
+    //                                         ->where('student_id', $newData['student_id'])
+    //                                         ->first();
 
-            if ($existingRegistrant) {
-                return response()->json(['message' => 'Registrant already exists'], 400);
-            } else {
-                $data = Registrant::create($newData);
-            }
-            $data->student = $data->student;
-            $group = Group::where('id',$newData['group_id'])->with('section')->get()->first();
+    //         if ($existingRegistrant) {
+    //             return response()->json(['message' => 'Registrant already exists'], 400);
+    //         } else {
+    //             $data = Registrant::create($newData);
+    //         }
+    //         $data->student = $data->student;
+    //         $group = Group::where('id',$newData['group_id'])->with('section')->get()->first();
     
-            $group->availability = $group->availability - 1;
-            $group->save();
-            $data->group = $data->group;
-            $data->user = $data->user;
-            array_push($newRegistrants, $data);
-            if (!$data) {
-                return response()->json(['message' => 'Failed to create Registrant'], 500);
-            }
+    //         $group->availability = $group->availability - 1;
+    //         $group->save();
+    //         $data->group = $data->group;
+    //         $data->user = $data->user;
+    //         array_push($newRegistrants, $data);
+    //         if (!$data) {
+    //             return response()->json(['message' => 'Failed to create Registrant'], 500);
+    //         }
+    //     }
+    //     return response()->json(['message' => 'Registrant created successfully', 'data' => $data], 200);
+    // }
+
+    public function store(Request $request)
+{
+    $newData = $request->validate([
+        'date' => 'required',
+        'enter_date' => 'nullable',
+        'center' => 'required',
+        'user_id' => 'required',
+        'student_id' => 'required',
+        'group_id' => 'required',
+    ]);
+
+    $newRegistrants = [];
+    foreach ($newData['group_id'] as $group_id) {
+        $newData['group_id'] = $group_id;
+        $newData['status'] = 1;
+
+        // -------- NEW: AY number allocation (reuse or create) --------
+        // Requires: use Carbon\Carbon; use Illuminate\Support\Facades\DB;
+        $enter = $newData['enter_date'] ?? $newData['date'] ?? now()->toDateString();
+        $dt = \Carbon\Carbon::parse($enter);
+        $y  = (int) $dt->year;
+        $m  = (int) $dt->month;
+        $ay = $m >= 9 ? "{$y}/" . ($y + 1) : ($y - 1) . "/{$y}";
+
+        // Try to reuse existing AY number for this student
+        $ayNum = \Illuminate\Support\Facades\DB::table('student_ay_numbers')
+            ->where('ay', $ay)
+            ->where('student_id', $newData['student_id'])
+            ->value('num');
+
+        if (!$ayNum) {
+            // Allocate a new sequential number for this AY, race-safe
+            \Illuminate\Support\Facades\DB::transaction(function () use ($ay, $newData, &$ayNum) {
+                $max = \Illuminate\Support\Facades\DB::table('student_ay_numbers')
+                    ->where('ay', $ay)
+                    ->lockForUpdate()
+                    ->max('num');
+
+                $ayNum = (int) ($max ?? 0) + 1;
+
+                \Illuminate\Support\Facades\DB::table('student_ay_numbers')->insert([
+                    'ay'         => $ay,
+                    'student_id' => $newData['student_id'],
+                    'num'        => $ayNum,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            });
         }
-        return response()->json(['message' => 'Registrant created successfully', 'data' => $data], 200);
+
+        // Denormalize onto registrant for zero-join reads
+        $newData['ay_no'] = $ayNum;
+        // -------------------- END NEW --------------------
+
+        $existingRegistrant = Registrant::where('group_id', $newData['group_id'])
+            ->where('student_id', $newData['student_id'])
+            ->first();
+
+        if ($existingRegistrant) {
+            return response()->json(['message' => 'Registrant already exists'], 400);
+        } else {
+            $data = Registrant::create($newData);
+        }
+
+        $data->student = $data->student;
+        $group = Group::where('id', $newData['group_id'])->with('section')->get()->first();
+
+        $group->availability = $group->availability - 1;
+        $group->save();
+        $data->group = $data->group;
+        $data->user = $data->user;
+        array_push($newRegistrants, $data);
+        if (!$data) {
+            return response()->json(['message' => 'Failed to create Registrant'], 500);
+        }
     }
+
+    return response()->json(['message' => 'Registrant created successfully', 'data' => $data], 200);
+}
+
 
     public function update(Request $request, $id)
     {

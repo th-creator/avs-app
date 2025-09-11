@@ -10,6 +10,7 @@ class Registrant extends Model
     use HasFactory;
     
     protected $fillable = [
+        'ay_no',
         'date',
         'center',
         'status',
