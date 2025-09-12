@@ -100,7 +100,7 @@
             { field: 'n_place', title: 'Nombre de places', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'salle', title: "Salle", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'timing', title: "Temps", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'availability', title: "Disponibilité", headerClass: '!text-center flex justify-center', width: 'full' },
+            // { field: 'availability', title: "Disponibilité", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'teacher_id', title: "Enseignant", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
