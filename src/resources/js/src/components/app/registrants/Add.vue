@@ -137,7 +137,7 @@ const groupsStore = useGroupsStore();
 const options = ref(['AVS', 'ISFPT']);
 
 const students = computed(() => {
-        return studentsStore.students.length > 0 ? studentsStore.students.map(res => res.firstName + ' '+ res.lastName) : [];
+        return studentsStore.students.length > 0 ? studentsStore.students.map(res => res.id + ' : ' + res.firstName + ' '+ res.lastName) : [];
         });
 
 const groups = computed(() => {
