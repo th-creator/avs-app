@@ -321,7 +321,7 @@ class RegistrantController extends Controller
         $currentDate = date('Y-m-d');
         $data = Registrant::where('status',1)
                           ->where('group_id',$id)
-                          ->whereDate('enter_date', '<=', $currentDate)
+                          ->whereDate('date', '<=', $currentDate)
                           ->forAY($this->ay) 
                           ->with('student')
                           ->with('payments')
