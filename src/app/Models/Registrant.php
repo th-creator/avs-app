@@ -11,6 +11,7 @@ class Registrant extends Model
     
     protected $fillable = [
         'ay_no',
+        'student_ay_number_id',
         'date',
         'center',
         'status',

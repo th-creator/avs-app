@@ -157,15 +157,23 @@ const errors = ref({})
 const Edit = () => {
     isLoading.value = true
     feesStore.update(data.value,props.editedData.id).then(res => {
-        isLoading.value = true
+        isLoading.value = false
         useAlert('success', 'Créé avec succès!');
         props.close()
     }).catch((err) => {
+        console.log(err);
+        
         isLoading.value = true
-        if(err.status == 422) {
+        if(err.status == 200) {
+            isLoading.value = false
+            useAlert('success', 'Créé avec succès!');
+            props.close()
+
+        }else if(err.status == 422) {
             errors.value =  err.response.data.errors;
+        } else {
+            useAlert('warning', "quelque chose s'est mal passé!");
         }
-        useAlert('warning', "quelque chose s'est mal passé!");
     });
 }
 </script>

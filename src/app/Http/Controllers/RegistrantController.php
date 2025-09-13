@@ -83,84 +83,94 @@ class RegistrantController extends Controller
     // }
 
     public function store(Request $request)
-{
-    $newData = $request->validate([
-        'date' => 'required',
-        'enter_date' => 'nullable',
-        'center' => 'required',
-        'user_id' => 'required',
-        'student_id' => 'required',
-        'group_id' => 'required',
-    ]);
+    {
+        $newData = $request->validate([
+            'date' => 'required',
+            'enter_date' => 'nullable',
+            'center' => 'required',
+            'user_id' => 'required',
+            'student_id' => 'required',
+            'group_id' => 'required',
+        ]);
 
-    $newRegistrants = [];
-    foreach ($newData['group_id'] as $group_id) {
-        $newData['group_id'] = $group_id;
-        $newData['status'] = 1;
+        $newRegistrants = [];
+        foreach ($newData['group_id'] as $group_id) {
+            $newData['group_id'] = $group_id;
+            $newData['status'] = 1;
 
-        // -------- NEW: AY number allocation (reuse or create) --------
-        // Requires: use Carbon\Carbon; use Illuminate\Support\Facades\DB;
-        $enter = $newData['enter_date'] ?? $newData['date'] ?? now()->toDateString();
-        $dt = \Carbon\Carbon::parse($enter);
-        $y  = (int) $dt->year;
-        $m  = (int) $dt->month;
-        $ay = $m >= 9 ? "{$y}/" . ($y + 1) : ($y - 1) . "/{$y}";
+            // -------- AY number allocation (reuse or create) --------
+            $enter = $newData['enter_date'] ?? $newData['date'] ?? now()->toDateString();
+            $dt = \Carbon\Carbon::parse($enter);
+            $y  = (int) $dt->year;
+            $m  = (int) $dt->month;
+            $ay = $m >= 9 ? "{$y}/" . ($y + 1) : ($y - 1) . "/{$y}";
 
-        // Try to reuse existing AY number for this student
-        $ayNum = \Illuminate\Support\Facades\DB::table('student_ay_numbers')
-            ->where('ay', $ay)
-            ->where('student_id', $newData['student_id'])
-            ->value('num');
+            // Try to reuse existing mapping (id + num)
+            $mapping = \Illuminate\Support\Facades\DB::table('student_ay_numbers')
+                ->select('id', 'num')
+                ->where('ay', $ay)
+                ->where('student_id', $newData['student_id'])
+                ->first();
 
-        if (!$ayNum) {
-            // Allocate a new sequential number for this AY, race-safe
-            \Illuminate\Support\Facades\DB::transaction(function () use ($ay, $newData, &$ayNum) {
-                $max = \Illuminate\Support\Facades\DB::table('student_ay_numbers')
-                    ->where('ay', $ay)
-                    ->lockForUpdate()
-                    ->max('num');
+            $mappingId = $mapping->id  ?? null;
+            $ayNum     = $mapping->num ?? null;
 
-                $ayNum = (int) ($max ?? 0) + 1;
+            if (!$mappingId) {
+                // Allocate a new sequential number for this AY (race-safe)
+                \Illuminate\Support\Facades\DB::transaction(function () use ($ay, $newData, &$mappingId, &$ayNum) {
+                    $max = \Illuminate\Support\Facades\DB::table('student_ay_numbers')
+                        ->where('ay', $ay)
+                        ->lockForUpdate()
+                        ->max('num');
 
-                \Illuminate\Support\Facades\DB::table('student_ay_numbers')->insert([
-                    'ay'         => $ay,
-                    'student_id' => $newData['student_id'],
-                    'num'        => $ayNum,
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-            });
+                    $ayNum = (int) ($max ?? 0) + 1;
+
+                    $mappingId = \Illuminate\Support\Facades\DB::table('student_ay_numbers')->insertGetId([
+                        'ay'         => $ay,
+                        'student_id' => $newData['student_id'],
+                        'num'        => $ayNum,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                });
+            }
+
+            // Denormalize onto registrant for zero-join reads
+            $newData['ay_no'] = $ayNum;
+            // Link to mapping row so DB can enforce per-AY uniqueness
+            $newData['student_ay_number_id'] = $mappingId;
+            // -------------------- END NEW --------------------
+
+            // Duplicate check must be per AY (group + student_ay_number_id)
+            $existingRegistrant = Registrant::where('group_id', $newData['group_id'])
+                ->where('student_ay_number_id', $newData['student_ay_number_id'])->forAY($this->ay)
+                ->first();
+
+            if ($existingRegistrant) {
+                return response()->json(['message' => 'Registrant already exists'], 400);
+            } else {
+                $data = Registrant::create($newData);
+            }
+
+            $data->student = $data->student;
+            $group = Group::where('id', $newData['group_id'])->with('section')->first();
+
+            $group->availability = $group->availability - 1;
+            $group->save();
+
+            $data->group = $data->group;
+            $data->user  = $data->user;
+
+            $newRegistrants[] = $data;
+
+            if (!$data) {
+                return response()->json(['message' => 'Failed to create Registrant'], 500);
+            }
         }
 
-        // Denormalize onto registrant for zero-join reads
-        $newData['ay_no'] = $ayNum;
-        // -------------------- END NEW --------------------
-
-        $existingRegistrant = Registrant::where('group_id', $newData['group_id'])
-            ->where('student_id', $newData['student_id'])
-            ->first();
-
-        if ($existingRegistrant) {
-            return response()->json(['message' => 'Registrant already exists'], 400);
-        } else {
-            $data = Registrant::create($newData);
-        }
-
-        $data->student = $data->student;
-        $group = Group::where('id', $newData['group_id'])->with('section')->get()->first();
-
-        $group->availability = $group->availability - 1;
-        $group->save();
-        $data->group = $data->group;
-        $data->user = $data->user;
-        array_push($newRegistrants, $data);
-        if (!$data) {
-            return response()->json(['message' => 'Failed to create Registrant'], 500);
-        }
+        return response()->json(['message' => 'Registrant created successfully', 'data' => $data], 200);
     }
 
-    return response()->json(['message' => 'Registrant created successfully', 'data' => $data], 200);
-}
 
 
     public function update(Request $request, $id)

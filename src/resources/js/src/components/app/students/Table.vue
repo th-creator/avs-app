@@ -4,7 +4,10 @@
             <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les élèves</h5>
             <div class="flex justify-between mb-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
-                <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
+                <div class="flex justify-between gap-2">    
+                    <button type="button" class="btn btn-warning w-40 h-9" @click="exportToExcel()">Exporter</button>  
+                    <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button>
+                </div>
             </div>
             <div class="datatable">
                 <vue3-datatable
@@ -149,6 +152,8 @@
     import {useAuthStore} from '@/stores/auth.js';
     import html2pdf from "html2pdf.js";
     import { useRegistrantsStore } from '@/stores/registrants.js';
+    import * as XLSX from 'xlsx';
+
 
     const authStore = useAuthStore();
     
@@ -271,4 +276,17 @@ const printPayment = async (payment) => {
     selectedPayment.value = []
   });
 };
+    const exportToExcel = () => {
+        // Get the attendance data from Vuex
+        const attendanceData = studentsStore.students.map(res => ({'nom': res.fullName, 'Option': res.field, 'Niveau': res.level, 'Mobile du parent': res.parent_phone, 'Mobile': res.phone, 'email': res.email, "Date d'incription": res.date}))
+        // Create a worksheet from the attendance data
+        const worksheet = XLSX.utils.json_to_sheet(attendanceData);
+
+        // Create a new workbook and append the worksheet
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Les élèves');
+
+        // Export the workbook to an Excel file
+        XLSX.writeFile(workbook, 'Les élèves.xlsx');
+    };
 </script>

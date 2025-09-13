@@ -71,8 +71,8 @@ export const useFeesStore = defineStore("fees", () => {
         const secondIndex = studentfees.value.findIndex(user => user.id === id);
         
         if (index !== -1) {
-            students.value[index] = response.data.data;
-            students.value = [...students.value]; // Reassign to force reactivity
+            studentfees.value[index] = response.data.data;
+            studentfees.value = [...studentfees.value]; // Reassign to force reactivity
         }
         
         if (secondIndex !== -1) {

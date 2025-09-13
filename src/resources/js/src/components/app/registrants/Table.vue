@@ -1,7 +1,10 @@
 <template>
     <div>
         <div class="panel pb-0 mt-6">
-            <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Inscrits</h5>
+            <div class="flex justify-between gap-2">    
+                <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Inscrits</h5>
+                <button type="button" class="btn btn-warning w-40 h-9" @click="exportToExcel()">Exporter</button>  
+            </div>
             <div class="flex justify-between mb-4">    
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
                 <div class="flex flex-row gap-4">
@@ -145,6 +148,8 @@
     import Swal from 'sweetalert2';
 import {useAuthStore} from '@/stores/auth.js';
 import Multiselect from '@suadelabs/vue3-multiselect';
+    import * as XLSX from 'xlsx';
+
 
 const authStore = useAuthStore();
     
@@ -152,7 +157,7 @@ const authStore = useAuthStore();
         current_page: 1,
         search: '',
         pagesize: 10,
-        sort_column: 'id',
+        sort_column: 'ay_no',
         sort_direction: 'desc',
     });
     const isloading = ref(false);
@@ -190,7 +195,7 @@ const authStore = useAuthStore();
             { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'group', title: "Groupe", headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'email', title: 'Email', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'field', title: "spécialité", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'field', title: "Spécialité", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'level', title: "Niveau", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'phone', title: "Mobile", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'parent_phone', title: "Mobile du parent", headerClass: '!text-center flex justify-center', width: 'full' },
@@ -257,5 +262,71 @@ const authStore = useAuthStore();
             }
         });
     }
+    const exportToExcel = () => {
+  // 1) Collapse registrants so each student appears once
+  const byStudent = new Map();
+
+  // assuming registrantsStore.registrants is the registrants array you showed
+  for (const r of registrantsStore.registrants) {
+    const sid = r.student_id;
+    const fullName = r.fullName;
+    const groupName = r.group ?? '';
+
+    if (!byStudent.has(sid)) {
+      byStudent.set(sid, {
+        ay_no: r.ay_no,
+        fullName,
+        groups: groupName ? [groupName] : [],
+        field: r.field ?? '',
+        level: r.level ?? '',
+        parent_phone: r.parent_phone ?? '',
+        phone: r.phone ?? '',
+        status: r.status,
+        date: r.date ?? r.enter_date ?? '',
+      });
+    } else {
+      const s = byStudent.get(sid);
+      if (groupName && !s.groups.includes(groupName)) s.groups.push(groupName);
+      // keep earliest date if you want:
+      // if (r.date && (!s.date || r.date < s.date)) s.date = r.date;
+    }
+  }
+
+  // 2) Build export rows (groups stacked with newlines in one cell)
+  // Excel shows new lines if Wrap Text is enabled; most users toggle it.
+  const rows = Array.from(byStudent.values())
+    .sort((a, b) => (a.ay_no ?? 0) - (b.ay_no ?? 0)) // optional: sort by AY number
+    .map(s => ({
+      'N°': s.ay_no,
+      'Nom': s.fullName,
+      'Groupes': s.groups.join('\n'),      // stacked lines in one cell
+      'Spécialité': s.field,
+      'Niveau': s.level,
+      'Mobile du parent': s.parent_phone,
+      'Mobile': s.phone,
+      'État': s.status,
+      "Date d'inscription": s.date,
+    }));
+
+  // 3) Export via xlsx
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Les Inscrits');
+
+  // (Optional) set column widths so group text is readable
+  ws['!cols'] = [
+    { wch: 6 },   // N°
+    { wch: 28 },  // Nom
+    { wch: 60 },  // Groupes
+    { wch: 12 },  // Spécialité
+    { wch: 10 },  // Niveau
+    { wch: 16 },  // Mobile du parent
+    { wch: 14 },  // Mobile
+    { wch: 8 },   // État
+    { wch: 14 },  // Date d'inscription
+  ];
+
+  XLSX.writeFile(wb, 'Les Inscrits.xlsx');
+};
 
 </script>
