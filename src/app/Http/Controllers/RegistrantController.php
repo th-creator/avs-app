@@ -312,7 +312,7 @@ class RegistrantController extends Controller
         ->where('group_id', $oldGroup->id)
         ->whereIn('month', $monthsToDelete)
         ->where('year', '>=', $currentYear)
-        ->update(['group_id'=> $group['id'],'group'=>$group['intitule'],'enter_date'=> date('Y-m-d')]);
+        ->update(['group_id'=> $group['id'],'group'=>$group['intitule']]);
         // ->orWhere('year', '>=', $currentYear +1)
         $data->update($userData);
 
