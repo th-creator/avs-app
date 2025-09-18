@@ -342,6 +342,7 @@ class PaymentController extends Controller
         $existingPayment = Payment::where('group_id', $newData['group_id'])
                                   ->where('registrant_id', $newData['registrant_id'])
                                   ->where('month', $newData['month'])
+                                  ->where('year', $newData['year'])
                                   ->first();
 
         if ($existingPayment) {
