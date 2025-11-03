@@ -1,251 +1,486 @@
 <template>
     <div>
-        <div class="panel pb-0 mt-6">
-            <!-- <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les Payements et Inscriptions</h5> -->
-            <div class="flex justify-between my-4">    
-                <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
-                <div class="flex flex-row gap-4">
-                    <div class="flex gap-2">
-                        <multiselect
-                            v-model="choosenAY"
-                            :options="AYs"
-                            class="custom-multiselect  max-w-xs"
-                            :searchable="true"
-                            placeholder="Le mois"
-                            selected-label=""
-                            select-label=""
-                            deselect-label=""
-                        ></multiselect>    
-                    </div>
-                    <button type="button" class="btn btn-warning" @click="exportToExcel">Exporter</button>
-                </div>
+      <div class="panel pb-0 mt-6">
+        <div class="flex justify-between my-4">
+          <input
+            v-model="params.search"
+            type="text"
+            class="form-input max-w-xs"
+            placeholder="Rechercher..."
+          />
+          <div class="flex flex-row gap-4">
+            <div class="flex gap-2">
+              <multiselect
+                v-model="choosenAY"
+                :options="AYs"
+                class="custom-multiselect max-w-xs"
+                :searchable="true"
+                placeholder="Année scolaire"
+                selected-label=""
+                select-label=""
+                deselect-label=""
+              />
             </div>
-            <div class="datatable">
-                <vue3-datatable
-                    :rows="registrantsStore.groupRegistrants"
-                    :columns="cols"
-                    :totalRows="rows?.length"
-                    :sortable="true"
-                    :search="params.search"
-                    :loading="isloading"
-                    :paginationInfo="'{0} à {1} de {2}'"
-                    skin="whitespace-nowrap bh-table-hover"
-                    firstArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M13 19L7 12L13 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M16.9998 19L10.9998 12L16.9998 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
-                    lastArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M11 19L17 12L11 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> <path opacity="0.5" d="M6.99976 19L12.9998 12L6.99976 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg> '
-                    previousArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M15 5L9 12L15 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
-                    nextArrow='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 rtl:rotate-180"> <path d="M9 5L15 12L9 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
-                >
-                    <template #id="data">
-                        <div class="flex justify-around w-full">
-                            <h5 class="text-primary hover:underline">{{ data.value.student.id }}</h5>
-                        </div>
-                    </template>
-                    <template #firstName="data">
-                        <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.firstName }}</p>
-                        </div>
-                    </template>
-                    <template #lastName="data">
-                        <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.lastName  }}</p>
-                        </div>
-                    </template>
-                    <template #email="data">
-                        <div class="flex justify-around w-full">
-                            <a class="font-semibold text-center" >{{ data.value.email }}</a>
-                        </div>
-                    </template>
-                    <template #phone="data">
-                        <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.phone }}</p>
-                        </div>
-                    </template>
-                    <template #parent_phone="data">
-                        <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.parent_phone }}</p>
-                        </div>
-                    </template>
-                    <template #date="data">
-                        <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.date }}</p>
-                        </div>
-                    </template>
-                    <template #rest="data">
-                        <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.rest }}</p>
-                        </div>
-                    </template>
-                    <template #level="data">
-                        <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.level }}</p>
-                        </div>
-                    </template>
-                </vue3-datatable>
-            </div>
+            <button type="button" class="btn btn-warning" @click="exportToExcel">
+              Excel
+            </button>
+            <button type="button" class="btn btn-primary" @click="exportToPdf">
+              PDF
+            </button>
+          </div>
         </div>
+  
+        <div class="datatable">
+          <vue3-datatable
+            :rows="registrantsStore.groupRegistrants"
+            :columns="cols"
+            :totalRows="rows?.length"
+            :sortable="true"
+            :search="params.search"
+            :loading="isloading"
+            :paginationInfo="'{0} à {1} de {2}'"
+            skin="whitespace-nowrap bh-table-hover"
+          >
+            <template #firstName="data">
+              <div class="flex justify-around w-full items-center gap-2">
+                <p class="font-semibold text-center">
+                  {{ data.value.firstName }}
+                </p>
+              </div>
+            </template>
+            <template #lastName="data">
+              <div class="flex justify-around w-full items-center gap-2">
+                <p class="font-semibold text-center">
+                  {{ data.value.lastName }}
+                </p>
+              </div>
+            </template>
+          </vue3-datatable>
+        </div>
+      </div>
     </div>
-</template>
-<script setup>
-    import { ref, reactive, computed, onMounted, watch } from 'vue';
-    import Vue3Datatable from '@bhplugin/vue3-datatable';
-    import { useRegistrantsStore } from '@/stores/registrants.js';
-    import { useRoute } from 'vue-router';
-    import Multiselect from '@suadelabs/vue3-multiselect';
-    import * as XLSX from 'xlsx';
-    import { useGroupsStore } from '@/stores/groups.js';
-
-    const groupsStore = useGroupsStore();
-    
-    const params = reactive({
-        current_page: 1,
-        search: '',
-        pagesize: 10,
-        sort_column: 'id',
-        sort_direction: 'asc',
-    });
-
-    const AYs = ref(['2024/2025','2025/2026','2026/2027','2027/2028','2028/2029','2029/2030','2030/2031','2031/2032','2032/2033', '2033/2034']);
-    const choosenAY = ref(getCurrentAY())
-
-    const registrantsStore = useRegistrantsStore();
-    const route = useRoute();
-
-    const studyDates = ref([]);
-    const isloading = ref(true);
-    function getCurrentAY() {
-        const now = new Date()
-        const y = now.getFullYear()
-        const m = now.getMonth() + 1 // JS months are 0-based
-
-        if (m >= 9) {
-            return `${y}/${y + 1}`   // e.g., Sept 2025 → "2025/2026"
-        } else {
-            return `${y - 1}/${y}`   // e.g., Feb 2025 → "2024/2025"
-        }
+  </template>
+  
+  <script setup>
+  import { ref, reactive, computed, onMounted, watch } from 'vue'
+  import Vue3Datatable from '@bhplugin/vue3-datatable'
+  import Multiselect from '@suadelabs/vue3-multiselect'
+  import * as XLSX from 'xlsx'
+  import jsPDF from 'jspdf'
+  
+  import { useRegistrantsStore } from '@/stores/registrants.js'
+  import { useGroupsStore } from '@/stores/groups.js'
+  import { useRoute } from 'vue-router'
+  
+  const registrantsStore = useRegistrantsStore()
+  const groupsStore = useGroupsStore()
+  const route = useRoute()
+  
+  /* --------------------------------------------------
+     BASIC STATE
+  -------------------------------------------------- */
+  const params = reactive({
+    current_page: 1,
+    search: '',
+    pagesize: 10,
+    sort_column: 'id',
+    sort_direction: 'asc',
+  })
+  
+  const AYs = ref([
+    '2024/2025',
+    '2025/2026',
+    '2026/2027',
+    '2027/2028',
+    '2028/2029',
+    '2029/2030',
+    '2030/2031',
+    '2031/2032',
+    '2032/2033',
+    '2033/2034',
+  ])
+  
+  const choosenAY = ref(getCurrentAY())
+  const isloading = ref(true)
+  
+  // will contain { "02": "", "06": "", ... }
+  const studyDates = ref({})
+  
+  function getCurrentAY() {
+    const now = new Date()
+    const y = now.getFullYear()
+    const m = now.getMonth() + 1
+    return m >= 9 ? `${y}/${y + 1}` : `${y - 1}/${y}`
+  }
+  
+  const cols = ref([
+    { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center' },
+    { field: 'firstName', title: 'Prénom', headerClass: '!text-center flex justify-center' },
+    { field: 'phone', title: 'Mobile', headerClass: '!text-center flex justify-center' },
+    { field: 'date', title: "Date d'inscription", headerClass: '!text-center flex justify-center' },
+  ])
+  
+  const rows = computed(async () => {
+    let data = registrantsStore.groupRegistrants.length
+      ? registrantsStore.groupRegistrants
+      : []
+    return data
+  })
+  
+  /* --------------------------------------------------
+     WATCH AY
+  -------------------------------------------------- */
+  watch(choosenAY, async () => {
+    isloading.value = true
+    await registrantsStore.fetchGroupRegistrants(route.params.id, choosenAY.value)
+    isloading.value = false
+    setTimeout(buildStudyDatesFromTiming, 100)
+  })
+  
+  /* --------------------------------------------------
+     ON MOUNT
+  -------------------------------------------------- */
+  onMounted(async () => {
+    await registrantsStore.fetchGroupRegistrants(route.params.id, choosenAY.value)
+    isloading.value = false
+    setTimeout(buildStudyDatesFromTiming, 100)
+  })
+  
+  /* --------------------------------------------------
+     BUILD DATES from group.timing
+  -------------------------------------------------- */
+  const dayMap = {
+    Lundi: 1,
+    Mardi: 2,
+    Mercredi: 3,
+    Jeudi: 4,
+    Vendredi: 5,
+    Samedi: 6,
+    Dimanche: 0,
+  }
+  
+  function buildStudyDatesFromTiming() {
+    const group = groupsStore.group
+    const current = new Date()
+    const year = current.getFullYear()
+    const month = current.getMonth() // 0-based
+  
+    const dates = {}
+  
+    if (group?.timing) {
+      const days = []
+      const d = new Date(year, month, 1)
+      while (d.getMonth() === month) {
+        days.push(new Date(d))
+        d.setDate(d.getDate() + 1)
+      }
+  
+      JSON.parse(group.timing).forEach((item) => {
+        const target = dayMap[item.day]
+        days.forEach((date) => {
+          if (date.getDay() === target) {
+            const dayString = String(date.getDate()).padStart(2, '0')
+            dates[dayString] = ''
+          }
+        })
+      })
     }
-    const cols =
-        ref([
-            { field: 'ay_no', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'firstName', title: 'Prenom', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'phone', title: "Mobile", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'parent_phone', title: "Mobile du parent", headerClass: '!text-center flex justify-center', width: 'full' },
-            // { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'date', title: "Date d'incription", headerClass: '!text-center flex justify-center', width: 'full' },
-        ]) || [];
-
-    const rows = computed(async() => {
-        let data = await registrantsStore.groupRegistrants.length > 0 ? registrantsStore.groupRegistrants : []
-        return data;
-        });
-
-    watch(choosenAY, async () => {
-        isloading.value = true
-        await registrantsStore.fetchGroupRegistrants(route.params.id,choosenAY.value)
-        isloading.value = false
-    });
-
-    onMounted(async () => {
-        await registrantsStore.fetchGroupRegistrants(route.params.id,choosenAY.value)
-        isloading.value =false
-        setTimeout(getStudyDatesForCurrentMonth, 1000);
+  
+    if (!Object.keys(dates).length) {
+      ;['02', '06', '09', '13', '16', '20', '23', '27', '30'].forEach((d) => {
+        dates[d] = ''
+      })
+    }
+  
+    const sorted = {}
+    Object.keys(dates)
+      .sort((a, b) => Number(a) - Number(b))
+      .forEach((k) => {
+        sorted[k] = dates[k]
+      })
+  
+    studyDates.value = sorted
+  }
+  
+  /* --------------------------------------------------
+     EXCEL (unchanged)
+  -------------------------------------------------- */
+  const exportToExcel = () => {
+    const attendanceData = registrantsStore.groupRegistrants.map((res) => ({
+      no: res.student.id,
+      nom: res.lastName,
+      prenom: res.firstName,
+      Mobile: res.phone,
+      ...studyDates.value,
+    }))
+    const worksheet = XLSX.utils.json_to_sheet(attendanceData, { cellStyles: true })
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance')
+    XLSX.writeFile(
+      workbook,
+      'liste de présence - ' + (groupsStore.group.intitule || 'groupe') + '.xlsx'
+    )
+  }
+  
+  /* --------------------------------------------------
+     PDF
+  -------------------------------------------------- */
+  const exportToPdf = async () => {
+    try {
+      const doc = new jsPDF('p', 'mm', 'a4')
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+  
+      const marginLeft = 10
+      const marginRight = 10
+      const usableWidth = pageWidth - marginLeft - marginRight
+  
+      const group = groupsStore.group || {}
+      const students = registrantsStore.groupRegistrants || []
+  
+      // dates
+      let dates = Object.keys(studyDates.value || {})
+      if (!dates.length) {
+        dates = ['02', '06', '09', '13', '16', '20', '23', '27', '30']
+      }
+  
+      const monthNamesFr = [
+        'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+        'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'
+      ]
+      const moisLabel = monthNamesFr[new Date().getMonth()]
+  
+      // parse header
+      const parsed = parseIntitule(group?.intitule || '')
+  
+      // load logo from /public
+      const logoImg = await loadPublicImage('/assets/images/avs-logo.png').catch(() => null)
+  
+      // 1) HEADER
+      let y = 12
+      y = drawHeaderLikePaper(doc, {
+        y,
+        x: marginLeft,
+        usableWidth,
+        parsed,
+        group,
+        moisLabel,
+        dates,
+        studentsCount: students.length,
+        logoImg,
+      })
+  
+      // 2) TABLE ROWS
+      const colNo = 7
+      const colNom = 52
+      const colPrenom = 36
+      const fixedWidth = colNo + colNom + colPrenom
+      const dateW = (usableWidth - fixedWidth) / dates.length
+  
+      let rowY = y
+      const rowH = 7
+  
+      doc.setFontSize(9)
+      students.forEach((s, idx) => {
+        // page break
+        if (rowY + rowH > pageHeight - 10) {
+          doc.addPage()
+          // redraw header line on top of new page
+          rowY = 12
+          // we can also redraw the header row (N°, NOM, ...)
+          rowY = redrawTableHeader(doc, {
+            y: rowY,
+            x: marginLeft,
+            usableWidth,
+            colNo,
+            colNom,
+            colPrenom,
+            dates,
+            dateW,
+          })
+        }
+  
+        const x = marginLeft
+        const no = idx + 1
+        const nom = (s.lastName || '').toUpperCase()
+        const prenom = (s.firstName || '').toUpperCase()
+  
+        // cells borders
+        doc.setDrawColor(0)
+        doc.setLineWidth(0.25)
+        // N°
+        doc.rect(x, rowY, colNo, rowH)
+        // NOM
+        doc.rect(x + colNo, rowY, colNom, rowH)
+        // PRENOM
+        doc.rect(x + colNo + colNom, rowY, colPrenom, rowH)
+  
+        // dates cells
+        let dx = x + fixedWidth
+        dates.forEach(() => {
+          doc.rect(dx, rowY, dateW, rowH)
+          dx += dateW
+        })
+  
+        // text
+        doc.text(String(no), x + 2, rowY + 4)
+        doc.text(nom, x + colNo + 2, rowY + 4)
+        doc.text(prenom, x + colNo + colNom + 2, rowY + 4)
+  
+        rowY += rowH
+      })
+  
+      // 3) save
+      const fileName =
+        'presence-' +
+        (parsed.groupName || group?.intitule || 'groupe').replace(/\s+/g, '-') +
+        '.pdf'
+      doc.save(fileName)
+    } catch (err) {
+      console.error('PDF ERROR:', err)
+      alert('Impossible de générer le PDF (voir console).')
+    }
+  }
+  
+  /* --------------------------------------------------
+     HELPERS
+  -------------------------------------------------- */
+  
+  // parse "GR- ABDELAATI KHELAF-: 2 Bac SM-GA / Math"
+  const parseIntitule = (intitule = '') => {
+    const res = {
+      teacherName: '',
+      groupName: '',
+      subject: '',
+    }
+  
+    if (!intitule) return res
+  
+    let s = intitule.trim()
+    if (s.startsWith('GR-')) {
+      s = s.slice(3).trim()
+    }
+  
+    const parts = s.split('-:')
+    if (parts.length >= 2) {
+      res.teacherName = parts[0].trim()
+      const right = parts[1].trim()
+      const subParts = right.split('/')
+      res.groupName = subParts[0]?.trim() || ''
+      res.subject = subParts[1]?.trim() || ''
+    } else {
+      res.groupName = s
+    }
+  
+    return res
+  }
+  
+  // load an image that is in /public/... (same origin)
+  const loadPublicImage = (relativePath) =>
+    new Promise((resolve, reject) => {
+      const img = new Image()
+      img.src = window.location.origin + relativePath
+      img.onload = () => resolve(img)
+      img.onerror = (err) => {
+        console.warn('image load failed', err)
+        reject(err)
+      }
     })
-    const exportToExcel = () => {
-        // Get the attendance data from Vuex
-        const attendanceData = registrantsStore.groupRegistrants.map(res => ({no: res.student.id, nom: res.lastName, prenom: res.firstName, Mobile: res.phone,...studyDates.value}))
-        
-        // Create a worksheet from the attendance data
-        const worksheet = XLSX.utils.json_to_sheet(attendanceData, {cellStyles: true});
-
-        // Create a new workbook and append the worksheet
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance');
-
-        // Apply some cell styling
-        const ws = workbook.Sheets['Attendance'];
-        const range = XLSX.utils.decode_range(ws['!ref']);
-        for(let R = range.s.r; R <= range.e.r; ++R) {
-            for(let C = range.s.c; C <= range.e.c; ++C) {
-                const cell_address = {c:C, r:R};
-                const cell_ref = XLSX.utils.encode_cell(cell_address);
-                if(ws[cell_ref]) {
-                    ws[cell_ref].s = {
-                        fill: {
-                            fgColor: {rgb: "FFFFAA00"}
-                        },
-                        font: {
-                            color: {rgb: "FF000000"},
-                            sz: 14,
-                            bold: true,
-                            underline: true
-                        }
-                    };
-                }
-            }
-        }
-
-        // Export the workbook to an Excel file
-        XLSX.writeFile(workbook, 'liste de présence - '+groupsStore.group.intitule+'.xlsx');
-    };
-    // Mapping from French days to JavaScript days
-    const dayMap = {
-        "Lundi": 2,    // Monday
-        "Mardi": 3,    // Tuesday
-        "Mercredi": 4, // Wednesday
-        "Jeudi": 5,    // Thursday
-        "Vendredi": 6, // Friday
-        "Samedi": 7,   // Saturday
-        "Dimanche": 1  // Sunday (this will be excluded)
-        };
-
-// Function to get all dates for the specified days in the current month, excluding Sundays
-    const getStudyDatesForCurrentMonth = () => {
-        const currentDate = new Date();
-        const currentMonth = currentDate.getMonth(); // Current month (0-based)
-        const currentYear = currentDate.getFullYear();
-        const datesToReturn = [];
-
-        // Helper function to get all days of the current month
-        function getDaysInMonth(month, year) {
-            const date = new Date(year, month, 1);
-            const days = [];
-
-            while (date.getMonth() === month) {
-            days.push(new Date(date));
-            date.setDate(date.getDate() + 1);
-            }
-            return days;
-        }
-
-        // Get all the days in the current month
-        const allDays = getDaysInMonth(currentMonth, currentYear);
-        // Loop through the studyData and find all matching dates
-        JSON.parse(groupsStore.group.timing).forEach(item => {
-            console.log(allDays);
-            
-            const targetDay = dayMap[item.day]; // Get the day number (0-6) from French day
-
-            // Loop through all the days of the current month
-            allDays.forEach(date => {
-                console.log(date.getDay(), (targetDay));
-                
-                if (date.getDay() === (targetDay)) {
-                    datesToReturn.push(date.toISOString().slice(5, 10)); // Format MM-DD
-                }
-                if (7 === (targetDay) && date.getDay() == 6) {
-                    date.setDate(date.getDate() + 1);
-                    console.log(date.toISOString().slice(5, 10));
-                    
-                    datesToReturn.push(date.toISOString().slice(5, 10)); // Format MM-DD
-                }
-                // console.log(datesToReturn);
-            });
-        });
-
-        //    = datesToReturn.sort();
-        datesToReturn.sort().forEach(date => {
-            studyDates.value[date] = ''; // Initialize each date with an empty string for now
-        });
-        console.log(studyDates.value);
-    };
-</script>
+  
+  // draw the header (logo + 5 lines + big top line + header row)
+  const drawHeaderLikePaper = (
+    doc,
+    { y, x, usableWidth, group, parsed, moisLabel, dates, studentsCount, logoImg }
+  ) => {
+    const logoH = 18
+    const logoW = 40
+  
+    if (logoImg) {
+      doc.addImage(logoImg, 'PNG', x, y - 3, logoW, logoH)
+    } else {
+      doc.setFontSize(16)
+      doc.setFont('helvetica', 'bold')
+      doc.text('AVS ma', x, y + 4)
+    }
+  
+    const rightX = x + logoW + 6
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(10)
+  
+    const prof =
+      parsed?.teacherName ||
+      `${group?.teacher?.firstName ?? ''} ${group?.teacher?.lastName ?? ''}`.trim()
+    const grp = parsed?.groupName || group?.intitule || ''
+    const subj = parsed?.subject || group?.section?.title || ''
+  
+    doc.text(`Professeur : ${prof}`, rightX, y + 1)
+    doc.text(`Groupe : ${grp}`, rightX, y + 6)
+    doc.text(`Matière : ${subj}`, rightX, y + 11)
+    doc.text(`Mois : ${moisLabel}`, rightX, y + 16)
+    doc.text(`Nombre : ${studentsCount ?? ''}`, rightX, y + 21)
+  
+    const lineY = y + 25
+    doc.setDrawColor(0)
+    doc.setLineWidth(0.6)
+    doc.line(x, lineY, x + usableWidth, lineY)
+  
+    // table header
+    const colNo = 7
+    const colNom = 52
+    const colPrenom = 36
+    const fixedWidth = colNo + colNom + colPrenom
+    const dateW = (usableWidth - fixedWidth) / dates.length
+    const headerY = lineY + 6
+  
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9)
+    doc.text('N°', x + 2, headerY)
+    doc.text('NOM', x + colNo + 2, headerY)
+    doc.text('PRENOM', x + colNo + colNom + 2, headerY)
+  
+    let dx = x + fixedWidth
+    doc.setFont('helvetica', 'normal')
+    dates.forEach((d) => {
+      doc.text(d, dx + 2, headerY)
+      dx += dateW
+    })
+  
+    doc.setDrawColor(0)
+    doc.setLineWidth(0.25)
+    doc.line(x, headerY + 2, x + usableWidth, headerY + 2)
+  
+    return headerY + 2
+  }
+  
+  // when we go to a new page we need to redraw ONLY the table header
+  const redrawTableHeader = (
+    doc,
+    { y, x, usableWidth, colNo, colNom, colPrenom, dates, dateW }
+  ) => {
+    const lineY = y
+    doc.setDrawColor(0)
+    doc.setLineWidth(0.6)
+    doc.line(x, lineY, x + usableWidth, lineY)
+  
+    const headerY = lineY + 5
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(9)
+    doc.text('N°', x + 2, headerY)
+    doc.text('NOM', x + colNo + 2, headerY)
+    doc.text('PRENOM', x + colNo + colNom + 2, headerY)
+  
+    let dx = x + (colNo + colNom + colPrenom)
+    doc.setFont('helvetica', 'normal')
+    dates.forEach((d) => {
+      doc.text(d, dx + 2, headerY)
+      dx += dateW
+    })
+  
+    doc.setDrawColor(0)
+    doc.setLineWidth(0.25)
+    doc.line(x, headerY + 2, x + usableWidth, headerY + 2)
+  
+    return headerY + 2
+  }
+  </script>
+  

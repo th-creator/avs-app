@@ -272,7 +272,8 @@ class PaymentController extends Controller
                     'student_id' =>  $registrant->student['id'],
                     'paid' => 0,
                     'month' => $month,
-                    'year' => $year
+                    'year' => $year,
+                    'parent_id' => null
                 ];
             }
         }
@@ -332,7 +333,7 @@ class PaymentController extends Controller
             'student_id' => 'required',
             'group_id' => 'required',
         ]);
-        $registrant = Registrant::where('group_id',$newData['group_id'])->where('student_id',$newData['student_id'])->first();
+        $registrant = Registrant::where('group_id',$newData['group_id'])->where('student_id',$newData['student_id'])->latest()->first();
         $group = group::where('id',$newData['group_id'])->first();
 
         $newData['group'] = $group['intitule'];
@@ -359,6 +360,59 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Failed to create Payment'], 500);
         }
     }
+
+    public function followUpStore(Request $request)
+{
+    $validated = $request->validate([
+        'parent_id' => 'required|exists:payments,id',
+        'date' => 'nullable|date',
+        'fullName' => 'required|string',
+        'amount' => 'required|numeric',
+        'reduction' => 'required|numeric',
+        'rest' => 'required|numeric',
+        'total' => 'required|numeric',
+        'amount_paid' => 'nullable|numeric',
+        'month' => 'required|string',
+        'year' => 'required|numeric',
+        'type' => 'required|string',
+        'bank' => 'nullable|string',
+        'bank_receipt' => 'nullable|string',
+        'receipt' => 'nullable|string',
+        'group' => 'nullable|string',
+        'user_id' => 'required|integer',
+        'student_id' => 'required|integer',
+        'group_id' => 'required|integer',
+    ]);
+
+    // Find the parent payment
+    $parent = Payment::findOrFail($validated['parent_id']);
+
+    // Get registrant if needed
+    $registrant = Registrant::where('group_id', $validated['group_id'])
+        ->where('student_id', $validated['student_id'])
+        ->latest()
+        ->first();
+
+    $validated['registrant_id'] = $registrant ? $registrant->id : $parent->registrant_id;
+    $validated['paid'] = 1;
+
+    // Create the follow-up payment
+    $childPayment = Payment::create($validated);
+
+    // Update parent's rest amount
+    $remaining = max(0, $parent->rest - $validated['amount']);
+    $parent->update(['rest' => $remaining]);
+
+    // Load relations for response
+    $childPayment->load('user');
+
+    return response()->json([
+        'message' => 'Follow-up payment created successfully',
+        'data' => $childPayment,
+    ], 201);
+}
+
+ 
 
     public function update(Request $request, $id)
     {

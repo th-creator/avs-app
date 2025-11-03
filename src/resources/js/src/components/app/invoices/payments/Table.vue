@@ -117,7 +117,7 @@
                                     Gratuit
                                 </div>
                             </div>
-                            <div v-else-if="(data.value.paid == 1 && data.value.total == data.value.amount_paid)">
+                            <div v-else-if="(data.value.paid == 1 && data.value.rest == 0)">
                                 <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
                                     Payé
                                 </div>

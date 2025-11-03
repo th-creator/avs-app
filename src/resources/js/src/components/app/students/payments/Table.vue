@@ -114,7 +114,7 @@
                                     Gratuit
                                 </div>
                             </div>
-                            <div v-else-if="(data.value.paid == 1 && data.value.total == data.value.amount_paid)">
+                            <div v-else-if="(data.value.paid == 1 && data.value.rest == 0)">
                                 <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
                                     Payé
                                 </div>
@@ -148,7 +148,8 @@
                     </template>
                     <template #actions="data">
                         <div v-if="data.value.paid != null" class="flex w-fit mx-auto justify-around gap-5">
-                            <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
+                            <p class="font-semibold text-xl text-center cursor-pointer" @click="() => toggleFollowUp(data.value)">+</p>
+                            <IconComponent name="edit" @click="() => toggleEdit(data.value)"/>
                             <!-- <IconComponent name="print" @click="printPayment(data.value)" /> -->
                             <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
                         </div>
@@ -160,7 +161,12 @@
     </div>
     <AddNew :close="() => showNewPopup = false" :showNewPopup="showNewPopup" v-bind:newData="newData" v-if="showNewPopup"/>
     <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
-    <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
+    <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup" :refresh="() => paymentsStore.show(route.params.id,choosenMonth,choosenYear)"/>
+        <FollowUpAdd
+            :showPopup="showFollowUpModal"
+            :close="() => showFollowUpModal = false"
+            v-bind:parentPayment="followUpData"
+            />
     <!-- Hidden element to use for printing -->
     <div id="receipt" class="receipt-container hidden">
         <div class="reciept-wrapper">
@@ -260,6 +266,7 @@
     import {useAuthStore} from '@/stores/auth.js';
     import Multiselect from '@suadelabs/vue3-multiselect';
     import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+    import FollowUpAdd from './FollowUpAdd.vue';
 
     const authStore = useAuthStore();
     
@@ -288,6 +295,7 @@
     const showPopup = ref(false);
     const showEditPopup = ref(false);
     const showNewPopup = ref(false);
+    const showFollowUpModal = ref(false);
     
     const cols =
         ref([
@@ -320,6 +328,7 @@
     });
 
     const editedData = ref({})
+    const followUpData = ref({})
     const newData = ref({})
     onMounted(async () => {
         const currentMonth = new Date().getMonth();
@@ -344,12 +353,16 @@
 
     const toggleEdit = (data) => {
         editedData.value = data
-        console.log(editedData.value);
         showEditPopup.value = true
+    }
+    const toggleFollowUp = (data) => {
+        
+        followUpData.value = data
+        console.log(followUpData.value);
+        showFollowUpModal.value = true
     }
     const toggleNew = (data) => {
         newData.value = data
-        console.log(editedData.value);
         showNewPopup.value = true
     }
 

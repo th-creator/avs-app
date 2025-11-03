@@ -50,6 +50,7 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::apiResource('sections', SectionController::class);
     Route::apiResource('payments', PaymentController::class);
     Route::get('all/paymens', [PaymentController::class, 'all']);
+    Route::post('/payments/follow-up', [PaymentController::class, 'followUpStore']);
     Route::get('check/payment/{from}/{to}', [PaymentController::class, 'fetchCheck']);
     Route::get('receipt/payment/{from}/{to}', [PaymentController::class, 'fetchReceipt']);
     Route::get('student/payments/{id}/{month}/{year}', [PaymentController::class,'studentpayments']);

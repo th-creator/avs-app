@@ -103,7 +103,7 @@
                                     Gratuit
                                 </div>
                             </div>
-                            <div v-else-if="data.value.paid == 1 && data.value.total == data.value.amount_paid">
+                            <div v-else-if="data.value.paid == 1 && data.value.rest == 0">
                                 <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
                                     Payé
                                 </div>
@@ -171,8 +171,11 @@
         await paymentsStore.fetchGroupPayments(route.params.id,choosenMonth.value,choosenYear.value)
         choosenData.value = paymentsStore.groupPayments;
         total.value = paymentsStore.groupPayments.reduce((total, payment) => {
+            if(payment.parent_id === null) {
             let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
             return total + Number(amount)
+        } else return total
+
         }, 0)
         isloading.value = false
     });
@@ -180,9 +183,12 @@
         isloading.value = true
         await paymentsStore.fetchGroupPayments(route.params.id,choosenMonth.value,choosenYear.value)
         choosenData.value = paymentsStore.groupPayments;
+        
         total.value = paymentsStore.groupPayments.reduce((total, payment) => {
-            let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
-            return total + Number(amount)
+            if(payment.parent_id === null) {
+                let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+                return total + Number(amount)
+            } else return total
         }, 0)
         isloading.value = false
     });
@@ -224,8 +230,10 @@
         isloading.value =false
         choosenData.value = paymentsStore.groupPayments;
         total.value = choosenData.value.reduce((total, payment) => {
-            let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
-            return total + Number(amount)
+            if(payment.parent_id === null) {
+                let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+                return total + Number(amount)
+            } else return total
         }, 0)
     })
 

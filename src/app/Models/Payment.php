@@ -29,6 +29,7 @@ class Payment extends Model
         'student_id',
         'group_id',
         'registrant_id',
+        'parent_id',
     ];
 
     public function user()
@@ -49,6 +50,16 @@ class Payment extends Model
     public function registrant()
     {
         return $this->BelongsTo(Registrant::class);
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Payment::class, 'parent_id');
+    }
+
+    public function children()
+    {
+        return $this->hasMany(Payment::class, 'parent_id');
     }
 
     public function scopeForAY($q, string $ay) {

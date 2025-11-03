@@ -145,7 +145,7 @@ class GroupController extends Controller
     }
     public function studentGroups($id) {
         $data = Group::whereHas('registrants', function ($query) use ($id) {
-            $query->where('student_id', $id);
+            $query->where('student_id', $id)->forAY($this->ay);
         })->with('section')->get();
         return response()->json(['data' => $data], 200);
     }

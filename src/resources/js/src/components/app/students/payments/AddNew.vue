@@ -171,12 +171,12 @@ const props = defineProps({
 });
 
 const data = ref({
-    date: '',
+    date: new Date().toISOString().slice(0, 10),
     amount: props.newData.amount,
     reduction: props.newData.reduction,
     rest: props.newData.rest,
     amount_paid: props.newData.amount_paid,
-    total: props.newData.total,
+    total: Number(props.newData.amount)*((100-Number(props.newData.reduction))/100),
     type: 'espèces',
     bank: '',
     bank_receipt: '',

@@ -124,6 +124,15 @@ export const usePaymentsStore = defineStore("payments", () => {
         studentPayments.value = [...studentPayments.value]; // Reassign to force reactivity
         return response
     };
+    const followUpStore = async (payload) => {
+        // const response = await api.post('api/payments', payload);
+        const response = await api.post('/api/payments/follow-up', payload)
+        payments.value.push(response.data.data);  // Add the new user to the payments array
+        payments.value = [...payments.value]; // Reassign to force reactivity
+        studentPayments.value.push(response.data.data);  // Add the new user to the studentPayments array
+        studentPayments.value = [...studentPayments.value]; // Reassign to force reactivity
+        return response
+    };
 
     // Update an existing user and update the state
     const update = async (payload, id) => {
@@ -152,5 +161,5 @@ export const usePaymentsStore = defineStore("payments", () => {
     };
 
     // Expose the payments state and actions
-    return { payments, undandled, store, update, destroy, studentPayments, show, fetchGroupPayments, groupPayments, allPayments, all, financePayments, fetchFinance, fetchFacturation, registrantPayment, checkPayments, fetchchecks, fetchReceipt, receiptPayments };
+    return { payments, undandled, store, update, destroy, followUpStore, studentPayments, show, fetchGroupPayments, groupPayments, allPayments, all, financePayments, fetchFinance, fetchFacturation, registrantPayment, checkPayments, fetchchecks, fetchReceipt, receiptPayments };
 });
