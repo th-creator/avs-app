@@ -38,6 +38,8 @@
             :sortable="true"
             :search="params.search"
             :loading="isloading"
+            :sortColumn="params.sort_column"
+            :sortDirection="params.sort_direction"
             :paginationInfo="'{0} à {1} de {2}'"
             skin="whitespace-nowrap bh-table-hover"
           >
@@ -83,7 +85,7 @@
     current_page: 1,
     search: '',
     pagesize: 10,
-    sort_column: 'id',
+    sort_column: 'firstName',
     sort_direction: 'asc',
   })
   
@@ -114,8 +116,8 @@
   }
   
   const cols = ref([
-    { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center' },
     { field: 'firstName', title: 'Prénom', headerClass: '!text-center flex justify-center' },
+    { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center' },
     { field: 'phone', title: 'Mobile', headerClass: '!text-center flex justify-center' },
     { field: 'date', title: "Date d'inscription", headerClass: '!text-center flex justify-center' },
   ])
@@ -205,22 +207,53 @@
   /* --------------------------------------------------
      EXCEL (unchanged)
   -------------------------------------------------- */
-  const exportToExcel = () => {
-    const attendanceData = registrantsStore.groupRegistrants.map((res) => ({
-      no: res.student.id,
-      nom: res.lastName,
-      prenom: res.firstName,
-      Mobile: res.phone,
-      ...studyDates.value,
-    }))
-    const worksheet = XLSX.utils.json_to_sheet(attendanceData, { cellStyles: true })
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Attendance')
-    XLSX.writeFile(
-      workbook,
-      'liste de présence - ' + (groupsStore.group.intitule || 'groupe') + '.xlsx'
-    )
-  }
+/* --------------------------------------------------
+   EXCEL (fixed column order to match PDF)
+-------------------------------------------------- */
+const exportToExcel = () => {
+  const students = registrantsStore.groupRegistrants || []
+  const dates = Object.keys(studyDates.value || {}).sort((a, b) => Number(a) - Number(b))
+
+  // Build Excel rows in same column order as PDF
+  const attendanceData = students.map((res, index) => {
+    const row = {
+      'N°': index + 1,
+      NOM: res.lastName?.toUpperCase() || '',
+      PRENOM: res.firstName || '',
+    }
+
+    // Add all date columns in sorted order
+    dates.forEach((d) => {
+      row[d] = ''
+    })
+
+    return row
+  })
+
+  // Ensure headers appear in correct order: static columns first, then dates
+  const headers = ['N°', 'NOM', 'PRENOM', ...dates]
+
+  const worksheet = XLSX.utils.json_to_sheet(attendanceData, {
+    header: headers,
+    skipHeader: false,
+  })
+
+  // Style columns width a bit
+  const colWidths = [
+    { wch: 5 }, // N°
+    { wch: 25 }, // NOM
+    { wch: 20 }, // PRENOM
+    ...dates.map(() => ({ wch: 6 })),
+  ]
+  worksheet['!cols'] = colWidths
+
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Liste de présence')
+
+  const groupName = groupsStore.group?.intitule || 'Groupe'
+  XLSX.writeFile(workbook, `Liste de présence - ${groupName}.xlsx`)
+}
+
   
   /* --------------------------------------------------
      PDF
@@ -242,8 +275,10 @@
       let dates = Object.keys(studyDates.value || {})
       if (!dates.length) {
         dates = ['02', '06', '09', '13', '16', '20', '23', '27', '30']
-      }
-  
+      }  
+      // ✅ ensure dates are in ascending order
+      dates = dates.sort((a, b) => Number(a) - Number(b))
+
       const monthNamesFr = [
         'janvier', 'février', 'mars', 'avril', 'mai', 'juin',
         'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'

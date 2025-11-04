@@ -146,8 +146,8 @@
     import Edit from './Edit.vue'
     import Transfer from './Transfer.vue'
     import Swal from 'sweetalert2';
-import {useAuthStore} from '@/stores/auth.js';
-import Multiselect from '@suadelabs/vue3-multiselect';
+    import {useAuthStore} from '@/stores/auth.js';
+    import Multiselect from '@suadelabs/vue3-multiselect';
     import * as XLSX from 'xlsx';
 
 
