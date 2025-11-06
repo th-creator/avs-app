@@ -164,6 +164,7 @@
     <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup" :refresh="() => paymentsStore.show(route.params.id,choosenMonth,choosenYear)"/>
         <FollowUpAdd
             :showPopup="showFollowUpModal"
+            :refresh="() => paymentsStore.show(route.params.id,choosenMonth,choosenYear)"
             :close="() => showFollowUpModal = false"
             v-bind:parentPayment="followUpData"
             />

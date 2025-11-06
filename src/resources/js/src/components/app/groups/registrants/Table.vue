@@ -57,6 +57,27 @@
                 </p>
               </div>
             </template>
+            <template #date="data">
+              <div class="flex justify-around w-full items-center gap-2">
+                <p class="font-semibold text-center">
+                  {{ data.value.date }}
+                </p>
+              </div>
+            </template>
+            <template #phone="data">
+              <div class="flex justify-around w-full items-center gap-2">
+                <p class="font-semibold text-center">
+                  {{ data.value.phone }}
+                </p>
+              </div>
+            </template>
+            <template #parent_phone="data">
+              <div class="flex justify-around w-full items-center gap-2">
+                <p class="font-semibold text-center">
+                  {{ data.value.parent_phone }}
+                </p>
+              </div>
+            </template>
           </vue3-datatable>
         </div>
       </div>
@@ -119,6 +140,7 @@
     { field: 'firstName', title: 'Prénom', headerClass: '!text-center flex justify-center' },
     { field: 'lastName', title: 'Nom', headerClass: '!text-center flex justify-center' },
     { field: 'phone', title: 'Mobile', headerClass: '!text-center flex justify-center' },
+    { field: 'parent_phone', title: 'Mobile du parent', headerClass: '!text-center flex justify-center' },
     { field: 'date', title: "Date d'inscription", headerClass: '!text-center flex justify-center' },
   ])
   

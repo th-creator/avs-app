@@ -182,6 +182,7 @@
   const props = defineProps({
     showPopup: Boolean,
     close: Function,
+    refresh: Function,
     parentPayment: Object // 👈 the parent payment passed when user clicks "Follow-up"
   })
   watch(() => props.parentPayment, (newVal, oldVal) => {
@@ -251,6 +252,7 @@
       .then(() => {
         isLoading.value = false
         useAlert('success', 'Suivi de paiement créé avec succès !')
+        props.refresh()
         props.close()
       })
       .catch(err => {

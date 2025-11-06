@@ -33,7 +33,9 @@
                     </template>
                     <template #fullName="data">
                         <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.fullName }}</p>
+                            <router-link :to="`/students/${data.value.id}/payments`" class="main-logo flex items-center shrink-0">
+                                <p class="font-semibold text-center">{{ data.value.fullName }}</p>
+                            </router-link>
                         </div>
                     </template>
                     <template #firstName="data">

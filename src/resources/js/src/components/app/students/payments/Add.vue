@@ -445,6 +445,7 @@
       .then(() => {
         isLoading.value = false
         useAlert('success', 'Créé avec succès!')
+        props.refresh()
         // close modal after single submit
         closeModal()
       })
