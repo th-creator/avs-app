@@ -143,123 +143,168 @@
     </div>
 </template>
 <script setup>
-    import { ref, reactive, computed, onMounted, watch } from 'vue';
-    import Vue3Datatable from '@bhplugin/vue3-datatable';
-    import { usePaymentsStore } from '@/stores/payments.js';
-    import { useRoute } from 'vue-router';
-    import IconComponent from '@/components/icons/IconComponent.vue'
-    import Multiselect from '@suadelabs/vue3-multiselect';
-    import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
-    import * as XLSX from 'xlsx';
-    import { useGroupsStore } from '@/stores/groups.js';
+import { ref, reactive, computed, onMounted, watch } from 'vue';
+import Vue3Datatable from '@bhplugin/vue3-datatable';
+import { usePaymentsStore } from '@/stores/payments.js';
+import { useRoute } from 'vue-router';
+import IconComponent from '@/components/icons/IconComponent.vue'
+import Multiselect from '@suadelabs/vue3-multiselect';
+import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+import * as XLSX from 'xlsx';
+import { useGroupsStore } from '@/stores/groups.js';
 
-    const groupsStore = useGroupsStore();
-    
-    const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
-    const choosenMonth = ref('');
-    const years = ref([2024,2025,2026,2027,2028,2029,2030]);
-    const choosenYear = ref(new Date().getFullYear());
-    const choosenData = ref([]);
-    const isloading = ref(true);
-    const params = reactive({
-        current_page: 1,
-        search: '',
-        pagesize: 10,
-        sort_column: 'fullName',
-        sort_direction: 'asc',
+const groupsStore = useGroupsStore();
+
+const options = ref([
+    'Janvier','Février','Mars','Avril','Mai','Juin',
+    'Juillet','Août','Septembre', 'Octobre','Novembre','Décembre'
+]);
+
+const choosenMonth = ref('');
+const years = ref([2024,2025,2026,2027,2028,2029,2030]);
+const choosenYear = ref(new Date().getFullYear());
+
+const choosenData = ref([]);
+const isloading = ref(true);
+
+const params = reactive({
+    current_page: 1,
+    search: '',
+    pagesize: 10,
+    sort_column: 'fullName',
+    sort_direction: 'asc',
+});
+
+const paymentsStore = usePaymentsStore();
+const route = useRoute();
+
+const total = ref(0);
+
+/* --------------------------------------------------------
+   🔥 MERGE PARENT FACTURE + SUB-FACTURES
+---------------------------------------------------------*/
+const mergeFactures = (payments) => {
+    const parents = {};
+    const children = [];
+
+    payments.forEach(p => {
+        if (p.parent_id === null) {
+            parents[p.id] = { ...p, merged_amount_paid: Number(p.amount_paid) };
+        } else {
+            children.push(p);
+        }
     });
-    watch(choosenMonth, async (newVal, oldVal) => {
-        isloading.value = true
-        await paymentsStore.fetchGroupPayments(route.params.id,choosenMonth.value,choosenYear.value)
-        choosenData.value = paymentsStore.groupPayments;
-        total.value = paymentsStore.groupPayments.reduce((total, payment) => {
-            if(payment.parent_id === null) {
-            let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
-            return total + Number(amount)
-        } else return total
 
-        }, 0)
-        isloading.value = false
+    children.forEach(c => {
+        const parent = parents[c.parent_id];
+        if (parent) {
+            parent.merged_amount_paid += Number(c.amount_paid);
+        }
     });
-    watch(choosenYear, async (newVal, oldVal) => {
-        isloading.value = true
-        await paymentsStore.fetchGroupPayments(route.params.id,choosenMonth.value,choosenYear.value)
-        choosenData.value = paymentsStore.groupPayments;
-        
-        total.value = paymentsStore.groupPayments.reduce((total, payment) => {
-            if(payment.parent_id === null) {
-                let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
-                return total + Number(amount)
-            } else return total
-        }, 0)
-        isloading.value = false
+
+    return Object.values(parents).map(p => {
+        const total = p.total !== null
+            ? Number(p.total)
+            : Number(p.amount) * ((100 - Number(p.reduction)) / 100);
+
+        const rest = total - p.merged_amount_paid;
+        const paid = rest === 0 ? 1 : p.paid;
+
+        return {
+            ...p,
+            amount_paid: p.merged_amount_paid,
+            rest,
+            paid
+        };
     });
-    
-    const paymentsStore = usePaymentsStore();
-    const route = useRoute();
+};
 
-    const total = ref();
-    
-    const cols =
-        ref([
-            // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'reduction', title: "Reduction", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'bank', title: "Bank", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'bank_receipt', title: "Chèque", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'receipt', title: "Recu", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'date', title: "Date", headerClass: '!text-center flex justify-center', width: 'full' },
-            // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
-        ]) || [];
-    const rows = computed(async() => {
-        let data = await paymentsStore.groupPayments.length > 0 ? paymentsStore.groupPayments : []
-        return data;
-        });
+/* --------------------------------------------------------
+   🔄 WATCHERS — Load data & merge invoices
+---------------------------------------------------------*/
+watch(choosenMonth, async () => {
+    isloading.value = true;
+    await paymentsStore.fetchGroupPayments(route.params.id, choosenMonth.value, choosenYear.value);
 
+    choosenData.value = mergeFactures(paymentsStore.groupPayments);
 
-    onMounted(async () => {
-        const currentMonth = new Date().getMonth();
-        // choosenYear.value = new Date().getFullYear();
-        choosenMonth.value = options.value[currentMonth];
-        // await paymentsStore.fetchGroupPayments(route.params.id,choosenMonth.value,choosenYear.value)
-        isloading.value =false
-        choosenData.value = paymentsStore.groupPayments;
-        total.value = choosenData.value.reduce((total, payment) => {
-            if(payment.parent_id === null) {
-                let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
-                return total + Number(amount)
-            } else return total
-        }, 0)
-    })
+    total.value = choosenData.value.reduce((sum, p) => sum + Number(p.amount_paid), 0);
 
-    const exportToExcel = () => {
-        // Get the attendance data from Vuex
-        const attendanceData = choosenData.value.map(res => ({nom: res.fullName, mois: res.month, 'Reste à payer': res.rest ? res.rest : Number(res.amount)*((100-Number(res.reduction))/100), 'montant à payer': res.total ? res.total : Number(res.amount)*((100-Number(res.reduction))/100)}))
+    isloading.value = false;
+});
 
-        // Calculate the total of all 'montant à payer'
-        // const totalMontant = attendanceData.reduce((total, row) => total + row['montant à payer'], 0);
+watch(choosenYear, async () => {
+    isloading.value = true;
+    await paymentsStore.fetchGroupPayments(route.params.id, choosenMonth.value, choosenYear.value);
 
-        // Add the total to the attendance data
-        attendanceData.push({nom: '', mois: '', 'Reste à payer': '', 'montant à payer': total.value});
+    choosenData.value = mergeFactures(paymentsStore.groupPayments);
 
-        console.log(attendanceData);
+    total.value = choosenData.value.reduce((sum, p) => sum + Number(p.amount_paid), 0);
 
-        // Create a worksheet from the attendance data
-        const worksheet = XLSX.utils.json_to_sheet(attendanceData);
+    isloading.value = false;
+});
 
-        // Create a new workbook and append the worksheet
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, 'paiements');
+/* --------------------------------------------------------
+   🟢 onMounted — Initial load
+---------------------------------------------------------*/
+onMounted(async () => {
+    const currentMonth = new Date().getMonth();
+    choosenMonth.value = options.value[currentMonth];
 
-        // Export the workbook to an Excel file
-        XLSX.writeFile(workbook, 'Paiements - '+groupsStore.group.intitule+' - '+choosenMonth.value+'.xlsx');
-    };
+    await paymentsStore.fetchGroupPayments(route.params.id, choosenMonth.value, choosenYear.value);
+
+    choosenData.value = mergeFactures(paymentsStore.groupPayments);
+
+    total.value = choosenData.value.reduce((sum, p) => sum + Number(p.amount_paid), 0);
+
+    isloading.value = false;
+});
+
+/* --------------------------------------------------------
+   📤 EXPORT EXCEL (works with merged data)
+---------------------------------------------------------*/
+const exportToExcel = () => {
+    const attendanceData = choosenData.value.map(res => ({
+        nom: res.fullName,
+        mois: res.month,
+        'Reste à payer': res.rest,
+        'montant à payer': res.total
+    }));
+
+    attendanceData.push({
+        nom: '',
+        mois: '',
+        'Reste à payer': '',
+        'montant à payer': total.value
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(attendanceData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'paiements');
+
+    XLSX.writeFile(
+        workbook,
+        `Paiements - ${groupsStore.group.intitule} - ${choosenMonth.value}.xlsx`
+    );
+};
+
+/* --------------------------------------------------------
+   Columns for datatable
+---------------------------------------------------------*/
+const cols = ref([
+    { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center' },
+    { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center' },
+    { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center' },
+    { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center' },
+    { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center' },
+    { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center' },
+    { field: 'reduction', title: "Reduction", headerClass: '!text-center flex justify-center' },
+    { field: 'type', title: "Type", headerClass: '!text-center flex justify-center' },
+    { field: 'bank', title: "Bank", headerClass: '!text-center flex justify-center' },
+    { field: 'bank_receipt', title: "Chèque", headerClass: '!text-center flex justify-center' },
+    { field: 'receipt', title: "Recu", headerClass: '!text-center flex justify-center' },
+    { field: 'date', title: "Date", headerClass: '!text-center flex justify-center' },
+    { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center' }
+]);
 
 </script>

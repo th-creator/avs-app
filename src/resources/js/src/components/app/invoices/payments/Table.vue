@@ -1,27 +1,32 @@
 <template>
     <div>
-    <div class="flex justify-between my-4 items-center"> 
-        <button type="button" class="btn btn-warning w-40 h-9" @click="exportToExcel()">Exporter</button>   
-        <button type="button" class="btn btn-info w-36 h-9" @click="searchPayments">
-            <IconComponent v-if="isloading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
-            <span v-else>Rechercher</span>
-        </button>
+    <div class="flex justify-end my-4 items-end"> 
+        <div class="flex flex-col gap-3 justify-between my-4 items-center">
+            <button type="button" class="btn btn-success w-40 h-9" @click="exportToExcel()">Excel</button>   
+            <button type="button" class="btn btn-warning w-40 h-9" @click="exportToPDF()">PDF</button>
+        </div>
     </div>
-        <div class="panel pb-0 mt-6">
-            
-            <div class="flex justify-between items-end mb-4">  
+        <div class="flex gap-3 justify-between my-4 items-center"> 
                 <div class="flex gap-10 items-end">
                     <label for="">Du:</label>
                     <input v-model="search.from" type="date" class="form-input max-w-xs" placeholder="Du..." />
                     <label for="">A:</label>
                     <input v-model="search.to" type="date" class="form-input max-w-xs" placeholder="A..." />
                 </div>
+            <button type="button" class="btn btn-info w-40 h-9" @click="searchPayments">
+                <IconComponent v-if="isloading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
+                <span v-else>Rechercher</span>
+            </button>
+        </div>
+        <div class="panel pb-0 mt-6">
+            
+            <div class="flex justify-between items-end mb-4"> 
                 <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." />
-                <div class="flex flex-col gap-4">  
+                <div>
                     <multiselect
                         v-model="choosenVal"
                         :options="options"
-                        class="custom-multiselect  max-w-xs"
+                        class="custom-multiselect"
                         :searchable="true"
                         placeholder="Type"
                         selected-label=""
@@ -167,6 +172,8 @@
     import {useAuthStore} from '@/stores/auth.js';
     import Multiselect from '@suadelabs/vue3-multiselect';
     import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
+    import jsPDF from "jspdf";
+    import autoTable from "jspdf-autotable";
     import * as XLSX from 'xlsx';
 
     const authStore = useAuthStore();
@@ -273,10 +280,67 @@
             }
         });
     }
- 
+    const getTodayDate = () => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
+const exportToPDF = () => {
+    const doc = new jsPDF('landscape'); // landscape like your screenshot
+
+    // Table columns like your Excel/PDF screenshot
+    const columns = [
+        { header: "N° Reçu", dataKey: "receipt" },
+        { header: "Nom Prénom", dataKey: "fullName" },
+        { header: "Groupe", dataKey: "group" },   // or subject if you have it
+        { header: "Montant", dataKey: "amount_paid" },
+        { header: "Reste", dataKey: "rest" },
+        { header: "Chèque/Espèce", dataKey: "type" },
+    ];
+
+    // Data for the table
+    const rows = choosenData.value.map(p => ({
+        receipt: p.receipt,
+        fullName: p.fullName,
+        group: p.group,
+        bank: p.bank,
+        amount_paid: p.amount_paid + " MAD",
+        rest: p.rest + " MAD",
+        type: p.type,
+    }));
+
+    doc.setFontSize(14);
+    doc.text("Liste des Paiements", 14, 15);
+
+    autoTable(doc, {
+        columns,
+        body: rows,
+        startY: 25,
+        styles: {
+            fontSize: 10,
+            cellPadding: 3,
+            lineColor: [0, 0, 0],
+            lineWidth: 0.25,
+        },
+        headStyles: {
+            fillColor: [230, 230, 230], // light grey like screenshot
+            textColor: 0,
+            halign: "center",
+        },
+        bodyStyles: {
+            halign: "center"
+        },
+        tableWidth: "auto"
+    });
+
+    doc.save(`paiements-${getTodayDate()}.pdf`);
+};
+
     const exportToExcel = () => {
         // Get the attendance data from Vuex
-        const attendanceData = paymentsStore.financePayments.map(res => ({Nom: res.fullName, 'Montant à payer': res.total, 'Montant reçu': res.amount_paid, 'Reste à payer': res.rest, 'Réduction': res.reduction, 'Recu': res.receipt}))
+        const attendanceData = paymentsStore.financePayments.map(res => ({'Recu': res.receipt, Nom: res.fullName,'Groupe': res.group, 'Montant à payer': res.total, 'Montant reçu': res.amount_paid, 'Reste à payer': res.rest, 'Réduction': res.reduction}))
         // Create a worksheet from the attendance data
         const worksheet = XLSX.utils.json_to_sheet(attendanceData);
 
@@ -285,7 +349,7 @@
         XLSX.utils.book_append_sheet(workbook, worksheet, 'groupes');
 
         // Export the workbook to an Excel file
-        XLSX.writeFile(workbook, 'paiements.xlsx');
+        XLSX.writeFile(workbook, `paiements-${getTodayDate()}.xlsx`);
     };
 </script>
 
