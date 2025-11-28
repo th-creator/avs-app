@@ -217,6 +217,7 @@
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'month', title: 'Mois', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'total', title: "Montant à payer", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount_paid', title: "Montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
