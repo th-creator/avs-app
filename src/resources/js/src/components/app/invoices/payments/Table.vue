@@ -295,6 +295,7 @@ const exportToPDF = () => {
     const columns = [
         { header: "N° Reçu", dataKey: "receipt" },
         { header: "Nom Prénom", dataKey: "fullName" },
+        { header: "Mois", dataKey: "month" },
         { header: "Groupe", dataKey: "group" },   // or subject if you have it
         { header: "Montant", dataKey: "amount_paid" },
         { header: "Reste", dataKey: "rest" },
@@ -305,6 +306,7 @@ const exportToPDF = () => {
     const rows = choosenData.value.map(p => ({
         receipt: p.receipt,
         fullName: p.fullName,
+        month: p.month,
         group: p.group,
         bank: p.bank,
         amount_paid: p.amount_paid + " MAD",
@@ -341,7 +343,7 @@ const exportToPDF = () => {
 
     const exportToExcel = () => {
         // Get the attendance data from Vuex
-        const attendanceData = paymentsStore.financePayments.map(res => ({'Recu': res.receipt, Nom: res.fullName,'Groupe': res.group, 'Montant à payer': res.total, 'Montant reçu': res.amount_paid, 'Reste à payer': res.rest, 'Réduction': res.reduction}))
+        const attendanceData = paymentsStore.financePayments.map(res => ({'Recu': res.receipt, Nom: res.fullName,'Groupe': res.group,'Mois': res.month, 'Montant à payer': res.total, 'Montant reçu': res.amount_paid, 'Reste à payer': res.rest, 'Réduction': res.reduction}))
         // Create a worksheet from the attendance data
         const worksheet = XLSX.utils.json_to_sheet(attendanceData);
 
