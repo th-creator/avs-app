@@ -152,7 +152,7 @@ const props = defineProps({
 });
 
 const data = ref({
-    date: '',
+    date: new Date().toISOString().slice(0, 10),
     fullName: '',
     group: '',
     amount: 0,
@@ -160,7 +160,7 @@ const data = ref({
     rest: 0,
     amount_paid: 0,
     type: 'espèces',
-    total: '',
+    total: 0,
     bank: '',
     bank_receipt: '',
     receipt: '',

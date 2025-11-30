@@ -62,6 +62,13 @@ export const useFeesStore = defineStore("fees", () => {
         studentfees.value = [...studentfees.value]; // Reassign to force reactivity
         return response
     };
+    const followUpStore = async (payload) => {
+        // const response = await api.post('api/payments', payload);
+        const response = await api.post('/api/fees/follow-up', payload)
+        studentfees.value.push(response.data.data);  // Add the new user to the studentfees array
+        studentfees.value = [...studentfees.value]; // Reassign to force reactivity
+        return response
+    };
 
     // Update an existing user and update the state
     const update = async (payload, id) => {
@@ -92,5 +99,5 @@ export const useFeesStore = defineStore("fees", () => {
     };
 
     // Expose the fees state and actions
-    return { fees, index, store, update, destroy, studentfees, show, undandledFess, fetchFinance, financeFees };
+    return { fees, index, store, followUpStore, update, destroy, studentfees, show, undandledFess, fetchFinance, financeFees };
 });

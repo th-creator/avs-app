@@ -297,9 +297,7 @@
 
 
 <script setup>
-    import { ref, computed, onMounted, reactive } from 'vue';
-    import Vue3Datatable from '@bhplugin/vue3-datatable';
-    import { useAppStore } from '@/stores/index';
+    import { ref, reactive } from 'vue';
     import { usePaymentsStore } from '@/stores/payments.js';
     import { useFeesStore } from '@/stores/fees.js';
     import { useTeacherExpansesStore } from '@/stores/teacherExpanse.js';
@@ -307,7 +305,6 @@
     import IconComponent from '@/components/icons/IconComponent.vue'
 
 
-    const store = useAppStore();
     const paymentsStore = usePaymentsStore();
     const feesStore = useFeesStore();
     const teacherExpanseStore = useTeacherExpansesStore();
@@ -350,7 +347,6 @@
             // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
         ]) || [];
-    const rows = ref([]);
     const searchPayments = async () => {
         payments.value = {
             cash: 0,

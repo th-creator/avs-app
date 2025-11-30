@@ -17,7 +17,7 @@ class FeeController extends Controller
     public function __construct()
     {
         $this->ay = request('ay') 
-            ?? (now()->month >= 9 
+            ?? (now()->month >= 8
                 ? now()->year.'/'.(now()->year+1) 
                 : (now()->year-1).'/'.now()->year);
     }
@@ -37,39 +37,14 @@ class FeeController extends Controller
         $data = Fee::whereBetween('date', [$fromDate, $toDate])->get();
         return response()->json(['data' => $data], 200);
     }
-
-    // public function undandledFees() {
-    //     $studentsWithoutFees = Student::whereDoesntHave('fees')
-    //     ->forAY($this->ay)->get();
-
-    //     $data = Fee::where(function ($query) {
-    //         $query->where('rest', '!=', 0)
-    //               ->orWhereNull('rest')
-    //               ->whereColumn('total', '!=', 'amount_paid');
-    //     })->get();
-    //     foreach($studentsWithoutFees as $student) {
-    //         $data[] = [
-    //             'fullName' => $student['firstName'] . ' ' . $student['lastName'],
-    //             'amount' => 0,
-    //             'reduction' => '0',
-    //             'rest' => '0',
-    //             'total' => '0',
-    //             'amount_paid' => '0',
-    //             'type' => null, 
-    //             'receipt' => null,
-    //             'user_id' => null,
-    //             'student_id' => $student['id'],
-    //         ];
-    //     }
-    //     return response()->json(['data' => $data], 200);
-    // }
+    
     public function undandledFees()
 {
     // ay like "2025/2026"
     [$ayStart, $ayEnd] = array_map('intval', explode('/', $this->ay));
 
     // AY window: Sep 1 (start) -> Jun 30 (end)
-    $from = \Carbon\Carbon::create($ayStart, 9, 1)->startOfDay()->toDateString();   // YYYY-09-01
+    $from = \Carbon\Carbon::create($ayStart, 8, 1)->startOfDay()->toDateString();   // YYYY-08-01
     $to   = \Carbon\Carbon::create($ayEnd,   6, 30)->endOfDay()->toDateString();     // (Y+1)-06-30
 
     // 1) Existing unpaid fees within the AY window
@@ -77,8 +52,7 @@ class FeeController extends Controller
     $existingUnpaid = Fee::whereBetween('date', [$from, $to])
         ->where(function ($q) {
             $q->whereNull('rest')
-              ->orWhere('rest', '!=', 0)
-              ->orWhereColumn('amount_paid', '<', 'total');
+              ->orWhere('rest', '!=', 0);
         })
         ->with('student')
         ->get();
@@ -112,6 +86,7 @@ class FeeController extends Controller
             'user_id'      => null,
             'student_id'   => $s->id,
             'date'         => null,   // no fee created yet
+            'parent_id' => null
         ];
     });
 
@@ -144,7 +119,7 @@ class FeeController extends Controller
                                   ->first();
 
         if ($existingPayment) {
-            return response()->json(['message' => 'Payment already exists'], 400);
+            return response()->json(['message' => 'fee already exists'], 400);
         } else {
             $data = Fee::create($newData);
         }
@@ -157,6 +132,49 @@ class FeeController extends Controller
             return response()->json(['message' => 'Failed to create Fee'], 500);
         }
     }
+
+    public function followUpStore(Request $request)
+    {
+        $validated = $request->validate([
+            'parent_id'     => 'required|exists:fees,id',
+            'date'          => 'nullable|date',
+            'fullName'      => 'required|string',
+            'amount'        => 'required|numeric',
+            'reduction'     => 'required|numeric',
+            'rest'          => 'required|numeric',
+            'total'         => 'required|numeric',
+            'amount_paid'   => 'nullable|numeric',
+            'type'          => 'required|string',
+            'bank'          => 'nullable|string',
+            'bank_receipt'  => 'nullable|string',
+            'receipt'       => 'nullable|string',
+            'user_id'       => 'required|integer',
+            'student_id'    => 'required|integer',
+        ]);
+
+        // 1) Get the parent fee
+        $parent = Fee::findOrFail($validated['parent_id']);
+
+        // 2) Set new fee as "handled"
+        $validated['status'] = 1;
+
+        // 3) Create the follow-up entry
+        $childFee = Fee::create($validated);
+
+        // 4) Update parent's remaining amount (same logic as payments)
+        $remaining = max(0, $parent->rest - $validated['amount']);
+        $parent->update(['rest' => $remaining]);
+
+        // 5) Eager load relations for consistency
+        $childFee->student = $childFee->student;
+        $childFee->user = $childFee->user;
+
+        return response()->json([
+            'message' => 'Follow-up fee created successfully',
+            'data' => $childFee,
+        ], 201);
+    }
+
 
     public function update(Request $request, $id)
     {

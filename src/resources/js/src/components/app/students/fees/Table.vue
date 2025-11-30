@@ -87,7 +87,7 @@
                                     Gratuit
                                 </div>
                             </div>
-                            <div v-else-if="(data.value.total > 0 && data.value.total == data.value.amount_paid) || data.value.reduction == 100">
+                            <div v-else-if="(data.value.rest == 0) || data.value.reduction == 100">
                                 <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
                                     Payé
                                 </div>
@@ -116,6 +116,7 @@
                     </template>
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
+                            <p class="font-semibold text-xl text-center cursor-pointer" @click="() => toggleFollowUp(data.value)">+</p>
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
                                 <IconComponent name="print" @click="printPayment(data.value)" />
                             <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
@@ -127,6 +128,12 @@
     </div>
     <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
     <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
+    <FollowUpAdd
+        :showPopup="showFollowUpModal"
+        :refresh="() => feesStore.show(route.params.id,choosenAY)"
+        :close="() => showFollowUpModal = false"
+        v-bind:parentFee="followUpData"
+        />
     <!-- Hidden element to use for printing -->
     <div id="receipt" class="receipt-container hidden">
         <div class="reciept-wrapper">
@@ -220,10 +227,18 @@
     import {useAuthStore} from '@/stores/auth.js';
     import html2pdf from "html2pdf.js";
     import Multiselect from '@suadelabs/vue3-multiselect';
+    import FollowUpAdd from './FollowUpAdd.vue';
 
     const AYs = ref(['2024/2025','2025/2026','2026/2027','2027/2028','2028/2029','2029/2030','2030/2031','2031/2032','2032/2033', '2033/2034']);
     const choosenAY = ref(getCurrentAY())
+    const followUpData = ref({})
     
+    const toggleFollowUp = (data) => {
+        
+        followUpData.value = data
+        console.log(followUpData.value);
+        showFollowUpModal.value = true
+    }
     function getCurrentAY() {
         const now = new Date()
         const y = now.getFullYear()
@@ -261,6 +276,7 @@
 
     const showPopup = ref(false);
     const showEditPopup = ref(false);
+    const showFollowUpModal = ref(false);
     
     watch(choosenAY, async () => {
         isloading.value = true

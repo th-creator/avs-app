@@ -28,6 +28,8 @@ return new class extends Migration
             $table->foreign('student_id')->references('id')->on('students')->onDelete('set null');
             $table->unsignedBigInteger('user_id')->nullable();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->foreign('parent_id')->references('id')->on('payments')->onDelete('set null');
             $table->timestamps();
         });
     }

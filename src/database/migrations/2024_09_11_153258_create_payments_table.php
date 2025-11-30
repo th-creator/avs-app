@@ -36,6 +36,8 @@ return new class extends Migration
             $table->foreign('group_id')->references('id')->on('groups')->onDelete('set null');
             $table->unsignedBigInteger('registrant_id')->nullable();
             $table->foreign('registrant_id')->references('id')->on('registrants')->onDelete('set null');
+            $table->unsignedBigInteger('parent_id')->nullable();
+            $table->foreign('parent_id')->references('id')->on('payments')->onDelete('set null');
             $table->timestamps();
         });
     }

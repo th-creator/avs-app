@@ -278,9 +278,7 @@ class PaymentController extends Controller
             }
         }
         return response()->json(['data' => $data], 200);
-    }
-
-    
+    }    
 
     public function fetchFinance(Request $request) {
         $fromDate = $request->input('from');

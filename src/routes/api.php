@@ -55,6 +55,7 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::get('receipt/payment/{from}/{to}', [PaymentController::class, 'fetchReceipt']);
     Route::get('student/payments/{id}/{month}/{year}', [PaymentController::class,'studentpayments']);
     Route::get('unhandled/paymens/{month}/{year}', [PaymentController::class, 'unhandledPayments']);
+    Route::post('/fees/follow-up', [FeeController::class, 'followUpStore']);
     Route::apiResource('fees', FeeController::class);
     Route::get('undandledFees', [FeeController::class, 'undandledFees']);
     Route::post('finance/payments', [PaymentController::class, 'fetchFinance']);
