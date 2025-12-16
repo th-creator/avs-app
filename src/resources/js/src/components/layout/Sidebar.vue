@@ -2,10 +2,10 @@
     <div :class="{ 'dark text-white-dark': store.semidark }">
         <nav class="sidebar fixed min-h-screen h-full top-0 bottom-0 w-[260px] shadow-[5px_0_25px_0_rgba(94,92,154,0.1)] z-50 transition-all duration-300">
             <div class="bg-white dark:bg-[#0e1726] h-full">
-                <div class="flex justify-between items-center px-4 py-3">
+                <div class="flex justify-between items-center px-4 pt-3">
                     <div></div>
                     <router-link to="/" class="main-logo flex items-center justify-center shrink-0">
-                        <img class="w-32 ml-[5px] flex-none" src="/assets/images/avs-logo.png" alt="" />
+                        <img class="w-20 lg:w-28 md:w-24 ml-[5px] flex-none" src="/assets/images/avs-logo.png" alt="" />
                         <!-- <span class="text-2xl ltr:ml-1.5 rtl:mr-1.5 font-semibold align-middle lg:inline dark:text-white-light">AVS</span> -->
                     </router-link>
                     <a
@@ -163,10 +163,10 @@
                         <li class="nav-item">
                             <ul>
                                 <li class="nav-item">
-                                    <router-link to="/receipt" class="group" @click="toggleMobileMenu">
+                                    <router-link to="/emploi" class="group" @click="toggleMobileMenu">
                                         <div class="flex items-center">
                                             <IconComponent name="receipt"/>  
-                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Reçu</span>
+                                            <span class="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">Emploi</span>
                                         </div>
                                     </router-link>
                                 </li>

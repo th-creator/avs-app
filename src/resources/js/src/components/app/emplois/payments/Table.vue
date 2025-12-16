@@ -184,47 +184,40 @@ const total = ref(0);
    🔥 MERGE PARENT FACTURE + SUB-FACTURES
 ---------------------------------------------------------*/
 const mergeFactures = (payments) => {
-  const parents = {};
-  const children = [];
+    const parents = {};
+    const children = [];
 
-  payments.forEach((p) => {
-    const isParent = p.parent_id === null;
+    payments.forEach(p => {
+        if (p.parent_id === null) {
+            parents[p.id] = { ...p, merged_amount_paid: Number(p.amount_paid) };
+        } else {
+            children.push(p);
+        }
+    });
 
-    // ✅ unique key even when id is missing
-    const parentKey = p.id ?? `reg-${p.registrant_id}`;
+    children.forEach(c => {
+        const parent = parents[c.parent_id];
+        if (parent) {
+            parent.merged_amount_paid += Number(c.amount_paid);
+        }
+    });
 
-    if (isParent) {
-      parents[parentKey] = { ...p, merged_amount_paid: Number(p.amount_paid) };
-    } else {
-      children.push(p);
-    }
-  });
+    return Object.values(parents).map(p => {
+        const total = p.total !== null
+            ? Number(p.total)
+            : Number(p.amount) * ((100 - Number(p.reduction)) / 100);
 
-  children.forEach((c) => {
-    // children MUST have parent_id; we try matching by raw parent id
-    // so we search for a parent that has id == c.parent_id
-    const parent = Object.values(parents).find((p) => p.id === c.parent_id);
-    if (parent) parent.merged_amount_paid += Number(c.amount_paid);
-  });
+        const rest = total - p.merged_amount_paid;
+        const paid = rest === 0 ? 1 : p.paid;
 
-  return Object.values(parents).map((p) => {
-    const total =
-      p.total !== null && p.total !== undefined
-        ? Number(p.total)
-        : Number(p.amount) * ((100 - Number(p.reduction)) / 100);
-
-    const rest = total - p.merged_amount_paid;
-    const paid = rest === 0 ? 1 : Number(p.paid);
-
-    return {
-      ...p,
-      amount_paid: p.merged_amount_paid,
-      rest,
-      paid,
-    };
-  });
+        return {
+            ...p,
+            amount_paid: p.merged_amount_paid,
+            rest,
+            paid
+        };
+    });
 };
-
 
 /* --------------------------------------------------------
    🔄 WATCHERS — Load data & merge invoices

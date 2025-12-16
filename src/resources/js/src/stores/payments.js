@@ -46,9 +46,9 @@ export const usePaymentsStore = defineStore("payments", () => {
             return error
         }
     };
-    const fetchFacturation = async (payload) => {
+    const fetchFacturation = async (month,year) => {
         try {
-            const response = await api.post('api/facturation/payments',payload);
+            const response = await api.get(`api/facturation/payments/${month}/${year}`);
             financePayments.value = response.data.data;   // Update the payments state with the fetched data
             return response
         } catch (error) {
@@ -101,9 +101,9 @@ export const usePaymentsStore = defineStore("payments", () => {
     };
 
     // Fetch all payments and update the state
-    const fetchReceipt = async (from,to) => {
+    const fetchReceipt = async (month,year) => {
         try {
-            const response = await api.get(`api/receipt/payment/${from}/${to}`);
+            const response = await api.get(`api/receipt/payment/${month}/${year}`);
             receiptPayments.value = response.data.data;  // Update the payments state with the fetched data
             return response
         } catch (error) {

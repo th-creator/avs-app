@@ -172,19 +172,23 @@
             <div class="table-responsive">
                 
                 <div class="panel h-full p-0 border-0 overflow-hidden">
-                    <div class="p-6 bg-gradient-to-r from-[#4361ee] to-[#160f6b] min-h-[190px]">
+                    <div class="p-6 bg-gradient-to-r from-[#4361ee] to-[#160f6b] min-h-[220px]">
                         <div class="flex justify-between items-center mb-6">
                             <div class="bg-black/50 rounded-full p-1 ltr:p-3 rtl:p-3 flex items-center text-white font-semibold">
                                 
                                 AVS
                             </div>
                         </div>
-                        <div class="text-white flex justify-between items-center">
+                        <div class="text-white flex justify-between items-center mb-4">
                             <p class="text-xl">Solde</p>
                             <h5 class="ltr:ml-auto rtl:mr-auto text-2xl"><span class="text-white-light"></span>{{payments.cash+payments.bank+payments.virement-teacherExpans.amount-expanses.cash-expanses.bank-expanses.virement}}</h5>
                         </div>
+                        <div class="text-white flex justify-between items-center">
+                            <p class="text-xl">Caisse</p>
+                            <h5 class="ltr:ml-auto rtl:mr-auto text-2xl"><span class="text-white-light"></span>{{payments.cash-teacherExpans.amount-expanses.cash}}</h5>
+                        </div>
                     </div>
-                    <div class="-mt-12 px-8 grid grid-cols-2 gap-2">
+                    <div class="-mt-8 px-8 grid grid-cols-2 gap-2">
                         <div class="bg-white rounded-md shadow px-4 py-2.5 dark:bg-[#060818]">
                             <span class="flex justify-between items-center mb-4 dark:text-white"
                                 >Reçu
@@ -192,7 +196,7 @@
                                     <path d="M19 15L12 9L5 15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                                 </svg>
                             </span>
-                            <div class="btn w-full py-1 text-base shadow-none border-0 bg-[#ebedf2] dark:bg-black text-[#515365] dark:text-[#bfc9d4]">
+                            <div class="btn w-full py-1 text-base shadow-none border-0 bg-[#babcc2] dark:bg-black text-[#515365] dark:text-[#bfc9d4]">
                                 {{payments.cash+payments.bank+payments.virement}}
                             </div>
                         </div>

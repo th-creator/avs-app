@@ -23,7 +23,9 @@
                 >
                     <template #intitule="data">
                         <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.intitule }}</p>
+                            <router-link v-if="data.value.id" :to="`/groups/${data.value.id}/registrants`" class="main-logo flex items-center shrink-0">
+                                <p class="font-semibold text-center">{{ data.value.intitule }}</p>
+                            </router-link>
                         </div>
                     </template>
                     <template #n_place="data">

@@ -60,16 +60,6 @@
                                     deselect-label=""
                                     >
                                     </multiselect>
-                                <!-- <multiselect
-                                    v-model="data.group"
-                                    :options="groups"
-                                    class="custom-multiselect"
-                                    :searchable="true"
-                                    placeholder="Groupe"
-                                    selected-label=""
-                                    select-label=""
-                                    deselect-label=""
-                                ></multiselect> -->
                                 <span v-if="errors.group_id" class="text-red-600 text-sm">{{ errors.group_id[0] }}</span>
                             </div>
                             <div class="relative mb-4">

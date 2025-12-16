@@ -147,7 +147,7 @@
                         </div>
                     </template>
                     <template #actions="data">
-                        <div v-if="data.value.paid != null" class="flex w-fit mx-auto justify-around gap-5">
+                        <div v-if="data.value.paid != null" class="flex w-fit mx-auto justify-around items-center gap-5">
                             <p class="font-semibold text-xl text-center cursor-pointer" @click="() => toggleFollowUp(data.value)">+</p>
                             <IconComponent name="edit" @click="() => toggleEdit(data.value)"/>
                             <!-- <IconComponent name="print" @click="printPayment(data.value)" /> -->

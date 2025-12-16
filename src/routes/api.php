@@ -3,17 +3,18 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\FeeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\StudentController;
-use App\Http\Controllers\RegistrantController;
-use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\GroupController;
-use App\Http\Controllers\SectionController;
-use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\FeeController;
+use App\Http\Controllers\EmploiController;
 use App\Http\Controllers\ExpanseController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SectionController;
+use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\RegistrantController;
 use App\Http\Controllers\TeacherExpanseController;
 
 Route::get('user', [AuthController::class, "getUser"]);
@@ -52,16 +53,21 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::get('all/paymens', [PaymentController::class, 'all']);
     Route::post('/payments/follow-up', [PaymentController::class, 'followUpStore']);
     Route::get('check/payment/{from}/{to}', [PaymentController::class, 'fetchCheck']);
-    Route::get('receipt/payment/{from}/{to}', [PaymentController::class, 'fetchReceipt']);
+    Route::get('receipt/payment/{month}/{year}', [PaymentController::class, 'fetchReceipt']);
     Route::get('student/payments/{id}/{month}/{year}', [PaymentController::class,'studentpayments']);
     Route::get('unhandled/paymens/{month}/{year}', [PaymentController::class, 'unhandledPayments']);
     Route::post('/fees/follow-up', [FeeController::class, 'followUpStore']);
     Route::apiResource('fees', FeeController::class);
     Route::get('undandledFees', [FeeController::class, 'undandledFees']);
     Route::post('finance/payments', [PaymentController::class, 'fetchFinance']);
-    Route::post('facturation/payments', [PaymentController::class, 'fetchFacturation']);
+    Route::get('facturation/payments/{month}/{year}', [PaymentController::class, 'fetchFacturation']);
     Route::post('finance/fees', [FeeController::class, 'fetchFinance']);
     Route::post('finance/expanses', [ExpanseController::class, 'fetchFinance']);
     Route::post('finance/teacherExpanses', [TeacherExpanseController::class, 'fetchFinance']);
     Route::get('doubled/registrants', [RegistrantController::class, 'doubled']);
+
+    // Timetable logic
+    Route::apiResource('emplois', EmploiController::class);
+    Route::get('emplois/active/{groupId}', [EmploiController::class, 'activeForGroup']);
+    Route::post('emplois/timetable/date', [EmploiController::class, 'timetableForDate']);
 });

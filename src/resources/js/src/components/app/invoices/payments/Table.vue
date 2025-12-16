@@ -1,12 +1,12 @@
 <template>
     <div>
-    <div class="flex justify-end my-4 items-end"> 
-        <div class="flex flex-col gap-3 justify-between my-4 items-center">
+    <div class="flex justify-end mx-4 mt-3 items-end"> 
+        <div class="flex flex-col gap-3 justify-between items-center">
             <button type="button" class="btn btn-success w-40 h-9" @click="exportToExcel()">Excel</button>   
             <button type="button" class="btn btn-warning w-40 h-9" @click="exportToPDF()">PDF</button>
         </div>
     </div>
-        <div class="flex gap-3 justify-between my-4 items-center"> 
+        <!-- <div class="flex gap-3 justify-between my-4 items-center"> 
                 <div class="flex gap-10 items-end">
                     <label for="">Du:</label>
                     <input v-model="search.from" type="date" class="form-input max-w-xs" placeholder="Du..." />
@@ -17,12 +17,12 @@
                 <IconComponent v-if="isloading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
                 <span v-else>Rechercher</span>
             </button>
-        </div>
-        <div class="panel pb-0 mt-6">
+        </div> -->
+        <div class="panel pb-0 mt-">
             
             <div class="flex justify-between items-end mb-4"> 
                 <input v-model="params.search" type="text" class="form-input max-w-xs h-10" placeholder="Rechercher..." />
-                <div>
+                <div class="flex gap-2">
                     <multiselect
                         v-model="choosenVal"
                         :options="options"
@@ -33,6 +33,26 @@
                         select-label=""
                         deselect-label=""
                     ></multiselect> 
+                        <multiselect
+                            v-model="choosenMonth"
+                            :options="months"
+                            class="custom-multiselect  max-w-xs"
+                            :searchable="true"
+                            placeholder="Le mois"
+                            selected-label=""
+                            select-label=""
+                            deselect-label=""
+                        ></multiselect>    
+                        <multiselect
+                            v-model="choosenYear"
+                            :options="years"
+                            class="custom-multiselect  max-w-xs"
+                            :searchable="true"
+                            placeholder="L'année"
+                            selected-label=""
+                            select-label=""
+                            deselect-label=""
+                        ></multiselect>    
                 </div>
                 <!-- <button type="button" class="btn btn-info" @click="showPopup = true">Ajouter</button> -->
             </div>
@@ -158,13 +178,13 @@
             </div>
         </div>
     <div class="flex justify-end items-center my-4">
-        <p class="font-semibold text-lg">Total: {{ total }} MAD</p>
+        <p class="font-semibold text-lg" v-if="total && total > 0">Total: {{ total }} MAD</p>
         <!-- <p class="font-semibold text-lg">revenu: {{ choosenData.reduce((total, payment) => total + Number(payment.amount)*((100-Number(payment.reduction))/100), 0) }} MAD</p> -->
     </div>
     </div>
 </template>
 <script setup>
-    import { ref, reactive, computed, watch } from 'vue';
+    import { ref, reactive, computed, watch, onMounted } from 'vue';
     import Vue3Datatable from '@bhplugin/vue3-datatable';
     import { usePaymentsStore } from '@/stores/payments.js';
     import IconComponent from '@/components/icons/IconComponent.vue'
@@ -183,9 +203,12 @@
     const choosenVal = ref('tous');
     const choosenData = ref([]);
     const isloading = ref(false);
+    const months = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
+    const choosenMonth = ref('Septembre');
+    const years = ref([2024,2025,2026,2027,2028,2029,2030]);
+    const choosenYear = ref(2024);
 
-    const datatable = ref([]);
-    const total = ref();
+    const total = ref(0);
 
     const params = reactive({
         current_page: 1,
@@ -203,6 +226,31 @@
         }, 0)
         
     });
+    onMounted(async () => {
+        const currentMonth = new Date().getMonth();
+        choosenYear.value = new Date().getFullYear();
+        choosenMonth.value = months.value[currentMonth];
+    })
+    watch(choosenMonth, async (newVal, oldVal) => {
+        isloading.value = true
+        await paymentsStore.fetchFacturation(choosenMonth.value,choosenYear.value)
+        choosenData.value = paymentsStore.financePayments.filter(payment => {if(choosenVal.value == 'tous' && payment.paid != -2 && payment.paid != -1) {return payment} if(choosenVal.value == 'remboursé' && payment.paid == -1) {return payment} if (payment.type == choosenVal.value && payment.paid != -2 && payment.paid != -1) return payment});
+        total.value = choosenData.value.reduce((total, payment) => {
+            // let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+            return total + Number(payment.amount_paid)
+        }, 0)
+        isloading.value = false
+    });
+    watch(choosenYear, async (newVal, oldVal) => {
+        isloading.value = true
+        await paymentsStore.fetchFacturation(choosenMonth.value,choosenYear.value)
+        choosenData.value = paymentsStore.financePayments.filter(payment => {if(choosenVal.value == 'tous' && payment.paid != -2 && payment.paid != -1) {return payment} if(choosenVal.value == 'remboursé' && payment.paid == -1) {return payment} if (payment.type == choosenVal.value && payment.paid != -2 && payment.paid != -1) return payment});
+        total.value = choosenData.value.reduce((total, payment) => {
+            // let amount = payment.total !== null ? payment.total : Number(payment.amount)*((100-Number(payment.reduction))/100)
+            return total + Number(payment.amount_paid)
+        }, 0)
+        isloading.value = false
+    });
 
     const paymentsStore = usePaymentsStore();
 
@@ -217,16 +265,16 @@
             // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'month', title: 'Mois', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'total', title: "Montant à payer", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount_paid', title: "Montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'reduction', title: "Réduction", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'receipt', title: "Recu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'type', title: "Type", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'month', title: 'Mois', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'bank', title: "Bank", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'bank_receipt', title: "Chèque", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'receipt', title: "Recu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'date', title: "Date", headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
             // { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },

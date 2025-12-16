@@ -295,18 +295,57 @@ class PaymentController extends Controller
         return response()->json(['data' => $data], 200);
     }
 
-    public function fetchReceipt($fromDate, $toDate) {
-        $payments = Payment::whereBetween('date', [$fromDate, $toDate])->get();
-        $fees = Fee::whereBetween('date', [$fromDate, $toDate])->get();
-        $data = $payments->concat($fees);
+    public function fetchReceipt($month, $year)
+{
+    $months = [
+        'Janvier' => 1,
+        'Février' => 2,
+        'Mars' => 3,
+        'Avril' => 4,
+        'Mai' => 5,
+        'Juin' => 6,
+        'Juillet' => 7,
+        'Août' => 8,
+        'Septembre' => 9,
+        'Octobre' => 10,
+        'Novembre' => 11,
+        'Décembre' => 12,
+    ];
 
-        return response()->json(['data' => $data], 200);
-    }
+    $monthNumber = $months[$month];
 
-    public function fetchFacturation(Request $request) {
-        $fromDate = $request->input('from');
-        $toDate = $request->input('to');
-        $data = Payment::whereNotIn('paid',[-1,0])->whereBetween('date', [$fromDate, $toDate])->get();
+    // 🟢 First day of month
+    $fromDate = \Carbon\Carbon::createFromDate(
+        (int) $year,
+        (int) $monthNumber,
+        1
+    )->startOfDay();
+
+    // 🔵 Last day of month
+    $toDate = \Carbon\Carbon::createFromDate(
+        (int) $year,
+        (int) $monthNumber,
+        1
+    )->endOfMonth()->endOfDay();
+
+    $payments = Payment::whereBetween('date', [$fromDate, $toDate])->get();
+    $fees     = Fee::whereBetween('date', [$fromDate, $toDate])->get();
+
+    $data = $payments->concat($fees);
+
+    return response()->json([
+        'from' => $fromDate->toDateString(),
+        'to'   => $toDate->toDateString(),
+        'data' => $data,
+    ], 200);
+}
+
+
+    public function fetchFacturation($month,$year) {
+        // $fromDate = $request->input('from');
+        // $toDate = $request->input('to');
+        // $data = Payment::whereNotIn('paid',[-1,0])->whereBetween('date', [$fromDate, $toDate])->get();
+        $data = Payment::whereNotIn('paid',[-1,0])->where('month', $month)->where('year', $year)->get();
         return response()->json(['data' => $data], 200);
     }
     
