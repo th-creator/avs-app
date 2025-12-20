@@ -44,7 +44,7 @@
                             </div>
                             <div class="relative mb-4">
                                 <label class="text-sm">Montant à payer:</label>
-                                <input v-model="data.total" type="number" placeholder="Montant a payer" class="form-input" />
+                                <input v-model="data.total" type="number" placeholder="Montant à payer" class="form-input" />
                                 <span v-if="errors.total" class="text-red-600 text-sm">{{ errors.total[0] }}</span>
                             </div>
                             <div class="relative mb-4">

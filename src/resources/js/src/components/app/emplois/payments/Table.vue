@@ -295,7 +295,7 @@ const cols = ref([
     { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center' },
     { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center' },
     { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center' },
-    { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center' },
+    { field: 'total', title: "Montant à payer", headerClass: '!text-center flex justify-center' },
     { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center' },
     { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center' },
     { field: 'reduction', title: "Reduction", headerClass: '!text-center flex justify-center' },

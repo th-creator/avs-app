@@ -17,7 +17,7 @@
                         class="p-3.5 py-2 -mb-[1px] flex items-center border border-transparent hover:text-info !outline-none transition duration-300"
                         :class="{ '!border-white-light !border-b-white text-info dark:!border-[#191e3a] dark:!border-b-black': selected }"
                     >
-                    Les dépenses des enseignants
+                    Rémunération
                     </a>
                 </Tab>
             </TabList>

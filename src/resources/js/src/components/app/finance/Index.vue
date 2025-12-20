@@ -89,7 +89,7 @@
             <div class="panel overflow-hidden">
                 <div class="flex items-center justify-between">
                     <div>
-                        <div class="text-lg font-bold">Les dépenses des enseignants</div>
+                        <div class="text-lg font-bold">Rémunération</div>
                     </div>
                 </div>
                 <div class="relative mt-10">

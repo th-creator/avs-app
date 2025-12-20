@@ -156,7 +156,7 @@ class GroupController extends Controller
             'intitule' => 'nullable',
             'n_place' => 'nullable',
             'availability' => 'nullable',
-            'timing' => 'required',
+            'timing' => 'nullable',
             'salle' => 'nullable',
             'teacher_id' => 'required',
             'section_id' => 'required',
@@ -164,7 +164,9 @@ class GroupController extends Controller
         ]);
 
         $newData['date'] = now();
-        $newData['timing'] = json_encode($request['timing']);
+        if ($request['timing']) {
+            $newData['timing'] = json_encode($request['timing']);
+        }
 
         $data = Group::create($newData);
 
@@ -191,7 +193,9 @@ class GroupController extends Controller
             'section_id' => 'required',
         ]);
         
-        $newData['timing'] = json_encode($request['timing']);
+        if ($request['timing']) {
+            $newData['timing'] = json_encode($request['timing']);
+        }
         $data->update($newData);
 
         $data->teacher = $data->teacher;

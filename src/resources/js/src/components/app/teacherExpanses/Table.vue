@@ -1,7 +1,7 @@
 <template>
     <div>
         <div class="panel pb-0 mt-6">
-            <h5 class="font-semibold text-lg dark:text-white-light mb-5">Les dépenses des enseignants</h5>
+            <h5 class="font-semibold text-lg dark:text-white-light mb-5">Rémunération</h5>
             <div class="flex justify-between my-4">    
                 <button type="button" class="btn btn-warning w-40 h-9" @click="exportToExcel()">Exporter</button>   
                 <button type="button" class="btn btn-info w-40 h-9" @click="showPopup = true">Ajouter</button>
@@ -10,6 +10,16 @@
                 <input v-model="params.search" type="text" class="form-input max-w-xs" placeholder="Rechercher..." />
                 
                 <div class="flex gap-2">
+                    <multiselect
+                        v-model="selectedStatus"
+                        :options="statusOptions"
+                        class="custom-multiselect max-w-xs"
+                        placeholder="Statut"
+                        :searchable="false"
+                        selected-label=""
+                        select-label=""
+                        deselect-label=""
+                        ></multiselect>
                     <multiselect
                         v-model="choosenMonth"
                         :options="options"
@@ -34,7 +44,7 @@
             </div>
             <div class="datatable">
                 <vue3-datatable
-                    :rows="teacherExpanseStore.teacherExpanses"
+                    :rows="rows"
                     :columns="cols"
                     :totalRows="rows?.length"
                     :sortable="true"
@@ -51,17 +61,33 @@
                 >
                     <template #total="data">
                         <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.total }}MAD</p>
+                            <p class="font-semibold text-center">{{ roundMoney(data.value.total, 2) }}MAD</p>
                         </div>
                     </template>
                     <template #amount="data">
                         <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.amount }}MAD</p>
+                            <p class="font-semibold text-center">{{ roundMoney(data.value.amount, 2) }}MAD</p>
                         </div>
                     </template>
                     <template #rest="data">
                         <div class="flex justify-around w-full items-center gap-2">
-                            <p class="font-semibold text-center">{{ data.value.rest }}MAD</p>
+                            <p class="font-semibold text-center">{{ roundMoney(data.value.rest, 2) }}MAD</p>
+                        </div>
+                    </template>
+                    <template #status="data">
+                        <div class="flex justify-center">
+                            <span
+                                v-if="data.value.status === 'Payé'"
+                                class="badge badge-outline-success"
+                            >
+                                Payé
+                            </span>
+                            <span
+                                v-else
+                                class="badge badge-outline-warning"
+                            >
+                                En attente
+                            </span>
                         </div>
                     </template>
                     <template #teacher="data"> 
@@ -91,14 +117,15 @@
                     </template>
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
-                            <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
-                            <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
+                            <span class="text-xl cursor-pointer" @click="() => openFollowUp(data.value)" v-if="data.value.status == 'En attente'">+</span>
+                            <IconComponent name="edit" @click="() => toggleEdit(data.value)" v-if="data.value.status == 'Payé'" />
+                            <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin' && data.value.status == 'Payé'" name="delete" @click="deleteData(data.value)" />
                         </div>
                     </template>
                 </vue3-datatable>
             </div>
         </div>
-        <div class="flex flex-col justify-end items-end my-4">
+        <!-- <div class="flex flex-col justify-end items-end my-4">
             <table class="w-fit font-semibold text-lg">
                 <tr>
                     <td>Montant Total: </td>
@@ -113,10 +140,16 @@
                     <td> {{ rest }} MAD</td>
                 </tr>
             </table>
-        </div>
+        </div> -->
     </div>
     <Edit :close="() => showEditPopup = false" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
     <Add :close="() => showPopup = false" :showPopup="showPopup" v-if="showPopup"/>
+    <FollowUp
+        :close="() => showFollowUp = false"
+        :expanse="selectedExpanse" 
+        :refresh="() => teacherExpanseStore.index(choosenMonth,choosenYear)"
+        :show="showFollowUp"
+        />
 </template>
 <script setup>
     import { ref, reactive, computed, onMounted, watch } from 'vue';
@@ -130,6 +163,7 @@
     import Multiselect from '@suadelabs/vue3-multiselect';
     import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
     import * as XLSX from 'xlsx';
+    import FollowUp from './FollowUp.vue';
 
     const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
     const choosenMonth = ref('');
@@ -153,34 +187,60 @@
     const total = ref(0)
     const rest = ref(0)
     const amount = ref(0)
+    const statusOptions = ref([ 'Tous', 'Payé', 'En attente',
+    ]);
+    const selectedExpanse = ref(null)
+    const showFollowUp = ref(false)
+
+    const selectedStatus = ref('all');
     
-    const cols =
-        ref([
-            // { field: 'id', title: 'ID', isUnique: true, headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'teacher', title: "Enseignant", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'group', title: 'Groupe', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'total', title: "Montant total", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'amount', title: "Montant payé", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'month', title: "Mois", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'date', title: "Date", headerClass: '!text-center flex justify-center', width: 'full' },
-            // { field: 'user_id', title: "Auteur", headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
-        ]) || [];
+    const cols = ref([
+        { field: 'teacher', title: "Enseignant", headerClass: '!text-center flex justify-center' },
+        { field: 'group', title: 'Groupe', headerClass: '!text-center flex justify-center' },
+        { field: 'status', title: "Statut", headerClass: '!text-center flex justify-center' },
+        { field: 'total', title: "Montant total", headerClass: '!text-center flex justify-center' },
+        { field: 'amount', title: "Montant payé", headerClass: '!text-center flex justify-center' },
+        { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center' },
+        { field: 'month', title: "Mois", headerClass: '!text-center flex justify-center' },
+        { field: 'date', title: "Date", headerClass: '!text-center flex justify-center' },
+        { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center' },
+    ]);
 
-    const rows = computed(async() => {
-        total.value = 0
-        rest.value = 0
-        amount.value = 0
-        let data = await teacherExpanseStore.teacherExpanses.length > 0 ? teacherExpanseStore.teacherExpanses : []
-        teacherExpanseStore.teacherExpanses.map((payment) => {
-            total.value = total.value + Number(payment.total)
-            rest.value = rest.value + Number(payment.rest)
-            amount.value = amount.value + Number(payment.amount)
-        }, 0)
-        return data;
-        });
+    const rows = computed(() => {
+        if (selectedStatus.value === 'Payé') {
+            return teacherExpanseStore.paidExpanses;
+        }
+        if (selectedStatus.value === 'En attente') {
+            return teacherExpanseStore.unpaidExpanses;
+        }
+        return teacherExpanseStore.allExpanses;
+    });
 
+    const openFollowUp = (row) => {
+        console.log("selected",row);
+        
+    selectedExpanse.value = row
+    showFollowUp.value = true
+    }
+//     const totals = computed(() => {
+//     let t = 0, a = 0, r = 0;
+
+//     rows.value.forEach(row => {
+//         t += Number(row.total);
+//         a += Number(row.amount);
+//         r += Number(row.rest);
+//     });
+
+//     return {
+//         total: roundMoney(t, 2),
+//         amount: roundMoney(a, 2),
+//         rest: roundMoney(r, 2)
+//     };
+// });
+    const roundMoney = (value, decimals = 2) => {
+        if (value === null || value === undefined || isNaN(value)) return 0;
+        return Number(Math.round((Number(value) + Number.EPSILON) * 10 ** decimals) / 10 ** decimals);
+    };
 
     watch(choosenMonth, async (newVal, oldVal) => { 
         isloading.value = true
@@ -200,12 +260,8 @@
         // isloading.value = false
     })
 
-    function openPdf(pdf) {
-      window.open(pdf, '_blank');
-    }
     const toggleEdit = (data) => {
         editedData.value = data
-        console.log(editedData.value);
         showEditPopup.value = true
     }
 
@@ -245,7 +301,7 @@
  
     const exportToExcel = () => {
         // Get the attendance data from Vuex
-        const attendanceData = teacherExpanseStore.teacherExpanses.map(res => ({'Enseignant': res.teacher, 'Groupe': res.group, 'Montant total': res.total, 'Montant payé': res.amount, 'Reste': res.rest, 'Date': res.date}))
+        const attendanceData = rows.value.map(res => ({'Enseignant': res.teacher, 'Groupe': res.group, 'Montant total': res.total, 'Montant payé': res.amount, 'Reste': res.rest, 'Date': res.date}))
         attendanceData.push({'Enseignant': 'Total', 'Groupe': '', 'Montant total': total.value, 'Montant payé': amount.value, 'Reste': rest.value, 'Date': ''})
         // Create a worksheet from the attendance data
         const worksheet = XLSX.utils.json_to_sheet(attendanceData);

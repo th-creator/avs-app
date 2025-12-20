@@ -9,18 +9,80 @@ export const useTeacherExpansesStore = defineStore("teacherExpanses", () => {
     // Define the global state for teacherExpanses
     const teacherExpanses = ref([]);  // This will hold the teacherExpanses globally
     const financeteachersExpanses = ref([]);  // This will hold the teacherExpanses globally
+    const paidExpanses = ref([]);
+    const unpaidExpanses = ref([]);
+    const allExpanses = ref([]);
+
 
     // Fetch all teacherExpanses and update the state
-    const index = async (month,year) => {
+    const index = async (month, year) => {
         try {
-            const response = await api.get(`api/all/teacher/expanse/${month}/${year}`);
-            teacherExpanses.value = response.data.data;  // Update the teacherExpanses state with the fetched data
-            return response
+          const response = await api.get(`api/all/teacher/expanse/${month}/${year}`);
+      
+          /* ======================
+           * 1️⃣ PAID EXPENSES
+           * ====================== */
+          paidExpanses.value = response.data.data.map(e => ({
+            ...e,
+            status: "Payé"
+          }));
+      
+          /* ======================
+           * 2️⃣ UNPAID (GROUPS)
+           * ====================== */
+          unpaidExpanses.value = response.data.groups.map(group => {
+            const total = group.payments.reduce((sum, payment) => {
+              const value =
+                payment.total !== null
+                  ? Number(payment.total)
+                  : Number(payment.amount) * ((100 - Number(payment.reduction)) / 100);
+      
+              return sum + value;
+            }, 0);
+      
+            const percentage = 70;
+            const amount = (total * percentage) / 100;
+            const rest = total - amount;
+      
+            return {
+              id: null,
+              teacher: `${group.teacher?.firstName} ${group.teacher?.lastName}`,
+              teacher_id: group.teacher?.id ?? null,
+              group: group.intitule,
+      
+              total,
+              percentage,
+              amount,
+              rest,
+      
+              month,
+              year,
+              payments: group.payments,
+              status: 'En attente'
+            };
+          })
+          .filter(expanse => expanse.total > 0);
+      
+          /* ======================
+           * 3️⃣ ALL EXPENSES
+           * ====================== */
+          allExpanses.value = [
+            ...paidExpanses.value,
+            ...unpaidExpanses.value
+          ];
+      
+          console.log('PAID', paidExpanses.value.length);
+          console.log('UNPAID', unpaidExpanses.value.length);
+          console.log('ALL', allExpanses.value.length);
+      
+          return true;
+      
         } catch (error) {
-            console.error("Failed to fetch teacherExpanses:", error);
-            return error
+          console.error("Failed to fetch teacherExpanses:", error);
+          throw error;
         }
-    };
+      };
+      
 
     const fetchFinance = async (payload) => {
         try {
@@ -60,5 +122,5 @@ export const useTeacherExpansesStore = defineStore("teacherExpanses", () => {
     };
 
     // Expose the teacherExpanses state and actions
-    return { teacherExpanses, index, store, update, destroy, financeteachersExpanses, fetchFinance };
+    return { teacherExpanses, index, store, update, destroy, financeteachersExpanses, fetchFinance, paidExpanses, unpaidExpanses, allExpanses };
 });

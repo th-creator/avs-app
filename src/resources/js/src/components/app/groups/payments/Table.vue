@@ -99,34 +99,45 @@
                         </div>
                     </template>
                     <template #paid="data">
-                        <div class="flex justify-center w-full">
-                            <div v-if="data.value.reduction == 100">
-                                <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
-                                    Gratuit
-                                </div>
-                            </div>
-                            <div v-else-if="data.value.paid == 1 && data.value.rest == 0">
-                                <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
-                                    Payé
-                                </div>
-                            </div>
-                            <div v-else-if="data.value.paid == 1 && data.value.amount_paid > 0">
-                                <div class="px-4 py-2 rounded-full bg-orange-100 text-orange-600 w-[120px] text-center text-sm">
-                                    En cours
-                                </div>
-                            </div>
-                            <div v-else-if="data.value.paid == -1">
-                                <div class="px-4 py-2 rounded-full bg-blue-100 text-blue-600 w-[120px] text-center text-sm">
-                                    Remboursé
-                                </div>
-                            </div>
-                            <div v-else>
-                                <div class="px-4 py-2 rounded-full bg-rose-100 text-rose-600 w-[120px] text-center text-sm">
-                                    Non payé
-                                </div>
-                            </div>
-                        </div>
-                    </template>
+    <div class="flex justify-center w-full">
+
+        <!-- Gratuit -->
+        <div v-if="data.value.reduction == 100 && data.value.paid != -1">
+            <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
+                Gratuit
+            </div>
+        </div>
+
+        <!-- Remboursé -->
+        <div v-else-if="data.value.paid == -1">
+            <div class="px-4 py-2 rounded-full bg-blue-100 text-blue-600 w-[120px] text-center text-sm">
+                Remboursé
+            </div>
+        </div>
+
+        <!-- Payé (FULL) -->
+        <div v-else-if="Number(data.value.amount_paid) >= Number(data.value.total)">
+            <div class="px-4 py-2 rounded-full bg-emerald-100 text-emerald-600 w-[120px] text-center text-sm">
+                Payé
+            </div>
+        </div>
+
+        <!-- En cours (PARTIAL BUT PAID FLAG = 1) -->
+        <div v-else-if="data.value.paid == 1">
+            <div class="px-4 py-2 rounded-full bg-orange-100 text-orange-600 w-[120px] text-center text-sm">
+                En cours
+            </div>
+        </div>
+
+        <!-- Non payé -->
+        <div v-else>
+            <div class="px-4 py-2 rounded-full bg-rose-100 text-rose-600 w-[120px] text-center text-sm">
+                Non payé
+            </div>
+        </div>
+
+    </div>
+</template>
                     <template #actions="data">
                         <div class="flex w-fit mx-auto justify-around gap-5">
                             <router-link v-if="data.value.student_id" :to="`/students/${data.value.student_id}/payments`" class="main-logo flex items-center shrink-0">
@@ -183,42 +194,64 @@ const total = ref(0);
 /* --------------------------------------------------------
    🔥 MERGE PARENT FACTURE + SUB-FACTURES
 ---------------------------------------------------------*/
+const roundMoney = (value, decimals = 2) =>
+  Math.round((Number(value) + Number.EPSILON) * 10 ** decimals) / 10 ** decimals;
+
 const mergeFactures = (payments) => {
   const parents = {};
+  const parentsById = {};   // ✅ fast + reliable child merge
   const children = [];
 
+  // 1️⃣ Split + index parents
   payments.forEach((p) => {
-    const isParent = p.parent_id === null;
+    if (p.parent_id === null) {
+      const parentKey = p.id ?? `reg-${p.registrant_id}`;
 
-    // ✅ unique key even when id is missing
-    const parentKey = p.id ?? `reg-${p.registrant_id}`;
+      const parentObj = {
+        ...p,
+        merged_amount_paid: Number(p.amount_paid),
+      };
 
-    if (isParent) {
-      parents[parentKey] = { ...p, merged_amount_paid: Number(p.amount_paid) };
+      parents[parentKey] = parentObj;
+
+      // ✅ Only DB parents have an id that children reference
+      if (p.id != null) {
+        parentsById[p.id] = parentObj;
+      }
     } else {
       children.push(p);
     }
   });
 
+  // 2️⃣ Merge children into their DB parent
   children.forEach((c) => {
-    // children MUST have parent_id; we try matching by raw parent id
-    // so we search for a parent that has id == c.parent_id
-    const parent = Object.values(parents).find((p) => p.id === c.parent_id);
-    if (parent) parent.merged_amount_paid += Number(c.amount_paid);
+    const parent = parentsById[c.parent_id];
+    if (!parent) return;
+    parent.merged_amount_paid += Number(c.amount_paid);
   });
 
+  // 3️⃣ Finalize
   return Object.values(parents).map((p) => {
     const total =
       p.total !== null && p.total !== undefined
         ? Number(p.total)
         : Number(p.amount) * ((100 - Number(p.reduction)) / 100);
 
-    const rest = total - p.merged_amount_paid;
-    const paid = rest === 0 ? 1 : Number(p.paid);
+    const roundedTotal = roundMoney(total, 2);
+    const mergedPaid = roundMoney(p.merged_amount_paid, 2);
+
+    // ✅ Clamp tiny rounding noise
+    let rest = roundMoney(roundedTotal - mergedPaid, 2);
+    if (Math.abs(rest) < 0.01) rest = 0;
+    if (rest < 0) rest = 0; // avoid negative rest when overpaid
+
+    // ✅ Your rule: paid=1 as soon as any payment exists, keep refunded as -1
+    const paid =
+      Number(p.paid) === -1 ? -1 : mergedPaid > 0 ? 1 : 0;
 
     return {
       ...p,
-      amount_paid: p.merged_amount_paid,
+      amount_paid: mergedPaid,
       rest,
       paid,
     };
@@ -235,7 +268,7 @@ watch(choosenMonth, async () => {
 
     choosenData.value = mergeFactures(paymentsStore.groupPayments);
 
-    total.value = choosenData.value.reduce((sum, p) => sum + Number(p.amount_paid), 0);
+    total.value = choosenData.value.reduce((sum, p) => sum + Number(p.total), 0);
 
     isloading.value = false;
 });
@@ -246,7 +279,7 @@ watch(choosenYear, async () => {
 
     choosenData.value = mergeFactures(paymentsStore.groupPayments);
 
-    total.value = choosenData.value.reduce((sum, p) => sum + Number(p.amount_paid), 0);
+    total.value = choosenData.value.reduce((sum, p) => sum + Number(p.total), 0);
 
     isloading.value = false;
 });
@@ -272,18 +305,13 @@ onMounted(async () => {
 ---------------------------------------------------------*/
 const exportToExcel = () => {
     const attendanceData = choosenData.value.map(res => ({
-        nom: res.fullName,
-        mois: res.month,
-        'Reste à payer': res.rest,
-        'montant à payer': res.total
+        Reçu: res.receipt,
+        Nom: res.fullName,
+        'Montant à payer': res.total,
+        'Reduction': res.reduction,
+        'montant reçu': res.amount_paid,
+        'Reste à payer': res.rest
     }));
-
-    attendanceData.push({
-        nom: '',
-        mois: '',
-        'Reste à payer': '',
-        'montant à payer': total.value
-    });
 
     const worksheet = XLSX.utils.json_to_sheet(attendanceData);
     const workbook = XLSX.utils.book_new();
@@ -302,14 +330,14 @@ const cols = ref([
     { field: 'fullName', title: 'Nom', headerClass: '!text-center flex justify-center' },
     { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center' },
     { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center' },
-    { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center' },
-    { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center' },
+    { field: 'total', title: "Montant à payer", headerClass: '!text-center flex justify-center' },
+    { field: 'amount_paid', title: "Montant reçu", headerClass: '!text-center flex justify-center' },
     { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center' },
     { field: 'reduction', title: "Reduction", headerClass: '!text-center flex justify-center' },
     { field: 'type', title: "Type", headerClass: '!text-center flex justify-center' },
     { field: 'bank', title: "Bank", headerClass: '!text-center flex justify-center' },
     { field: 'bank_receipt', title: "Chèque", headerClass: '!text-center flex justify-center' },
-    { field: 'receipt', title: "Recu", headerClass: '!text-center flex justify-center' },
+    { field: 'receipt', title: "Reçu", headerClass: '!text-center flex justify-center' },
     { field: 'date', title: "Date", headerClass: '!text-center flex justify-center' },
     { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center' }
 ]);

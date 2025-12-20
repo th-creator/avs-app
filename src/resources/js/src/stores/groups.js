@@ -39,7 +39,7 @@ export const useGroupsStore = defineStore("groups", () => {
     const fetchPayments = async (month,year) => {
         try {
             const response = await api.get(`api/group/Payments/${month}/${year}`);
-            allPayments.value = response.data.data.map(res => ({
+            allPayments.value = await response.data.data.map(res => ({
                 id: res.id,
                 intitule: res.intitule,
                 teacher: res?.teacher?.firstName + ' ' + res?.teacher?.lastName,
@@ -49,6 +49,8 @@ export const useGroupsStore = defineStore("groups", () => {
                 }, 0),
                 payments: res.payments,
             }));;  // Update the groups state with the fetched data
+            console.log("allPayments.value",allPayments.value);
+            
             return response
         } catch (error) {
             console.error("Failed to fetch groups:", error);

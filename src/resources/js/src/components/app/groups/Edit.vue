@@ -65,7 +65,7 @@
                                 <input v-model="data.intitule" type="text" placeholder="Intitule" class="form-input" />
                                 <span v-if="errors.intitule" class="text-red-600 text-sm">{{ errors.intitule[0] }}</span>
                             </div>
-                            <div class="relative mb-4">
+                            <!-- <div class="relative mb-4">
                                 <label class="text-sm">Nombre de places:</label>
                                 <input v-model="data.n_place" type="number" placeholder="Nombre de places" class="form-input" />
                                 <span v-if="errors.n_place" class="text-red-600 text-sm">{{ errors.n_place[0] }}</span>
@@ -103,7 +103,7 @@
                                     <div class="flex justify-around w-full items-center gap-2 mt-2" v-for="time in data.timing" @click="detachTiming(time)"><p class="cursor-pointer font-semibold text-center border-gray-700 border rounded-3xl px-4 py-1 bg-white-dark">{{ time.day + ' : ' + time.dates }}</p></div>
                                 </div>
                                 <span v-if="errors.day" class="text-red-600 text-sm">{{ errors.day[0] }}</span>
-                            </div>
+                            </div> -->
                             <button type="button" class="btn btn-primary w-full h-10" @click="Edit()">
                                 <IconComponent v-if="isLoading" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" name="loading" />
                                 <span v-else>Soumettre</span>

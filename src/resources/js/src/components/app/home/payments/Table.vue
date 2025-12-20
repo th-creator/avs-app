@@ -168,7 +168,7 @@
             { field: 'month', title: 'Mois', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'paid', title: 'Etat', headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount', title: 'Montant', headerClass: '!text-center flex justify-center', width: 'full' },
-            { field: 'total', title: "montant a payer", headerClass: '!text-center flex justify-center', width: 'full' },
+            { field: 'total', title: "Montant à payer", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'amount_paid', title: "montant reçu", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center', width: 'full' },
             { field: 'reduction', title: "Reduction", headerClass: '!text-center flex justify-center', width: 'full' },
