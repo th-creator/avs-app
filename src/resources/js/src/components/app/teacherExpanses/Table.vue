@@ -110,6 +110,19 @@
                             <p class="font-semibold text-center">{{ data.value.month }}</p>
                         </div>
                     </template>
+                    <template #missing_students="data">
+                        <div class="flex justify-center">
+                            <span
+                            v-if="data.value.missing_students > 0"
+                            class="text-red-600 font-semibold"
+                            >
+                            {{ data.value.missing_students }} MAD
+                            </span>
+                            <span v-else class="text-emerald-600">
+                            0 MAD
+                            </span>
+                        </div>
+                    </template>
                     <template #user_id="data">
                         <div class="flex justify-around w-full items-center gap-2">
                             <p class="font-semibold text-center">{{ data.value.user.firstName + ' ' + data.value.user.lastName }}</p>
@@ -201,6 +214,7 @@
         { field: 'total', title: "Montant total", headerClass: '!text-center flex justify-center' },
         { field: 'amount', title: "Montant payé", headerClass: '!text-center flex justify-center' },
         { field: 'rest', title: "Reste", headerClass: '!text-center flex justify-center' },
+        { field: 'missing_students', title: "Manquant étudiants", headerClass: '!text-center flex justify-center' },
         { field: 'month', title: "Mois", headerClass: '!text-center flex justify-center' },
         { field: 'date', title: "Date", headerClass: '!text-center flex justify-center' },
         { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center' },

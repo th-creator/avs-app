@@ -13,7 +13,25 @@ export const useTeacherExpansesStore = defineStore("teacherExpanses", () => {
     const unpaidExpanses = ref([]);
     const allExpanses = ref([]);
 
-
+    const calculateMissingStudents = (payments = []) => {
+        let expected = 0;
+        let paid = 0;
+      
+        payments.forEach(payment => {
+          // 100% reduction → nothing expected
+          if (Number(payment.reduction) === 100) return;
+      
+          const value =
+            payment.total !== null && payment.total !== undefined
+              ? Number(payment.total)
+              : Number(payment.amount) * ((100 - Number(payment.reduction)) / 100);
+      
+          expected += value;
+          paid += Number(payment.amount_paid);
+        });
+      
+        return Math.max(expected - paid, 0);
+      };
     // Fetch all teacherExpanses and update the state
     const index = async (month, year) => {
         try {
@@ -24,44 +42,58 @@ export const useTeacherExpansesStore = defineStore("teacherExpanses", () => {
            * ====================== */
           paidExpanses.value = response.data.data.map(e => ({
             ...e,
+            missing_students: calculateMissingStudents(e.missing_students || []),
             status: "Payé"
           }));
       
           /* ======================
            * 2️⃣ UNPAID (GROUPS)
            * ====================== */
-          unpaidExpanses.value = response.data.groups.map(group => {
-            const total = group.payments.reduce((sum, payment) => {
-              const value =
-                payment.total !== null
-                  ? Number(payment.total)
-                  : Number(payment.amount) * ((100 - Number(payment.reduction)) / 100);
-      
-              return sum + value;
-            }, 0);
-      
-            const percentage = 70;
-            const amount = (total * percentage) / 100;
-            const rest = total - amount;
-      
-            return {
-              id: null,
-              teacher: `${group.teacher?.firstName} ${group.teacher?.lastName}`,
-              teacher_id: group.teacher?.id ?? null,
-              group: group.intitule,
-      
-              total,
-              percentage,
-              amount,
-              rest,
-      
-              month,
-              year,
-              payments: group.payments,
-              status: 'En attente'
-            };
-          })
-          .filter(expanse => expanse.total > 0);
+          unpaidExpanses.value = response.data.groups
+  .map(group => {
+    let expected = 0;
+    let paidByStudents = 0;
+
+    group.payments.forEach(payment => {
+      const value =
+        payment.total !== null
+          ? Number(payment.total)
+          : Number(payment.amount) * ((100 - Number(payment.reduction)) / 100);
+
+      expected += value;
+      paidByStudents += Number(payment.amount_paid);
+    });
+
+    const missingStudents = Math.max(expected - paidByStudents, 0);
+
+    if (expected <= 0) return null;
+
+    const percentage = 70;
+    const amount = (expected * percentage) / 100;
+    const rest = expected - amount;
+
+    return {
+      id: null,
+      teacher: `${group.teacher?.firstName} ${group.teacher?.lastName}`,
+      teacher_id: group.teacher?.id ?? null,
+      group: group.intitule,
+
+      total: expected,
+      percentage,
+      amount,
+      rest,
+
+      // ✅ NEW COLUMN
+      missing_students: missingStudents,
+
+      month,
+      year,
+      payments: group.payments,
+      status: 'En attente'
+    };
+  })
+  .filter(Boolean);
+
       
           /* ======================
            * 3️⃣ ALL EXPENSES
