@@ -78,10 +78,20 @@
                 </p>
               </div>
             </template>
+            <template #actions="data">
+                <div class="flex w-fit mx-auto justify-around gap-5">
+                    <IconComponent name="edit" @click="() => toggleEdit(data.value)" />
+                    <router-link v-if="data.value.student_id" :to="`/students/${data.value.student_id}/payments`" class="main-logo flex items-center shrink-0">
+                        <IconComponent name="view" />
+                    </router-link>
+                    <IconComponent v-if="authStore?.user && authStore?.user?.roles[0]?.name == 'admin'" name="delete" @click="deleteData(data.value)" />
+                </div>
+            </template>
           </vue3-datatable>
         </div>
       </div>
     </div>
+    <Edit :close="() => {showEditPopup = false;registrantsStore.fetchGroupRegistrants(route.params.id, choosenAY)}" :showEditPopup="showEditPopup" v-bind:editedData="editedData" v-if="showEditPopup"/>
   </template>
   
   <script setup>
@@ -94,10 +104,15 @@
   import { useRegistrantsStore } from '@/stores/registrants.js'
   import { useGroupsStore } from '@/stores/groups.js'
   import { useRoute } from 'vue-router'
+  import {useAuthStore} from '@/stores/auth.js';
+  import Edit from '../../registrants/Edit.vue'
+    import IconComponent from '@/components/icons/IconComponent.vue'
   
   const registrantsStore = useRegistrantsStore()
   const groupsStore = useGroupsStore()
   const route = useRoute()
+  const authStore = useAuthStore();
+  const editedData = ref({})
   
   /* --------------------------------------------------
      BASIC STATE
@@ -125,10 +140,15 @@
   
   const choosenAY = ref(getCurrentAY())
   const isloading = ref(true)
+  const showEditPopup = ref(false);
   
   // will contain { "02": "", "06": "", ... }
   const studyDates = ref({})
   
+  const toggleEdit = (data) => {
+    editedData.value = data
+    showEditPopup.value = true
+  }
   function getCurrentAY() {
     const now = new Date()
     const y = now.getFullYear()
@@ -142,6 +162,7 @@
     { field: 'phone', title: 'Mobile', headerClass: '!text-center flex justify-center' },
     { field: 'parent_phone', title: 'Mobile du parent', headerClass: '!text-center flex justify-center' },
     { field: 'date', title: "Date d'inscription", headerClass: '!text-center flex justify-center' },
+    { field: 'actions', title: 'Actions', headerClass: '!text-center flex justify-center', width: 'full' },
   ])
   
   const rows = computed(async () => {
@@ -151,6 +172,40 @@
     return data
   })
   
+  const deleteData = (data) => {
+        console.log(data);
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                popup: 'sweet-alerts',
+                confirmButton: 'btn btn-secondary',
+                cancelButton: 'btn btn-dark ltr:mr-3 rtl:ml-3',
+            },
+            buttonsStyling: false,
+        });
+        swalWithBootstrapButtons
+        .fire({
+            title: 'Es-tu sûr?',
+            text: "Vous ne pourrez pas revenir en arrière!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Oui, supprimer!',
+            cancelButtonText: 'Non, Annuler!',
+            reverseButtons: true,
+            padding: '2em',
+        })
+        .then((result) => {
+            if (result.value) {
+                registrantsStore.destroy(data.id).then(res => {
+                    swalWithBootstrapButtons.fire('supprimé!', 'il a été supprimé.', 'success');
+                    rows.value = res.data.data
+                }).catch(err => {
+                    swalWithBootstrapButtons.fire('supprimé!', "il a été supprimé.", 'success');
+                });
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                swalWithBootstrapButtons.fire('Annulé', "aucune mesure n'a été prise:)", 'error');
+            }
+        });
+    }
   /* --------------------------------------------------
      WATCH AY
   -------------------------------------------------- */

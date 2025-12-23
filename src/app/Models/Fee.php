@@ -35,6 +35,12 @@ class Fee extends Model
     {
         return $this->BelongsTo(Student::class);
     }
+
+    public function registrant()
+    {
+        return $this->BelongsTo(Registrant::class);
+    }
+    
     public function scopeForAY($q, string $ay) {
         [$a,$b] = array_map('intval', explode('/', $ay));
         return $q->where(function($w) use($a,$b){

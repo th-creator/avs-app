@@ -151,15 +151,15 @@
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
                         <div>
                             <div class="text-primary">espèces</div>
-                            <div class="mt-2 font-semibold text-2xl">{{expanses.cash}}</div>
+                            <div class="mt-2 font-semibold text-2xl">{{expanses?.centre?.cash + expanses?.rochd?.cash}}</div>
                         </div>
                         <div>
                             <div class="text-primary">chèque</div>
-                            <div class="mt-2 font-semibold text-2xl">{{expanses.bank}}</div>
+                            <div class="mt-2 font-semibold text-2xl">{{expanses?.centre?.bank + expanses?.rochd?.bank}}</div>
                         </div>
                         <div>
                             <div class="text-primary">virement</div>
-                            <div class="mt-2 font-semibold text-2xl">{{expanses.virement}}</div>
+                            <div class="mt-2 font-semibold text-2xl">{{expanses?.centre?.virement + expanses?.rochd?.bank}}</div>
                         </div>
                     </div>
                 </div>
@@ -181,11 +181,11 @@
                         </div>
                         <div class="text-white flex justify-between items-center mb-4">
                             <p class="text-xl">Solde</p>
-                            <h5 class="ltr:ml-auto rtl:mr-auto text-2xl"><span class="text-white-light"></span>{{payments.cash+payments.bank+payments.virement-teacherExpans.amount-expanses.cash-expanses.bank-expanses.virement}}</h5>
+                            <h5 class="ltr:ml-auto rtl:mr-auto text-2xl"><span class="text-white-light"></span>{{payments.cash+payments.bank+payments.virement-teacherExpans.amount-expanses?.centre?.cash-expanses?.centre?.bank-expanses?.centre?.virement-expanses?.rochd?.cash-expanses?.rochd?.bank-expanses?.rochd?.virement}}</h5>
                         </div>
                         <div class="text-white flex justify-between items-center">
                             <p class="text-xl">Caisse</p>
-                            <h5 class="ltr:ml-auto rtl:mr-auto text-2xl"><span class="text-white-light"></span>{{payments.cash-teacherExpans.amount-expanses.cash}}</h5>
+                            <h5 class="ltr:ml-auto rtl:mr-auto text-2xl"><span class="text-white-light"></span>{{payments.cash-teacherExpans.amount-expanses?.centre?.cash}}</h5>
                         </div>
                     </div>
                     <div class="-mt-8 px-8 grid grid-cols-2 gap-2">
@@ -208,7 +208,7 @@
                                 </svg>
                             </span>
                             <div class="btn w-full py-1 text-base shadow-none border-0 bg-[#ebedf2] dark:bg-black text-[#515365] dark:text-[#bfc9d4]">
-                                {{teacherExpans.amount+expanses.cash+expanses.bank+expanses.virement}}
+                                {{teacherExpans.amount+expanses?.centre?.cash+expanses?.centre?.bank+expanses?.centre?.virement+expanses?.rochd?.cash+expanses?.rochd?.bank+expanses?.rochd?.virement}}
                             </div>
                         </div>
                     </div>
@@ -358,9 +358,16 @@
             virement: 0
         }
         expanses.value = {
-            cash: 0,
-            bank: 0,
-            virement: 0
+            centre: {
+                cash: 0,
+                bank: 0,
+                virement: 0,
+            },
+            rochd: {
+                cash: 0,
+                bank: 0,
+                virement: 0,
+            },
         }
         teacherExpans.value = {
             total: 0,
@@ -405,21 +412,33 @@
             }
         });
         expansesStore.financeExpanses.forEach(res => {
+            const target =
+                res.paid_by === 'Centre'
+                ? expanses.value.centre
+                : res.paid_by === 'Mr Rochd'
+                ? expanses.value.rochd
+                : null
+
+            if (!target) return
+
             switch (res.type) {
                 case 'espèces':
-                    expanses.value.cash += Number(res.amount);
-                    break;
+                target.cash += Number(res.amount)
+                break
+
                 case 'chèque':
-                    expanses.value.bank += Number(res.amount);
-                    break;
+                target.bank += Number(res.amount)
+                break
+
                 case 'virement':
-                    expanses.value.virement += Number(res.amount);
-                    break;
+                target.virement += Number(res.amount)
+                break
+
                 default:
-                    expanses.value.cash += Number(res.amount);
-                    break;
+                target.cash += Number(res.amount)
+                break
             }
-        });
+        })
         teacherExpanseStore.financeteachersExpanses.forEach(res => {
             teacherExpans.value.total += Number(res.total);
             teacherExpans.value.amount += Number(res.amount);

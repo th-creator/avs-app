@@ -49,11 +49,16 @@ class FeeController extends Controller
 
     // 1) Existing unpaid fees within the AY window
     // unpaid = rest is null OR rest != 0 OR amount_paid < total
+    $activeStudentIds = Registrant::forAY($this->ay)
+        ->where('status', 1)
+        ->distinct()
+        ->pluck('student_id');
     $existingUnpaid = Fee::whereBetween('date', [$from, $to])
         ->where(function ($q) {
             $q->whereNull('rest')
-              ->orWhere('rest', '!=', 0);
+            ->orWhere('rest', '!=', 0);
         })
+        ->whereIn('student_id', $activeStudentIds)
         ->with('student')
         ->get();
 
