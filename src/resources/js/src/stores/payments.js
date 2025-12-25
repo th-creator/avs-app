@@ -14,6 +14,7 @@ export const usePaymentsStore = defineStore("payments", () => {
     const financePayments = ref([]);  // This will hold the payments globally
     const checkPayments = ref([]);  // This will hold the payments globally
     const receiptPayments = ref([]);  // This will hold the payments globally
+    const allGroupsPayments = ref([]);  // This will hold the all groups with their payments
 
     // Fetch all payments and update the state
     const undandled = async (month, year) => {
@@ -82,6 +83,17 @@ export const usePaymentsStore = defineStore("payments", () => {
             const response = await api.get(`api/group/${id}/payments/${month}/${year}`);
             groupPayments.value = response.data.data;  // Update the payments state with the fetched data
             return response
+        } catch (error) {
+            console.error("Failed to fetch payments:", error);
+            return error
+        }
+    };
+    // Fetch all payments and update the state
+    const fetchAllGroupPayments = async (month,year) => {
+        try {
+            const response = await api.get(`api/all/group/payments/${month}/${year}`);
+            allGroupsPayments.value = response.data.data;  // Update the payments state with the fetched data
+            return response.data.data
         } catch (error) {
             console.error("Failed to fetch payments:", error);
             return error
@@ -161,5 +173,5 @@ export const usePaymentsStore = defineStore("payments", () => {
     };
 
     // Expose the payments state and actions
-    return { payments, undandled, store, update, destroy, followUpStore, studentPayments, show, fetchGroupPayments, groupPayments, allPayments, all, financePayments, fetchFinance, fetchFacturation, registrantPayment, checkPayments, fetchchecks, fetchReceipt, receiptPayments };
+    return { payments, undandled, store, update, destroy, followUpStore, studentPayments, show, fetchGroupPayments, fetchAllGroupPayments, groupPayments, allPayments, all, financePayments, fetchFinance, fetchFacturation, registrantPayment, checkPayments, fetchchecks, fetchReceipt, receiptPayments };
 });

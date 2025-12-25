@@ -42,6 +42,7 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::post('registrant/{id}/transfer', [RegistrantController::class, 'transfer']);
     Route::get('group/{id}/registrants', [RegistrantController::class, 'groupRegistrants']);
     Route::get('group/{id}/payments/{month}/{year}', [PaymentController::class, 'groupPayments']);
+    Route::get('all/group/payments/{month}/{year}', [PaymentController::class, 'allGroupsPayments']);
     Route::apiResource('teachers', TeacherController::class);
     Route::apiResource('groups', GroupController::class);
     Route::get('group/Payments/{month}/single/{id}/{year}', [GroupController::class,'groupPayments']);

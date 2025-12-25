@@ -3,7 +3,10 @@
         <div class="panel pb-0 mt-6">
             <h5 class="font-semibold text-lg dark:text-white-light mb-5">Rémunération</h5>
             <div class="flex justify-between my-4">    
-                <button type="button" class="btn btn-warning w-40 h-9" @click="exportToExcel()">Exporter</button>   
+                <div class="flex flex-col gap-2">
+                    <button type="button" class="btn btn-warning w-40 h-9" @click="exportToExcel()">Exporter</button>   
+                    <button type="button" class="btn btn-success w-40 h-9" @click="() => exportAllGroupsPayments()">Détails groupes</button>   
+                </div>
                 <button type="button" class="btn btn-info w-40 h-9" @click="showPopup = true">Ajouter</button>
             </div>
             <div class="flex justify-between my-4">    
@@ -177,11 +180,13 @@
     import '@suadelabs/vue3-multiselect/dist/vue3-multiselect.css';
     import * as XLSX from 'xlsx';
     import FollowUp from './FollowUp.vue';
+    import { usePaymentsStore } from '@/stores/payments.js';
 
     const options = ref(['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre', 'Octobre','Novembre','Décembre']);
     const choosenMonth = ref('');
     const years = ref([2024,2025,2026,2027,2028,2029,2030]);
     const choosenYear = ref(new Date().getFullYear());
+    const paymentsStore = usePaymentsStore();
 
     const authStore = useAuthStore();
     const isloading = ref(true);
@@ -229,7 +234,6 @@
         }
         return teacherExpanseStore.allExpanses;
     });
-
     const openFollowUp = (row) => {
         console.log("selected",row);
         
@@ -251,10 +255,6 @@
 //         rest: roundMoney(r, 2)
 //     };
 // });
-    const roundMoney = (value, decimals = 2) => {
-        if (value === null || value === undefined || isNaN(value)) return 0;
-        return Number(Math.round((Number(value) + Number.EPSILON) * 10 ** decimals) / 10 ** decimals);
-    };
 
     watch(choosenMonth, async (newVal, oldVal) => { 
         isloading.value = true
@@ -327,6 +327,126 @@
         // Export the workbook to an Excel file
         XLSX.writeFile(workbook, 'dépenses-'+choosenMonth.value+'-'+choosenYear.value+'.xlsx');
     };
+
+const roundMoney = (value, decimals = 2) => {
+  return (
+    Math.round((Number(value) + Number.EPSILON) * 10 ** decimals) /
+    10 ** decimals
+  );
+};
+
+const mergeFactures = (payments = []) => {
+  const parents = {};
+  const parentsById = {};   // ✅ fast + reliable child merge
+  const children = [];
+
+  // 1️⃣ Split + index parents
+  payments.forEach((p) => {
+    if (p.parent_id === null) {
+      const parentKey = p.id ?? `reg-${p.registrant_id}`;
+
+      const parentObj = {
+        ...p,
+        merged_amount_paid: Number(p.amount_paid),
+      };
+
+      parents[parentKey] = parentObj;
+
+      // ✅ Only DB parents have an id that children reference
+      if (p.id != null) {
+        parentsById[p.id] = parentObj;
+      }
+    } else {
+      children.push(p);
+    }
+  });
+
+  // 2️⃣ Merge children into their DB parent
+  children.forEach((c) => {
+    const parent = parentsById[c.parent_id];
+    if (!parent) return;
+    parent.merged_amount_paid += Number(c.amount_paid);
+  });
+
+  // 3️⃣ Finalize
+  return Object.values(parents).map((p) => {
+    const total =
+      p.total !== null && p.total !== undefined
+        ? Number(p.total)
+        : Number(p.amount) * ((100 - Number(p.reduction)) / 100);
+
+    const roundedTotal = roundMoney(total, 2);
+    const mergedPaid = roundMoney(p.merged_amount_paid, 2);
+
+    // ✅ Clamp tiny rounding noise
+    let rest = roundMoney(roundedTotal - mergedPaid, 2);
+    if (Math.abs(rest) < 0.01) rest = 0;
+    if (rest < 0) rest = 0; // avoid negative rest when overpaid
+
+    // ✅ Your rule: paid=1 as soon as any payment exists, keep refunded as -1
+    const paid =
+      Number(p.paid) === -1 ? -1 : mergedPaid > 0 ? 1 : 0;
+
+    return {
+      ...p,
+      amount_paid: mergedPaid,
+      rest,
+      paid,
+    };
+  });
+};
+const exportAllGroupsPayments = async () => {
+  try {
+    isloading.value = true;
+
+    const groups = await paymentsStore.fetchAllGroupPayments(
+      choosenMonth.value,
+      choosenYear.value
+    );
+
+    let allRows = [];
+
+    groups.forEach(group => {
+      const mergedPayments = mergeFactures(group.payments);
+      if (!mergedPayments.length) return;
+
+      mergedPayments.forEach(p => {
+        allRows.push({
+          'Reçu': p.receipt ?? '',
+          'Nom': p.fullName,
+          'Groupe': group.group,
+          'Montant global': p.total,
+          'Montant reçu': p.amount_paid,
+          'Reste': p.rest,
+          'Réduction': p.reduction,
+        });
+      });
+    });
+
+    if (!allRows.length) {
+      console.warn('Aucune donnée à exporter');
+      return;
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(allRows);
+    const workbook = XLSX.utils.book_new();
+
+    // ✅ ONE sheet, safe name
+    const sheetName = 'Details paiements';
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+
+    XLSX.writeFile(
+      workbook,
+      `Paiements - Tous groupes - ${choosenMonth.value} ${choosenYear.value}.xlsx`
+    );
+  } catch (err) {
+    console.error(err);
+  } finally {
+    isloading.value = false;
+  }
+};
+
 </script>
 
 <style scoped>

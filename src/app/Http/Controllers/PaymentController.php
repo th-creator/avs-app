@@ -280,6 +280,147 @@ class PaymentController extends Controller
         return response()->json(['data' => $data], 200);
     }    
 
+    public function allGroupsPayments($month, $year)
+    {
+        $months = [
+            'Janvier' => 1,
+            'Février' => 2,
+            'Mars' => 3,
+            'Avril' => 4,
+            'Mai' => 5,
+            'Juin' => 6,
+            'Juillet' => 7,
+            'Août' => 8,
+            'Septembre' => 9,
+            'Octobre' => 10,
+            'Novembre' => 11,
+            'Décembre' => 12,
+        ];
+
+        $monthNumber = $months[$month];
+
+        // End of selected month
+        $currentDate = \Carbon\Carbon::createFromDate(
+            (int) $year,
+            (int) $monthNumber,
+            1
+        )->endOfMonth()->toDateString();
+
+        /* ============================
+        * Academic year logic (UNCHANGED)
+        * ============================ */
+        if ($monthNumber >= 9) {
+            $ayStart = (int) $year;
+            $ayEnd   = (int) $year + 1;
+        } else {
+            $ayStart = (int) $year - 1;
+            $ayEnd   = (int) $year;
+        }
+
+        $groups = Group::with(['section', 'teacher'])->get();
+
+        $result = [];
+
+        foreach ($groups as $group) {
+
+            /* ============================
+            * 1️⃣ Existing payments (DB)
+            * ============================ */
+            $payments = Payment::whereHas('registrant', function ($query) use ($currentDate) {
+                    $query->where('status', 1)
+                        ->whereDate('enter_date', '<=', $currentDate);
+                })
+                ->whereNot('paid', -1)
+                ->where('group_id', $group->id)
+                ->where('month', $month)
+                ->where('year', $year)
+                ->get()
+                ->toArray();
+
+            /* ============================
+            * 2️⃣ Registrants (AY logic)
+            * ============================ */
+            $registrants = Registrant::where('group_id', $group->id)
+                ->where('status', 1)
+                ->where(function ($q) use ($ayStart, $ayEnd) {
+                    $q->where(function ($q1) use ($ayStart) {
+                        $q1->whereYear('enter_date', $ayStart)
+                        ->whereBetween(DB::raw('MONTH(enter_date)'), [9, 12]);
+                    })->orWhere(function ($q2) use ($ayEnd) {
+                        $q2->whereYear('enter_date', $ayEnd)
+                        ->whereBetween(DB::raw('MONTH(enter_date)'), [1, 6]);
+                    });
+                })
+                ->whereDate('enter_date', '<=', $currentDate)
+                ->get();
+
+            $price = $group->section->price;
+
+            /* ============================
+            * 3️⃣ Auto-generate missing payments
+            * ============================ */
+            foreach ($registrants as $registrant) {
+
+                $paymentExists = collect($payments)->firstWhere(
+                    'student_id',
+                    $registrant->student_id
+                );
+
+                if (!$paymentExists) {
+                    $pay = Payment::where('student_id', $registrant->student_id)
+                        ->where('group_id', $group->id)
+                        ->first();
+
+                    if ($pay && $pay->reduction) {
+                        $reduction = $pay->reduction;
+                        $total = $price * (100 - $pay->reduction) / 100;
+                    } else {
+                        $reduction = 0;
+                        $total = $price;
+                    }
+
+                    $payments[] = [
+                        'fullName'      => $registrant->student->firstName . ' ' . $registrant->student->lastName,
+                        'registrant_id' => $registrant->id,
+                        'group'         => $group->intitule,
+                        'amount'        => $price,
+                        'reduction'     => $reduction,
+                        'total'         => $total,
+                        'amount_paid'   => 0,
+                        'rest'          => 0,
+                        'paid'          => 0,
+                        'type'          => null,
+                        'receipt'       => null,
+                        'user_id'       => null,
+                        'student_id'    => $registrant->student_id,
+                        'month'         => $month,
+                        'year'          => $year,
+                        'parent_id'     => null,
+                    ];
+                }
+            }
+
+            /* ============================
+            * 4️⃣ Push group result
+            * ============================ */
+            $result[] = [
+                'group_id'   => $group->id,
+                'group'      => $group->intitule,
+                'teacher'    => $group->teacher
+                    ? $group->teacher->firstName . ' ' . $group->teacher->lastName
+                    : null,
+                'month'      => $month,
+                'year'       => $year,
+                'payments'   => $payments,
+            ];
+        }
+
+        return response()->json([
+            'data' => $result
+        ], 200);
+    }
+
+
     public function fetchFinance(Request $request) {
         $fromDate = $request->input('from');
         $toDate = $request->input('to');
